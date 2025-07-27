@@ -4,25 +4,25 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Input } from '@/components/ui/input'
 import { Note } from '@/types/database'
 import { formatDistanceToNow } from 'date-fns'
 import {
-    Calendar,
-    Edit,
-    Eye,
-    FileText,
-    Hash,
-    MoreVertical,
-    Plus,
-    Search,
-    Trash2
+  Calendar,
+  Edit,
+  Eye,
+  FileText,
+  Hash,
+  MoreVertical,
+  Plus,
+  Search,
+  Trash2,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -49,27 +49,25 @@ export function NoteList({
   const [selectedTags, setSelectedTags] = useState<string[]>([])
 
   // Get all unique tags from notes
-  const allTags = Array.from(
-    new Set(notes.flatMap(note => note.tags))
-  ).sort()
+  const allTags = Array.from(new Set(notes.flatMap((note) => note.tags))).sort()
 
   // Filter notes based on search and tags
-  const filteredNotes = notes.filter(note => {
-    const matchesSearch = !searchQuery || 
+  const filteredNotes = notes.filter((note) => {
+    const matchesSearch =
+      !searchQuery ||
       note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       note.summary?.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    const matchesTags = selectedTags.length === 0 ||
-      selectedTags.some(tag => note.tags.includes(tag))
-    
+
+    const matchesTags =
+      selectedTags.length === 0 ||
+      selectedTags.some((tag) => note.tags.includes(tag))
+
     return matchesSearch && matchesTags
   })
 
   const handleTagToggle = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     )
   }
 
@@ -77,7 +75,7 @@ export function NoteList({
     // Extract text content from Tiptap JSON
     const extractText = (node: Record<string, unknown>): string => {
       if (node.type === 'text') {
-        return node.text || ''
+        return (node.text as string) || ''
       }
       if (node.content && Array.isArray(node.content)) {
         return node.content.map(extractText).join('')
@@ -99,12 +97,12 @@ export function NoteList({
         {[...Array(3)].map((_, i) => (
           <Card key={i} className="animate-pulse">
             <CardHeader>
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-4 w-3/4 rounded bg-gray-200"></div>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <div className="h-3 bg-gray-200 rounded"></div>
-                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                <div className="h-3 rounded bg-gray-200"></div>
+                <div className="h-3 w-2/3 rounded bg-gray-200"></div>
               </div>
             </CardContent>
           </Card>
@@ -117,9 +115,9 @@ export function NoteList({
     <div className={`space-y-4 ${className}`}>
       {/* Header with search and create button */}
       <div className="flex items-center justify-between">
-        <div className="flex-1 max-w-md">
+        <div className="max-w-md flex-1">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
             <Input
               placeholder="Search notes..."
               value={searchQuery}
@@ -128,10 +126,10 @@ export function NoteList({
             />
           </div>
         </div>
-        
+
         {onCreateNew && (
           <Button onClick={onCreateNew}>
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="mr-2 h-4 w-4" />
             New Note
           </Button>
         )}
@@ -140,14 +138,14 @@ export function NoteList({
       {/* Tag filters */}
       {allTags.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {allTags.map(tag => (
+          {allTags.map((tag) => (
             <Badge
               key={tag}
               variant={selectedTags.includes(tag) ? 'default' : 'outline'}
               className="cursor-pointer"
               onClick={() => handleTagToggle(tag)}
             >
-              <Hash className="h-3 w-3 mr-1" />
+              <Hash className="mr-1 h-3 w-3" />
               {tag}
             </Badge>
           ))}
@@ -171,30 +169,32 @@ export function NoteList({
           title="No notes found"
           description={
             searchQuery || selectedTags.length > 0
-              ? "No notes match your current filters"
-              : "Create your first note to get started"
+              ? 'No notes match your current filters'
+              : 'Create your first note to get started'
           }
           action={
-            onCreateNew && !searchQuery && selectedTags.length === 0 ? {
-              label: "Create Note",
-              onClick: onCreateNew
-            } : undefined
+            onCreateNew && !searchQuery && selectedTags.length === 0
+              ? {
+                  label: 'Create Note',
+                  onClick: onCreateNew,
+                }
+              : undefined
           }
         />
       ) : (
         <div className="grid gap-4">
-          {filteredNotes.map(note => (
+          {filteredNotes.map((note) => (
             <Card
               key={note.id}
-              className="cursor-pointer hover:shadow-md transition-shadow"
+              className="cursor-pointer transition-shadow hover:shadow-md"
               onClick={() => onNoteSelect?.(note)}
             >
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg line-clamp-1">
+                  <CardTitle className="line-clamp-1 text-lg">
                     {note.title}
                   </CardTitle>
-                  
+
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -207,45 +207,49 @@ export function NoteList({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={(e) => {
-                        e.stopPropagation()
-                        onNoteSelect?.(note)
-                      }}>
-                        <Eye className="h-4 w-4 mr-2" />
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onNoteSelect?.(note)
+                        }}
+                      >
+                        <Eye className="mr-2 h-4 w-4" />
                         View
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={(e) => {
-                        e.stopPropagation()
-                        onNoteEdit?.(note)
-                      }}>
-                        <Edit className="h-4 w-4 mr-2" />
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onNoteEdit?.(note)
+                        }}
+                      >
+                        <Edit className="mr-2 h-4 w-4" />
                         Edit
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={(e) => {
                           e.stopPropagation()
                           onNoteDelete?.(note)
                         }}
                         className="text-destructive"
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
+                        <Trash2 className="mr-2 h-4 w-4" />
                         Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
               </CardHeader>
-              
+
               <CardContent className="pt-0">
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">
                   {note.summary || getContentPreview(note.content)}
                 </p>
-                
+
                 <div className="flex items-center justify-between">
                   <div className="flex flex-wrap gap-1">
-                    {note.tags.slice(0, 3).map(tag => (
+                    {note.tags.slice(0, 3).map((tag) => (
                       <Badge key={tag} variant="secondary" className="text-xs">
-                        <Hash className="h-2 w-2 mr-1" />
+                        <Hash className="mr-1 h-2 w-2" />
                         {tag}
                       </Badge>
                     ))}
@@ -255,10 +259,12 @@ export function NoteList({
                       </Badge>
                     )}
                   </div>
-                  
+
                   <div className="flex items-center text-xs text-muted-foreground">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    {formatDistanceToNow(new Date(note.updated_at), { addSuffix: true })}
+                    <Calendar className="mr-1 h-3 w-3" />
+                    {formatDistanceToNow(new Date(note.updated_at), {
+                      addSuffix: true,
+                    })}
                   </div>
                 </div>
               </CardContent>
