@@ -4,27 +4,27 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Editor } from '@tiptap/react'
 import {
-    AlignCenter,
-    AlignLeft,
-    AlignRight,
-    Bold,
-    CheckSquare,
-    Code,
-    Heading1,
-    Heading2,
-    Heading3,
-    Highlighter as HighlightIcon,
-    Image,
-    Italic,
-    Link,
-    List,
-    ListOrdered,
-    Quote,
-    Redo,
-    Strikethrough,
-    Table,
-    Underline,
-    Undo
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
+  Bold,
+  CheckSquare,
+  Code,
+  Heading1,
+  Heading2,
+  Heading3,
+  Highlighter as HighlightIcon,
+  Image,
+  Italic,
+  Link,
+  List,
+  ListOrdered,
+  Quote,
+  Redo,
+  Strikethrough,
+  Table,
+  Underline,
+  Undo
 } from 'lucide-react'
 
 interface EditorToolbarProps {
@@ -229,6 +229,7 @@ export function EditorToolbar({
         onClick={onInsertImage}
         title="Insert Image"
       >
+        {/* eslint-disable-next-line jsx-a11y/alt-text */}
         <Image className="h-4 w-4" />
       </ToolbarButton>
       <ToolbarButton
