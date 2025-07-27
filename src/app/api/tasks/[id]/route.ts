@@ -4,13 +4,10 @@ import type { ApiResponse, Task } from '@/types/database'
 import { createServerClient } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
 
-interface RouteParams {
-  params: {
-    id: string
-  }
-}
-
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,9 +20,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         },
       }
     )
-    
+
     // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json(
         { data: null, error: 'Unauthorized' },
@@ -34,13 +34,16 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     // Fetch task
+    const { id } = await params
     const { data: task, error } = await supabase
       .from('tasks')
-      .select(`
+      .select(
+        `
         *,
         category:task_categories(id, name, color)
-      `)
-      .eq('id', params.id)
+      `
+      )
+      .eq('id', id)
       .eq('user_id', user.id)
       .single()
 
@@ -51,7 +54,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           { status: 404 }
         )
       }
-      
+
       console.error('Error fetching task:', error)
       return NextResponse.json(
         { data: null, error: 'Failed to fetch task' },
@@ -74,7 +77,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -87,9 +93,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         },
       }
     )
-    
+
     // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json(
         { data: null, error: 'Unauthorized' },
@@ -109,15 +118,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     // Update task
+    const { id } = await params
     const { data: task, error } = await supabase
       .from('tasks')
       .update(validatedData)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
-      .select(`
+      .select(
+        `
         *,
         category:task_categories(id, name, color)
-      `)
+      `
+      )
       .single()
 
     if (error) {
@@ -127,7 +139,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           { status: 404 }
         )
       }
-      
+
       console.error('Error updating task:', error)
       return NextResponse.json(
         { data: null, error: 'Failed to update task' },
@@ -144,7 +156,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json(response)
   } catch (error) {
     console.error('Error in PUT /api/tasks/[id]:', error)
-    
+
     if (error instanceof Error && error.name === 'ZodError') {
       return NextResponse.json(
         { data: null, error: 'Invalid request data' },
@@ -159,12 +171,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const supabase = createApiSupabaseClient(request)
-    
+
     // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json(
         { data: null, error: 'Unauthorized' },
@@ -173,10 +191,11 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     // Delete task
+    const { id } = await params
     const { error } = await supabase
       .from('tasks')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
 
     if (error) {
