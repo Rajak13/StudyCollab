@@ -17,21 +17,28 @@ interface TasksOverviewWidgetProps {
 }
 
 export function TasksOverviewWidget({ className }: TasksOverviewWidgetProps) {
-  const { data: tasksResponse, isLoading, error } = useTasks({
+  const {
+    data: tasksResponse,
+    isLoading,
+    error,
+  } = useTasks({
     limit: 5,
     sort_by: 'created_at',
-    sort_order: 'desc'
+    sort_order: 'desc',
   })
 
   const stats = useMemo(() => {
     const tasks = tasksResponse?.data || []
     const total = tasks.length
-    const completed = tasks.filter(task => task.status === 'COMPLETED').length
-    const pending = tasks.filter(task => task.status === 'TODO' || task.status === 'IN_PROGRESS').length
-    const overdue = tasks.filter(task => 
-      task.due_date && 
-      isPast(new Date(task.due_date)) && 
-      task.status !== 'COMPLETED'
+    const completed = tasks.filter((task) => task.status === 'COMPLETED').length
+    const pending = tasks.filter(
+      (task) => task.status === 'TODO' || task.status === 'IN_PROGRESS'
+    ).length
+    const overdue = tasks.filter(
+      (task) =>
+        task.due_date &&
+        isPast(new Date(task.due_date)) &&
+        task.status !== 'COMPLETED'
     ).length
 
     return { total, completed, pending, overdue }
@@ -43,7 +50,9 @@ export function TasksOverviewWidget({ className }: TasksOverviewWidgetProps) {
     return (
       <Card className={className}>
         <CardHeader>
-          <CardTitle className="text-base font-medium">Tasks Overview</CardTitle>
+          <CardTitle className="text-base font-medium">
+            Tasks Overview
+          </CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center py-8">
           <LoadingSpinner />
@@ -56,7 +65,9 @@ export function TasksOverviewWidget({ className }: TasksOverviewWidgetProps) {
     return (
       <Card className={className}>
         <CardHeader>
-          <CardTitle className="text-base font-medium">Tasks Overview</CardTitle>
+          <CardTitle className="text-base font-medium">
+            Tasks Overview
+          </CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center py-8">
           <p className="text-sm text-muted-foreground">Failed to load tasks</p>
@@ -71,22 +82,26 @@ export function TasksOverviewWidget({ className }: TasksOverviewWidgetProps) {
         <CardTitle className="text-base font-medium">Tasks Overview</CardTitle>
         <Link href="/tasks">
           <Button size="sm" variant="outline">
-            <Plus className="h-4 w-4 mr-1" />
+            <Plus className="mr-1 h-4 w-4" />
             Add Task
           </Button>
         </Link>
       </CardHeader>
       <CardContent>
-        {tasks.length === 0 ? (
-          <div className="text-center py-6">
-            <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+        {(tasksResponse?.data || []).length === 0 ? (
+          <div className="py-6 text-center">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
               <CheckCircle className="h-6 w-6 text-gray-400" />
             </div>
-            <h3 className="text-sm font-medium text-gray-900 mb-1">No tasks yet</h3>
-            <p className="text-xs text-gray-600 mb-3">Create your first task to get started.</p>
+            <h3 className="mb-1 text-sm font-medium text-gray-900">
+              No tasks yet
+            </h3>
+            <p className="mb-3 text-xs text-gray-600">
+              Create your first task to get started.
+            </p>
             <Link href="/tasks">
               <Button size="sm">
-                <Plus className="h-4 w-4 mr-1" />
+                <Plus className="mr-1 h-4 w-4" />
                 Create Task
               </Button>
             </Link>
@@ -112,10 +127,12 @@ export function TasksOverviewWidget({ className }: TasksOverviewWidgetProps) {
             </div>
 
             {stats.overdue > 0 && (
-              <div className="flex items-center space-x-2 p-2 bg-red-50 rounded-lg">
+              <div className="flex items-center space-x-2 rounded-lg bg-red-50 p-2">
                 <AlertCircle className="h-4 w-4 text-red-500" />
                 <div>
-                  <p className="text-sm font-medium text-red-700">{stats.overdue} overdue task{stats.overdue !== 1 ? 's' : ''}</p>
+                  <p className="text-sm font-medium text-red-700">
+                    {stats.overdue} overdue task{stats.overdue !== 1 ? 's' : ''}
+                  </p>
                 </div>
               </div>
             )}
@@ -130,7 +147,7 @@ export function TasksOverviewWidget({ className }: TasksOverviewWidgetProps) {
                   </Button>
                 </Link>
               </div>
-              
+
               <div className="space-y-2">
                 {recentTasks.map((task) => (
                   <TaskItem key={task.id} task={task} />
@@ -146,11 +163,12 @@ export function TasksOverviewWidget({ className }: TasksOverviewWidgetProps) {
 
 function TaskItem({ task }: { task: Task }) {
   const isCompleted = task.status === 'COMPLETED'
-  const isOverdue = task.due_date && isPast(new Date(task.due_date)) && !isCompleted
+  const isOverdue =
+    task.due_date && isPast(new Date(task.due_date)) && !isCompleted
   const isDueToday = task.due_date && isToday(new Date(task.due_date))
 
   return (
-    <div className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50">
+    <div className="flex items-center space-x-3 rounded-lg p-2 hover:bg-gray-50">
       <div className="flex-shrink-0">
         {isCompleted ? (
           <CheckCircle className="h-4 w-4 text-green-500" />
@@ -158,36 +176,47 @@ function TaskItem({ task }: { task: Task }) {
           <div className="h-4 w-4 rounded-full border-2 border-gray-300" />
         )}
       </div>
-      
-      <div className="flex-1 min-w-0">
-        <p className={`text-sm font-medium truncate ${isCompleted ? 'line-through text-gray-500' : ''}`}>
+
+      <div className="min-w-0 flex-1">
+        <p
+          className={`truncate text-sm font-medium ${isCompleted ? 'text-gray-500 line-through' : ''}`}
+        >
           {task.title}
         </p>
-        
-        <div className="flex items-center space-x-2 mt-1">
-          <Badge 
-            variant="secondary" 
+
+        <div className="mt-1 flex items-center space-x-2">
+          <Badge
+            variant="secondary"
             className={`text-xs ${
-              task.priority === 'URGENT' ? 'bg-red-100 text-red-800' :
-              task.priority === 'HIGH' ? 'bg-orange-100 text-orange-800' :
-              task.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
-              'bg-green-100 text-green-800'
+              task.priority === 'URGENT'
+                ? 'bg-red-100 text-red-800'
+                : task.priority === 'HIGH'
+                  ? 'bg-orange-100 text-orange-800'
+                  : task.priority === 'MEDIUM'
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : 'bg-green-100 text-green-800'
             }`}
           >
             {task.priority}
           </Badge>
-          
+
           {task.due_date && (
-            <div className={`flex items-center space-x-1 text-xs ${
-              isOverdue ? 'text-red-600' : 
-              isDueToday ? 'text-orange-600' : 
-              'text-gray-500'
-            }`}>
+            <div
+              className={`flex items-center space-x-1 text-xs ${
+                isOverdue
+                  ? 'text-red-600'
+                  : isDueToday
+                    ? 'text-orange-600'
+                    : 'text-gray-500'
+              }`}
+            >
               <Calendar className="h-3 w-3" />
               <span>
-                {isDueToday ? 'Today' : 
-                 isOverdue ? 'Overdue' : 
-                 format(new Date(task.due_date), 'MMM d')}
+                {isDueToday
+                  ? 'Today'
+                  : isOverdue
+                    ? 'Overdue'
+                    : format(new Date(task.due_date), 'MMM d')}
               </span>
             </div>
           )}
