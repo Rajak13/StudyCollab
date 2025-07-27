@@ -3,18 +3,18 @@ import { updateTaskCategorySchema } from '@/lib/validations/tasks'
 import type { ApiResponse, TaskCategory } from '@/types/database'
 import { NextRequest, NextResponse } from 'next/server'
 
-interface RouteParams {
-  params: {
-    id: string
-  }
-}
-
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const supabase = createApiSupabaseClient(request)
-    
+
     // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json(
         { data: null, error: 'Unauthorized' },
@@ -27,10 +27,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const validatedData = updateTaskCategorySchema.parse(body)
 
     // Update category
+    const { id } = await params
     const { data: category, error } = await supabase
       .from('task_categories')
       .update(validatedData)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .select()
       .single()
@@ -42,7 +43,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           { status: 404 }
         )
       }
-      
+
       console.error('Error updating task category:', error)
       return NextResponse.json(
         { data: null, error: 'Failed to update task category' },
@@ -59,7 +60,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json(response)
   } catch (error) {
     console.error('Error in PUT /api/task-categories/[id]:', error)
-    
+
     if (error instanceof Error && error.name === 'ZodError') {
       return NextResponse.json(
         { data: null, error: 'Invalid request data' },
@@ -74,12 +75,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const supabase = createApiSupabaseClient(request)
-    
+
     // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json(
         { data: null, error: 'Unauthorized' },
@@ -88,10 +95,11 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     // Check if category has tasks
+    const { id } = await params
     const { data: tasks, error: tasksError } = await supabase
       .from('tasks')
       .select('id')
-      .eq('category_id', params.id)
+      .eq('category_id', id)
       .eq('user_id', user.id)
       .limit(1)
 
@@ -114,7 +122,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const { error } = await supabase
       .from('task_categories')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
 
     if (error) {
