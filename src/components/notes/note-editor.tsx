@@ -5,7 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/components/ui/use-toast'
-import { useAutoSaveNote, useCreateNote, useUpdateNote } from '@/hooks/use-notes'
+import {
+  useAutoSaveNote,
+  useCreateNote,
+  useUpdateNote,
+} from '@/hooks/use-notes'
 import { NoteFormData, noteSchema } from '@/lib/validations/notes'
 import { CreateNoteData, Note } from '@/types/database'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -18,7 +22,7 @@ import {
   Minimize,
   Plus,
   Save,
-  X
+  X,
 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -48,7 +52,7 @@ export function NoteEditor({
 
   const createNote = useCreateNote()
   const updateNote = useUpdateNote()
-  const { autoSave, isAutoSaving } = useAutoSaveNote(note?.id || '', 2000)
+  const { autoSave, isAutoSaving } = useAutoSaveNote(note?.id || '')
 
   const form = useForm<NoteFormData>({
     resolver: zodResolver(noteSchema),
@@ -57,7 +61,10 @@ export function NoteEditor({
       content: note?.content || getDefaultTemplate().content,
       tags: note?.tags || [],
       is_public: note?.is_public || false,
-      template: (note?.template as 'basic' | 'cornell' | 'mindmap') || (template as 'basic' | 'cornell' | 'mindmap') || 'basic',
+      template:
+        (note?.template as 'basic' | 'cornell' | 'mindmap') ||
+        (template as 'basic' | 'cornell' | 'mindmap') ||
+        'basic',
     },
   })
 
@@ -152,7 +159,10 @@ export function NoteEditor({
   // Handle tag removal
   const handleRemoveTag = (tagToRemove: string) => {
     const currentTags = watch('tags') || []
-    setValue('tags', currentTags.filter(tag => tag !== tagToRemove))
+    setValue(
+      'tags',
+      currentTags.filter((tag) => tag !== tagToRemove)
+    )
   }
 
   // Handle key press for tag input
@@ -166,16 +176,18 @@ export function NoteEditor({
   const isLoading = createNote.isPending || updateNote.isPending
 
   return (
-    <div className={`${className} ${isFullscreen ? 'fixed inset-0 z-50 bg-white' : ''}`}>
-      <Card className="h-full flex flex-col">
+    <div
+      className={`${className} ${isFullscreen ? 'fixed inset-0 z-50 bg-white' : ''}`}
+    >
+      <Card className="flex h-full flex-col">
         <CardHeader className="flex-shrink-0">
           <div className="flex items-center justify-between">
-            <div className="flex-1 mr-4">
+            <div className="mr-4 flex-1">
               <Input
                 placeholder="Note title..."
                 value={watch('title')}
                 onChange={(e) => setValue('title', e.target.value)}
-                className="text-lg font-semibold border-none p-0 focus-visible:ring-0"
+                className="border-none p-0 text-lg font-semibold focus-visible:ring-0"
               />
             </div>
 
@@ -190,7 +202,11 @@ export function NoteEditor({
                 onClick={() => setIsPreviewMode(!isPreviewMode)}
                 title={isPreviewMode ? 'Edit mode' : 'Preview mode'}
               >
-                {isPreviewMode ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                {isPreviewMode ? (
+                  <Eye className="h-4 w-4" />
+                ) : (
+                  <EyeOff className="h-4 w-4" />
+                )}
               </Button>
 
               <Button
@@ -199,24 +215,20 @@ export function NoteEditor({
                 onClick={() => setIsFullscreen(!isFullscreen)}
                 title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
               >
-                {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+                {isFullscreen ? (
+                  <Minimize className="h-4 w-4" />
+                ) : (
+                  <Maximize className="h-4 w-4" />
+                )}
               </Button>
 
-              <Button
-                onClick={handleSave}
-                disabled={isLoading}
-                size="sm"
-              >
-                <Save className="h-4 w-4 mr-1" />
+              <Button onClick={handleSave} disabled={isLoading} size="sm">
+                <Save className="mr-1 h-4 w-4" />
                 {note?.id ? 'Save' : 'Create'}
               </Button>
 
               {onCancel && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={onCancel}
-                >
+                <Button variant="ghost" size="sm" onClick={onCancel}>
                   <X className="h-4 w-4" />
                 </Button>
               )}
@@ -224,7 +236,7 @@ export function NoteEditor({
           </div>
 
           {/* Tags */}
-          <div className="flex flex-wrap items-center gap-2 mt-2">
+          <div className="mt-2 flex flex-wrap items-center gap-2">
             {watch('tags')?.map((tag) => (
               <Badge
                 key={tag}
@@ -232,9 +244,9 @@ export function NoteEditor({
                 className="cursor-pointer"
                 onClick={() => handleRemoveTag(tag)}
               >
-                <Hash className="h-3 w-3 mr-1" />
+                <Hash className="mr-1 h-3 w-3" />
                 {tag}
-                <X className="h-3 w-3 ml-1" />
+                <X className="ml-1 h-3 w-3" />
               </Badge>
             ))}
 
@@ -244,7 +256,7 @@ export function NoteEditor({
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={handleTagKeyPress}
-                className="h-6 text-xs w-20"
+                className="h-6 w-20 text-xs"
               />
               <Button
                 variant="ghost"
@@ -258,7 +270,7 @@ export function NoteEditor({
           </div>
         </CardHeader>
 
-        <CardContent className="flex-1 p-0 overflow-hidden">
+        <CardContent className="flex-1 overflow-hidden p-0">
           <TiptapEditor
             content={currentContent}
             onChange={handleContentChange}
