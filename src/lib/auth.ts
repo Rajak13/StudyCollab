@@ -107,6 +107,22 @@ export const auth = {
   },
 }
 
+// Server-side helper function for API routes
+export async function getCurrentUser() {
+  const supabase = await createServerSupabaseClient()
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
+
+  if (error || !user) {
+    return null
+  }
+
+  return user
+}
+
 // Server-side authentication functions
 export const serverAuth = {
   // Get user from server-side

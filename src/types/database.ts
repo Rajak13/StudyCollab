@@ -193,9 +193,41 @@ export interface UpdateTaskData {
   priority?: TaskPriority
   status?: TaskStatus
   due_date?: string
-  completed_at?: string
+  completed_at?: string | null
   tags?: string[]
   category_id?: string
+}
+
+// Form data types
+export interface TaskFormData {
+  title: string
+  description?: string
+  priority: TaskPriority
+  status: TaskStatus
+  due_date?: string
+  tags: string[]
+  category_id?: string
+}
+
+export interface UpdateTaskFormData {
+  title?: string
+  description?: string
+  priority?: TaskPriority
+  status?: TaskStatus
+  due_date?: string
+  completed_at?: string | null
+  tags?: string[]
+  category_id?: string
+}
+
+export interface TaskCategoryFormData {
+  name: string
+  color: string
+}
+
+export interface UpdateTaskCategoryFormData {
+  name?: string
+  color?: string
 }
 
 export interface CreateNoteData {
@@ -216,6 +248,18 @@ export interface UpdateNoteData {
   is_public?: boolean
   template?: string
   folder_id?: string
+}
+
+export interface CreateNoteFolderData {
+  name: string
+  color?: string
+  parent_id?: string
+}
+
+export interface UpdateNoteFolderData {
+  name?: string
+  color?: string
+  parent_id?: string
 }
 
 export interface CreateResourceData {
@@ -267,6 +311,13 @@ export interface TaskFilters {
   due_date_from?: string
   due_date_to?: string
   search?: string
+}
+
+export interface TaskFiltersData extends TaskFilters {
+  sort_by?: 'created_at' | 'due_date' | 'priority' | 'title'
+  sort_order?: 'asc' | 'desc'
+  page?: number
+  limit?: number
 }
 
 export interface ResourceFilters {

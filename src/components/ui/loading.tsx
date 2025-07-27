@@ -85,3 +85,6 @@ export function ListItemLoading({ className }: { className?: string }) {
     </div>
   )
 }
+
+// Alias for LoadingSpinner
+export const LoadingSpinner = Spinner

@@ -1,0 +1,5 @@
+export { ActivityWidget } from './activity-widget'
+export { CalendarWidget } from './calendar-widget'
+export { RecentNotesWidget } from './recent-notes-widget'
+export { StatsWidget } from './stats-widget'
+export { TasksOverviewWidget } from './tasks-overview-widget'

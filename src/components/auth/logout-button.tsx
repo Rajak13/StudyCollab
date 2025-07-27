@@ -33,7 +33,7 @@ export function LogoutButton({
         description: 'You have been successfully logged out.',
       })
       // Redirect will happen automatically via auth state change
-    } catch (error) {
+    } catch {
       toast({
         title: 'Logout failed',
         description: 'There was an error logging you out. Please try again.',

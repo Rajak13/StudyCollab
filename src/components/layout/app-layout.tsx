@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import * as React from 'react'
+import { BottomNavigation } from './bottom-navigation'
 import { Header } from './header'
 import { Sidebar } from './sidebar'
 
@@ -28,13 +29,15 @@ export function AppLayout({
 
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* Sidebar */}
+      {/* Sidebar - Hidden on mobile */}
       {showSidebar && (
-        <Sidebar
-          isOpen={sidebarOpen}
-          onToggle={() => setSidebarOpen(!sidebarOpen)}
-          user={user}
-        />
+        <div className="hidden md:flex">
+          <Sidebar
+            isOpen={sidebarOpen}
+            onToggle={() => setSidebarOpen(!sidebarOpen)}
+            user={user}
+          />
+        </div>
       )}
 
       {/* Main Content Area */}
@@ -43,10 +46,18 @@ export function AppLayout({
         {showHeader && <Header showNavigation={!showSidebar} user={user} />}
 
         {/* Page Content */}
-        <main className={cn('flex-1 overflow-auto', className)}>
+        <main className={cn(
+          'flex-1 overflow-auto',
+          // Add bottom padding on mobile to account for bottom navigation
+          showSidebar && 'pb-16 md:pb-0',
+          className
+        )}>
           {children}
         </main>
       </div>
+
+      {/* Bottom Navigation - Only visible on mobile */}
+      {showSidebar && <BottomNavigation />}
     </div>
   )
 }

@@ -63,7 +63,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       })
 
       return {}
-    } catch (error) {
+    } catch {
       set({ loading: false })
       return { error: 'An unexpected error occurred' }
     }
@@ -101,7 +101,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       })
 
       return {}
-    } catch (error) {
+    } catch {
       set({ loading: false })
       return { error: 'An unexpected error occurred' }
     }
@@ -190,7 +190,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       })
 
       return {}
-    } catch (error) {
+    } catch {
       set({ loading: false })
       return { error: 'Failed to update profile' }
     }
@@ -206,7 +206,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       // Create unique filename
       const fileExt = file.name.split('.').pop()
       const fileName = `${user.id}-${Date.now()}.${fileExt}`
-      const filePath = `avatars/${fileName}`
+
 
       // Upload file to Supabase Storage
       const { error: uploadError } = await supabase.storage
@@ -240,7 +240,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
       set({ loading: false })
       return { url: avatarUrl }
-    } catch (error) {
+    } catch {
       set({ loading: false })
       return { error: 'Failed to upload avatar' }
     }
