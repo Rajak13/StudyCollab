@@ -1,30 +1,53 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog'
-import { FileText, Layout, Lightbulb, Plus } from 'lucide-react'
+import {
+  BookOpen,
+  FileText,
+  Layout,
+  Lightbulb,
+  Plus,
+  Users,
+} from 'lucide-react'
 import { useState } from 'react'
 import { NoteTemplate, noteTemplates } from './note-templates'
 
 interface TemplateSelectorProps {
   onTemplateSelect: (template: NoteTemplate) => void
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
   trigger?: React.ReactNode
 }
 
-export function TemplateSelector({ onTemplateSelect, trigger }: TemplateSelectorProps) {
+export function TemplateSelector({
+  onTemplateSelect,
+  open,
+  onOpenChange,
+  trigger,
+}: TemplateSelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
+
+  const dialogOpen = open !== undefined ? open : isOpen
+  const setDialogOpen = onOpenChange || setIsOpen
 
   const handleTemplateSelect = (template: NoteTemplate) => {
     onTemplateSelect(template)
-    setIsOpen(false)
+    setDialogOpen(false)
   }
 
   const getTemplateIcon = (templateId: string) => {
@@ -35,39 +58,44 @@ export function TemplateSelector({ onTemplateSelect, trigger }: TemplateSelector
         return <Layout className="h-8 w-8 text-green-500" />
       case 'mindmap':
         return <Lightbulb className="h-8 w-8 text-purple-500" />
+      case 'study':
+        return <BookOpen className="h-8 w-8 text-orange-500" />
+      case 'meeting':
+        return <Users className="h-8 w-8 text-indigo-500" />
       default:
         return <FileText className="h-8 w-8 text-gray-500" />
     }
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
         {trigger || (
           <Button>
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="mr-2 h-4 w-4" />
             New Note
           </Button>
         )}
       </DialogTrigger>
-      
-      <DialogContent className="max-w-4xl">
+
+      <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Choose a Note Template</DialogTitle>
           <DialogDescription>
-            Select a template to get started with your note. You can always change the format later.
+            Select a template to get started with your note. You can always
+            change the format later.
           </DialogDescription>
         </DialogHeader>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+
+        <div className="mt-4 grid max-h-[60vh] grid-cols-1 gap-4 overflow-y-auto md:grid-cols-2 lg:grid-cols-3">
           {noteTemplates.map((template) => (
             <Card
               key={template.id}
-              className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-primary/50"
+              className="cursor-pointer border-2 transition-shadow hover:border-primary/50 hover:shadow-md"
               onClick={() => handleTemplateSelect(template)}
             >
-              <CardHeader className="text-center pb-2">
-                <div className="flex justify-center mb-2">
+              <CardHeader className="pb-2 text-center">
+                <div className="mb-2 flex justify-center">
                   {getTemplateIcon(template.id)}
                 </div>
                 <CardTitle className="text-lg">{template.name}</CardTitle>
@@ -75,15 +103,15 @@ export function TemplateSelector({ onTemplateSelect, trigger }: TemplateSelector
                   {template.description}
                 </CardDescription>
               </CardHeader>
-              
+
               <CardContent className="pt-0">
-                <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-600">
+                <div className="rounded-lg bg-gray-50 p-3 text-xs text-gray-600">
                   {template.preview}
                 </div>
-                
+
                 <Button
                   variant="outline"
-                  className="w-full mt-3"
+                  className="mt-3 w-full"
                   onClick={(e) => {
                     e.stopPropagation()
                     handleTemplateSelect(template)
@@ -95,9 +123,9 @@ export function TemplateSelector({ onTemplateSelect, trigger }: TemplateSelector
             </Card>
           ))}
         </div>
-        
-        <div className="flex justify-end mt-4">
-          <Button variant="outline" onClick={() => setIsOpen(false)}>
+
+        <div className="mt-4 flex justify-end">
+          <Button variant="outline" onClick={() => setDialogOpen(false)}>
             Cancel
           </Button>
         </div>

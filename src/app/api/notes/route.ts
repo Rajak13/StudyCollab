@@ -23,10 +23,12 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('notes')
-      .select(`
+      .select(
+        `
         *,
         folder:note_folders(id, name, color)
-      `)
+      `
+      )
       .eq('user_id', user.id)
       .order('updated_at', { ascending: false })
 
@@ -44,20 +46,30 @@ export async function GET(request: NextRequest) {
     }
 
     if (filters.search) {
-      query = query.textSearch('title', filters.search)
+      // Use full-text search across title and content
+      // Since content is JSONB, we need to extract text from it
+      query = query.or(
+        `title.ilike.%${filters.search}%,summary.ilike.%${filters.search}%`
+      )
     }
 
     const { data: notes, error } = await query
 
     if (error) {
       console.error('Error fetching notes:', error)
-      return NextResponse.json({ error: 'Failed to fetch notes' }, { status: 500 })
+      return NextResponse.json(
+        { error: 'Failed to fetch notes' },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({ data: notes })
   } catch (error) {
     console.error('Error in GET /api/notes:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
 
@@ -66,7 +78,10 @@ export async function POST(request: NextRequest) {
     console.log('POST /api/notes - Starting request')
 
     const user = await getCurrentUser()
-    console.log('User from getCurrentUser:', user ? { id: user.id, email: user.email } : 'null')
+    console.log(
+      'User from getCurrentUser:',
+      user ? { id: user.id, email: user.email } : 'null'
+    )
 
     if (!user) {
       console.log('No user found, returning 401')
@@ -93,16 +108,22 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!body.title || !body.content) {
-      console.log('Validation failed:', { title: body.title, content: body.content })
-      return NextResponse.json({
-        error: 'Title and content are required',
-        details: {
-          hasTitle: !!body.title,
-          hasContent: !!body.content,
-          titleLength: body.title?.length || 0,
-          contentKeys: body.content ? Object.keys(body.content) : []
-        }
-      }, { status: 400 })
+      console.log('Validation failed:', {
+        title: body.title,
+        content: body.content,
+      })
+      return NextResponse.json(
+        {
+          error: 'Title and content are required',
+          details: {
+            hasTitle: !!body.title,
+            hasContent: !!body.content,
+            titleLength: body.title?.length || 0,
+            contentKeys: body.content ? Object.keys(body.content) : [],
+          },
+        },
+        { status: 400 }
+      )
     }
 
     let supabase
@@ -111,45 +132,16 @@ export async function POST(request: NextRequest) {
       console.log('Successfully created Supabase client')
     } catch (supabaseError) {
       console.error('Error creating Supabase client:', supabaseError)
-      return NextResponse.json({ error: 'Database connection error' }, { status: 500 })
+      return NextResponse.json(
+        { error: 'Database connection error' },
+        { status: 500 }
+      )
     }
 
     // Log user information for debugging
     console.log('User info:', { id: user.id, email: user.email })
 
-    // First, ensure the user has a profile
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', user.id)
-      .single()
-
-    if (profileError && profileError.code === 'PGRST116') {
-      // Profile doesn't exist, create one
-      console.log('Creating profile for user:', user.id)
-      const { error: createProfileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: user.id,
-          name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-
-      if (createProfileError) {
-        console.error('Error creating profile:', createProfileError)
-        return NextResponse.json({
-          error: 'Failed to create user profile',
-          details: createProfileError.message
-        }, { status: 500 })
-      }
-    } else if (profileError) {
-      console.error('Error checking profile:', profileError)
-      return NextResponse.json({
-        error: 'Failed to verify user profile',
-        details: profileError.message
-      }, { status: 500 })
-    }
+    // Note: Profile should already exist from auth setup, skip profile check for now
 
     const { data: note, error } = await supabase
       .from('notes')
@@ -163,10 +155,12 @@ export async function POST(request: NextRequest) {
         folder_id: body.folder_id,
         user_id: user.id,
       })
-      .select(`
+      .select(
+        `
         *,
         folder:note_folders(id, name, color)
-      `)
+      `
+      )
       .single()
 
     if (error) {
@@ -175,17 +169,23 @@ export async function POST(request: NextRequest) {
         code: error.code,
         message: error.message,
         details: error.details,
-        hint: error.hint
+        hint: error.hint,
       })
-      return NextResponse.json({
-        error: 'Failed to create note',
-        details: error.message
-      }, { status: 500 })
+      return NextResponse.json(
+        {
+          error: 'Failed to create note',
+          details: error.message,
+        },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({ data: note }, { status: 201 })
   } catch (error) {
     console.error('Error in POST /api/notes:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }

@@ -24,7 +24,7 @@ import {
   Strikethrough,
   Table,
   Underline,
-  Undo
+  Undo,
 } from 'lucide-react'
 
 interface EditorToolbarProps {
@@ -66,7 +66,7 @@ export function EditorToolbar({
   )
 
   return (
-    <div className="border-b border-gray-200 bg-gray-50 p-2 flex flex-wrap items-center gap-1">
+    <div className="flex flex-wrap items-center gap-1 border-b border-gray-200 bg-gray-50 p-2 dark:border-gray-700 dark:bg-gray-800">
       {/* Undo/Redo */}
       <ToolbarButton
         onClick={() => editor.chain().focus().undo().run()}
@@ -83,7 +83,7 @@ export function EditorToolbar({
         <Redo className="h-4 w-4" />
       </ToolbarButton>
 
-      <Separator orientation="vertical" className="h-6 mx-1" />
+      <Separator orientation="vertical" className="mx-1 h-6" />
 
       {/* Text Formatting */}
       <ToolbarButton
@@ -129,7 +129,7 @@ export function EditorToolbar({
         <HighlightIcon className="h-4 w-4" />
       </ToolbarButton>
 
-      <Separator orientation="vertical" className="h-6 mx-1" />
+      <Separator orientation="vertical" className="mx-1 h-6" />
 
       {/* Headings */}
       <ToolbarButton
@@ -154,7 +154,7 @@ export function EditorToolbar({
         <Heading3 className="h-4 w-4" />
       </ToolbarButton>
 
-      <Separator orientation="vertical" className="h-6 mx-1" />
+      <Separator orientation="vertical" className="mx-1 h-6" />
 
       {/* Lists */}
       <ToolbarButton
@@ -179,7 +179,7 @@ export function EditorToolbar({
         <CheckSquare className="h-4 w-4" />
       </ToolbarButton>
 
-      <Separator orientation="vertical" className="h-6 mx-1" />
+      <Separator orientation="vertical" className="mx-1 h-6" />
 
       {/* Alignment */}
       <ToolbarButton
@@ -204,7 +204,7 @@ export function EditorToolbar({
         <AlignRight className="h-4 w-4" />
       </ToolbarButton>
 
-      <Separator orientation="vertical" className="h-6 mx-1" />
+      <Separator orientation="vertical" className="mx-1 h-6" />
 
       {/* Quote */}
       <ToolbarButton
@@ -215,7 +215,7 @@ export function EditorToolbar({
         <Quote className="h-4 w-4" />
       </ToolbarButton>
 
-      <Separator orientation="vertical" className="h-6 mx-1" />
+      <Separator orientation="vertical" className="mx-1 h-6" />
 
       {/* Media & Links */}
       <ToolbarButton
@@ -225,17 +225,11 @@ export function EditorToolbar({
       >
         <Link className="h-4 w-4" />
       </ToolbarButton>
-      <ToolbarButton
-        onClick={onInsertImage}
-        title="Insert Image"
-      >
+      <ToolbarButton onClick={onInsertImage} title="Insert Image">
         {/* eslint-disable-next-line jsx-a11y/alt-text */}
         <Image className="h-4 w-4" />
       </ToolbarButton>
-      <ToolbarButton
-        onClick={onAddTable}
-        title="Insert Table"
-      >
+      <ToolbarButton onClick={onAddTable} title="Insert Table">
         <Table className="h-4 w-4" />
       </ToolbarButton>
     </div>

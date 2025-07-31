@@ -150,7 +150,9 @@ export function useMoveNoteFolder() {
 }
 
 // Utility function to build folder tree
-export function buildFolderTree(folders: NoteFolder[]): NoteFolder[] {
+export function buildFolderTree(
+  folders: NoteFolder[]
+): (NoteFolder & { children: NoteFolder[] })[] {
   const folderMap = new Map<string, NoteFolder & { children: NoteFolder[] }>()
   const rootFolders: (NoteFolder & { children: NoteFolder[] })[] = []
 

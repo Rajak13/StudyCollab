@@ -2,14 +2,13 @@
 
 import * as React from 'react'
 
-type Theme = 'dark' | 'light' | 'system'
+type Theme = 'dark' | 'light' | 'educational' | 'nepali' | 'system'
 
 type ThemeProviderProps = {
   children: React.ReactNode
   defaultTheme?: Theme
   storageKey?: string
   attribute?: string
-  enableSystem?: boolean
   disableTransitionOnChange?: boolean
 }
 
@@ -19,7 +18,7 @@ type ThemeProviderState = {
 }
 
 const initialState: ThemeProviderState = {
-  theme: 'system',
+  theme: 'light',
   setTheme: () => null,
 }
 
@@ -28,9 +27,8 @@ const ThemeProviderContext =
 
 export function ThemeProvider({
   children,
-  defaultTheme = 'system',
+  defaultTheme = 'light',
   storageKey = 'studycollab-ui-theme',
-  enableSystem = true,
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = React.useState<Theme>(defaultTheme)
@@ -50,20 +48,18 @@ export function ThemeProvider({
 
     const root = window.document.documentElement
 
-    root.classList.remove('light', 'dark')
+    root.classList.remove('light', 'dark', 'educational', 'nepali')
 
-    if (theme === 'system' && enableSystem) {
+    if (theme === 'system') {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
         .matches
         ? 'dark'
         : 'light'
-
       root.classList.add(systemTheme)
-      return
+    } else {
+      root.classList.add(theme)
     }
-
-    root.classList.add(theme)
-  }, [theme, enableSystem, mounted])
+  }, [theme, mounted])
 
   const value = {
     theme,

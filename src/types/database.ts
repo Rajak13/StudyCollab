@@ -327,6 +327,8 @@ export interface ResourceFilters {
   is_verified?: boolean
   search?: string
   sortBy?: 'recent' | 'popular' | 'score'
+  page?: number
+  limit?: number
 }
 
 export interface NoteFilters {
@@ -334,4 +336,138 @@ export interface NoteFilters {
   tags?: string[]
   is_public?: boolean
   search?: string
+}
+
+// File Storage Types
+export interface FileFolder {
+  id: string
+  name: string
+  description?: string | null
+  color: string
+  parent_id?: string | null
+  user_id: string
+  created_at: string
+  updated_at: string
+  // Relations
+  parent?: FileFolder | null
+  children?: FileFolder[]
+  files?: FileRecord[]
+}
+
+export interface FileRecord {
+  id: string
+  name: string
+  original_name: string
+  file_path: string
+  file_url: string
+  file_size: number
+  mime_type: string
+  file_type: FileType
+  description?: string | null
+  tags: string[]
+  folder_id?: string | null
+  is_public: boolean
+  download_count: number
+  user_id: string
+  created_at: string
+  updated_at: string
+  // Relations
+  user?: Profile
+  folder?: FileFolder | null
+  shares?: FileShare[]
+}
+
+export interface FileShare {
+  id: string
+  file_id: string
+  share_token: string
+  expires_at?: string | null
+  password_hash?: string | null
+  max_downloads?: number | null
+  download_count: number
+  is_active: boolean
+  created_by: string
+  created_at: string
+  // Relations
+  file?: FileRecord
+  creator?: Profile
+}
+
+export interface FileAccessLog {
+  id: string
+  file_id: string
+  user_id?: string | null
+  action: FileAction
+  ip_address?: string | null
+  user_agent?: string | null
+  share_token?: string | null
+  created_at: string
+  // Relations
+  file?: FileRecord
+  user?: Profile | null
+}
+
+// File-related enums
+export type FileType =
+  | 'PDF'
+  | 'IMAGE'
+  | 'DOCUMENT'
+  | 'VIDEO'
+  | 'AUDIO'
+  | 'ARCHIVE'
+  | 'OTHER'
+export type FileAction = 'VIEW' | 'DOWNLOAD' | 'SHARE' | 'UPLOAD'
+
+// File form data types
+export interface CreateFileData {
+  name: string
+  original_name: string
+  file_path: string
+  file_url: string
+  file_size: number
+  mime_type: string
+  file_type: FileType
+  description?: string
+  tags?: string[]
+  folder_id?: string
+  is_public?: boolean
+}
+
+export interface UpdateFileData {
+  name?: string
+  description?: string
+  tags?: string[]
+  folder_id?: string
+  is_public?: boolean
+}
+
+export interface CreateFileFolderData {
+  name: string
+  description?: string
+  color?: string
+  parent_id?: string
+}
+
+export interface UpdateFileFolderData {
+  name?: string
+  description?: string
+  color?: string
+  parent_id?: string
+}
+
+export interface CreateFileShareData {
+  file_id: string
+  expires_at?: string
+  password?: string
+  max_downloads?: number
+}
+
+export interface FileFilters {
+  folder_id?: string
+  file_type?: FileType[]
+  tags?: string[]
+  is_public?: boolean
+  search?: string
+  sort_by?: 'name' | 'created_at' | 'file_size' | 'download_count'
+  sort_order?: 'asc' | 'desc'
 }

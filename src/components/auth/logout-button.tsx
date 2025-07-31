@@ -11,6 +11,7 @@ interface LogoutButtonProps {
   size?: 'default' | 'sm' | 'lg'
   showIcon?: boolean
   children?: React.ReactNode
+  className?: string
 }
 
 export function LogoutButton({
@@ -18,6 +19,7 @@ export function LogoutButton({
   size = 'default',
   showIcon = true,
   children,
+  className,
 }: LogoutButtonProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const { signOut } = useAuth()
@@ -50,6 +52,7 @@ export function LogoutButton({
       size={size}
       onClick={handleLogout}
       disabled={isLoggingOut}
+      className={className}
     >
       {isLoggingOut ? (
         <Loader2 className="h-4 w-4 animate-spin" />

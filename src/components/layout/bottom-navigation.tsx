@@ -77,6 +77,31 @@ const navigationItems: NavItem[] = [
     ),
   },
   {
+    title: 'Files',
+    href: '/files',
+    icon: (
+      <svg
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
+        />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"
+        />
+      </svg>
+    ),
+  },
+  {
     title: 'Resources',
     href: '/resources',
     icon: (
@@ -164,7 +189,7 @@ export function BottomNavigation({ className }: BottomNavigationProps) {
   return (
     <nav
       className={cn(
-        'fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t md:hidden',
+        'fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:hidden',
         className
       )}
     >
@@ -176,7 +201,7 @@ export function BottomNavigation({ className }: BottomNavigationProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex flex-col items-center justify-center min-w-0 flex-1 px-1 py-2 text-xs font-medium transition-colors relative',
+                'relative flex min-w-0 flex-1 flex-col items-center justify-center px-1 py-2 text-xs font-medium transition-colors',
                 isActive
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground'
@@ -185,8 +210,10 @@ export function BottomNavigation({ className }: BottomNavigationProps) {
               <div className="relative">
                 {item.icon}
                 {item.badge && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground flex items-center justify-center">
-                    {typeof item.badge === 'number' && item.badge > 9 ? '9+' : item.badge}
+                  <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
+                    {typeof item.badge === 'number' && item.badge > 9
+                      ? '9+'
+                      : item.badge}
                   </span>
                 )}
               </div>
@@ -194,7 +221,7 @@ export function BottomNavigation({ className }: BottomNavigationProps) {
                 {item.title}
               </span>
               {isActive && (
-                <div className="absolute top-0 left-1/2 h-0.5 w-8 -translate-x-1/2 rounded-full bg-primary" />
+                <div className="absolute left-1/2 top-0 h-0.5 w-8 -translate-x-1/2 rounded-full bg-primary" />
               )}
             </Link>
           )

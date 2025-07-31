@@ -22,11 +22,29 @@ export const noteTemplates: NoteTemplate[] = [
         {
           type: 'heading',
           attrs: { level: 1 },
-          content: [{ type: 'text', text: 'Note Title' }],
+          content: [{ type: 'text', text: 'My Note' }],
         },
         {
           type: 'paragraph',
-          content: [{ type: 'text', text: 'Start writing your note here...' }],
+          content: [
+            { type: 'text', text: 'Start writing your thoughts here...' },
+          ],
+        },
+        {
+          type: 'paragraph',
+          content: [],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'You can format text as ' },
+            { type: 'text', marks: [{ type: 'bold' }], text: 'bold' },
+            { type: 'text', text: ', ' },
+            { type: 'text', marks: [{ type: 'italic' }], text: 'italic' },
+            { type: 'text', text: ', or ' },
+            { type: 'text', marks: [{ type: 'code' }], text: 'code' },
+            { type: 'text', text: '.' },
+          ],
         },
       ],
     },
@@ -48,7 +66,11 @@ export const noteTemplates: NoteTemplate[] = [
           type: 'paragraph',
           content: [
             { type: 'text', text: 'Date: ' },
-            { type: 'text', marks: [{ type: 'bold' }], text: new Date().toLocaleDateString() },
+            {
+              type: 'text',
+              marks: [{ type: 'bold' }],
+              text: new Date().toLocaleDateString(),
+            },
           ],
         },
         {
@@ -63,7 +85,13 @@ export const noteTemplates: NoteTemplate[] = [
                   content: [
                     {
                       type: 'paragraph',
-                      content: [{ type: 'text', marks: [{ type: 'bold' }], text: 'Cues' }],
+                      content: [
+                        {
+                          type: 'text',
+                          marks: [{ type: 'bold' }],
+                          text: 'Cues',
+                        },
+                      ],
                     },
                   ],
                 },
@@ -73,7 +101,13 @@ export const noteTemplates: NoteTemplate[] = [
                   content: [
                     {
                       type: 'paragraph',
-                      content: [{ type: 'text', marks: [{ type: 'bold' }], text: 'Notes' }],
+                      content: [
+                        {
+                          type: 'text',
+                          marks: [{ type: 'bold' }],
+                          text: 'Notes',
+                        },
+                      ],
                     },
                   ],
                 },
@@ -88,7 +122,12 @@ export const noteTemplates: NoteTemplate[] = [
                   content: [
                     {
                       type: 'paragraph',
-                      content: [{ type: 'text', text: 'Key questions, keywords, formulas' }],
+                      content: [
+                        {
+                          type: 'text',
+                          text: 'Key questions, keywords, formulas',
+                        },
+                      ],
                     },
                   ],
                 },
@@ -98,7 +137,9 @@ export const noteTemplates: NoteTemplate[] = [
                   content: [
                     {
                       type: 'paragraph',
-                      content: [{ type: 'text', text: 'Main ideas, details, examples' }],
+                      content: [
+                        { type: 'text', text: 'Main ideas, details, examples' },
+                      ],
                     },
                   ],
                 },
@@ -113,7 +154,12 @@ export const noteTemplates: NoteTemplate[] = [
         },
         {
           type: 'paragraph',
-          content: [{ type: 'text', text: 'Write a brief summary of the main points...' }],
+          content: [
+            {
+              type: 'text',
+              text: 'Write a brief summary of the main points...',
+            },
+          ],
         },
       ],
     },
@@ -213,6 +259,297 @@ export const noteTemplates: NoteTemplate[] = [
                 },
               ],
             },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    id: 'study',
+    name: 'Study Notes',
+    description: 'Structured template for academic study notes',
+    preview:
+      'Organized sections for topic, objectives, key concepts, and review',
+    content: {
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 1 },
+          content: [{ type: 'text', text: 'Study Notes - [Subject/Topic]' }],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', marks: [{ type: 'bold' }], text: 'Date: ' },
+            { type: 'text', text: new Date().toLocaleDateString() },
+            { type: 'text', text: ' | ' },
+            { type: 'text', marks: [{ type: 'bold' }], text: 'Chapter/Unit: ' },
+            { type: 'text', text: '[Chapter Number/Name]' },
+          ],
+        },
+        {
+          type: 'heading',
+          attrs: { level: 2 },
+          content: [{ type: 'text', text: '🎯 Learning Objectives' }],
+        },
+        {
+          type: 'bulletList',
+          content: [
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'What I need to learn from this session',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [{ type: 'text', text: 'Key skills to develop' }],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'heading',
+          attrs: { level: 2 },
+          content: [{ type: 'text', text: '📚 Key Concepts' }],
+        },
+        {
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'Main ideas and definitions:' }],
+        },
+        {
+          type: 'bulletList',
+          content: [
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      marks: [{ type: 'bold' }],
+                      text: 'Concept 1: ',
+                    },
+                    { type: 'text', text: 'Definition and explanation' },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      marks: [{ type: 'bold' }],
+                      text: 'Concept 2: ',
+                    },
+                    { type: 'text', text: 'Definition and explanation' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'heading',
+          attrs: { level: 2 },
+          content: [{ type: 'text', text: '💡 Examples & Applications' }],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'Real-world examples and practice problems:',
+            },
+          ],
+        },
+        {
+          type: 'heading',
+          attrs: { level: 2 },
+          content: [{ type: 'text', text: '❓ Questions & Clarifications' }],
+        },
+        {
+          type: 'bulletList',
+          content: [
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'Questions to ask in class or research further',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'heading',
+          attrs: { level: 2 },
+          content: [{ type: 'text', text: '📝 Summary & Review' }],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'Key takeaways and points to remember for exam:',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    id: 'meeting',
+    name: 'Meeting Notes',
+    description: 'Template for meeting notes with agenda and action items',
+    preview: 'Structured format for meeting documentation and follow-ups',
+    content: {
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 1 },
+          content: [{ type: 'text', text: 'Meeting Notes' }],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', marks: [{ type: 'bold' }], text: 'Date: ' },
+            { type: 'text', text: new Date().toLocaleDateString() },
+            { type: 'text', text: ' | ' },
+            { type: 'text', marks: [{ type: 'bold' }], text: 'Time: ' },
+            { type: 'text', text: '[Start - End Time]' },
+          ],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', marks: [{ type: 'bold' }], text: 'Attendees: ' },
+            { type: 'text', text: '[List of participants]' },
+          ],
+        },
+        {
+          type: 'heading',
+          attrs: { level: 2 },
+          content: [{ type: 'text', text: '📋 Agenda' }],
+        },
+        {
+          type: 'orderedList',
+          content: [
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [{ type: 'text', text: 'Agenda item 1' }],
+                },
+              ],
+            },
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [{ type: 'text', text: 'Agenda item 2' }],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'heading',
+          attrs: { level: 2 },
+          content: [{ type: 'text', text: '💬 Discussion Points' }],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'Key points discussed during the meeting:' },
+          ],
+        },
+        {
+          type: 'heading',
+          attrs: { level: 2 },
+          content: [{ type: 'text', text: '✅ Decisions Made' }],
+        },
+        {
+          type: 'bulletList',
+          content: [
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [{ type: 'text', text: 'Decision 1 and rationale' }],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'heading',
+          attrs: { level: 2 },
+          content: [{ type: 'text', text: '🎯 Action Items' }],
+        },
+        {
+          type: 'bulletList',
+          content: [
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    { type: 'text', text: '[ ] ' },
+                    {
+                      type: 'text',
+                      marks: [{ type: 'bold' }],
+                      text: 'Task description',
+                    },
+                    {
+                      type: 'text',
+                      text: ' - Assigned to: [Name] - Due: [Date]',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'heading',
+          attrs: { level: 2 },
+          content: [{ type: 'text', text: '📅 Next Steps' }],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', marks: [{ type: 'bold' }], text: 'Next meeting: ' },
+            { type: 'text', text: '[Date and time]' },
           ],
         },
       ],

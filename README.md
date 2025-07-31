@@ -1,3 +1,15 @@
+# StudyCollab MVP
+
+## ⚠️ License & Usage
+
+This project is **not open source** and is protected under **All Rights Reserved** copyright law.
+
+You are **not allowed** to copy, use, or distribute any part of this code or design without explicit written permission from the author.
+
+**Copyright © 2025 Abdul Razzaq Ansari. All Rights Reserved.**
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

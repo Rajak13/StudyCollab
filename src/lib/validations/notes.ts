@@ -2,14 +2,18 @@ import { z } from 'zod'
 
 export const noteSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255, 'Title too long'),
-  content: z.any().refine(
-    (content) => content && typeof content === 'object',
-    'Content must be a valid JSON object'
-  ),
+  content: z
+    .any()
+    .refine(
+      (content) => content && typeof content === 'object',
+      'Content must be a valid JSON object'
+    ),
   summary: z.string().max(500, 'Summary too long').optional(),
   tags: z.array(z.string()).max(10, 'Too many tags').optional(),
   is_public: z.boolean().optional(),
-  template: z.enum(['basic', 'cornell', 'mindmap']).optional(),
+  template: z
+    .enum(['basic', 'cornell', 'mindmap', 'study', 'meeting'])
+    .optional(),
   folder_id: z.string().uuid().optional(),
 })
 

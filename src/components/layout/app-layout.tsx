@@ -29,9 +29,9 @@ export function AppLayout({
 
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* Sidebar - Hidden on mobile */}
+      {/* Sidebar - Hidden on mobile and tablet */}
       {showSidebar && (
-        <div className="hidden md:flex">
+        <div className="hidden lg:flex">
           <Sidebar
             isOpen={sidebarOpen}
             onToggle={() => setSidebarOpen(!sidebarOpen)}
@@ -43,20 +43,29 @@ export function AppLayout({
       {/* Main Content Area */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
-        {showHeader && <Header showNavigation={!showSidebar} user={user} />}
+        {showHeader && (
+          <Header
+            showNavigation={!showSidebar}
+            user={user}
+            sidebarOpen={sidebarOpen}
+            onSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
+          />
+        )}
 
         {/* Page Content */}
-        <main className={cn(
-          'flex-1 overflow-auto',
-          // Add bottom padding on mobile to account for bottom navigation
-          showSidebar && 'pb-16 md:pb-0',
-          className
-        )}>
+        <main
+          className={cn(
+            'flex-1 overflow-auto',
+            // Add bottom padding for bottom navigation on mobile and tablet only
+            showSidebar && 'pb-16 lg:pb-0',
+            className
+          )}
+        >
           {children}
         </main>
       </div>
 
-      {/* Bottom Navigation - Only visible on mobile */}
+      {/* Bottom Navigation - Visible on all devices */}
       {showSidebar && <BottomNavigation />}
     </div>
   )
@@ -68,7 +77,7 @@ export function DashboardLayout({
   user,
 }: {
   children: React.ReactNode
-  user?: { name: string; avatar?: string } | null
+  user?: { name: string; avatar?: string; email?: string } | null
 }) {
   return (
     <AppLayout showSidebar={true} showHeader={true} user={user}>
