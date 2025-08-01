@@ -174,15 +174,6 @@ export function FileUpload({ folderId, onUploadComplete }: FileUploadProps) {
             file_type: getFileType(item.file.type, item.file.name),
             folder_id: folderId,
           },
-          onProgress: (progress) => {
-            setUploadingFiles((prev) =>
-              prev.map((uploadItem) =>
-                uploadItem.file === item.file
-                  ? { ...uploadItem, progress: progress.percentage }
-                  : uploadItem
-              )
-            )
-          },
         })
 
         // Mark as completed

@@ -1,9 +1,5 @@
 import { toast } from '@/components/ui/use-toast'
-import {
-  normalizeMimeType,
-  uploadFile,
-  UploadProgress,
-} from '@/lib/file-upload'
+import { normalizeMimeType, uploadFile } from '@/lib/file-upload'
 import {
   ApiResponse,
   CreateFileData,
@@ -65,11 +61,11 @@ export function useUploadFile() {
     mutationFn: async ({
       file,
       metadata,
-      onProgress,
+      // onProgress: _,
     }: {
       file: File
       metadata: Partial<CreateFileData>
-      onProgress?: (progress: UploadProgress) => void
+      // onProgress?: (progress: UploadProgress) => void
     }) => {
       if (!user) throw new Error('User not authenticated')
 

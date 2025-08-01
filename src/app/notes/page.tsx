@@ -1,7 +1,7 @@
 'use client'
 
 import { ProtectedRoute } from '@/components/auth/protected-route'
-import { AppLayout } from '@/components/layout'
+import { DashboardLayout } from '@/components/layout'
 import { FolderDialog } from '@/components/notes/folder-dialog'
 import { FolderTree } from '@/components/notes/folder-tree'
 import { NoteTemplate } from '@/components/notes/note-templates'
@@ -131,7 +131,7 @@ function NotesPageContent() {
   }
 
   return (
-    <AppLayout user={layoutUser}>
+    <DashboardLayout user={layoutUser}>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
         <div className="container mx-auto px-4 py-4 sm:py-6 lg:py-8">
           {/* Header */}
@@ -307,7 +307,7 @@ function NotesPageContent() {
           />
         </div>
       </div>
-    </AppLayout>
+    </DashboardLayout>
   )
 }
 

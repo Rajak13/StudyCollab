@@ -1,4 +1,6 @@
 // Base UI Components
+export * from './avatar'
+export * from './badge'
 export * from './button'
 export * from './card'
 export * from './input'
@@ -6,6 +8,7 @@ export * from './label'
 export * from './textarea'
 
 // Layout Components
+export * from './command'
 export * from './dialog'
 export * from './dropdown-menu'
 

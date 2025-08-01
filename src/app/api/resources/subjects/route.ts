@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase'
 import { ApiResponse } from '@/types/database'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
 // GET /api/resources/subjects - Get popular subjects
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const supabase = createClient()
 
