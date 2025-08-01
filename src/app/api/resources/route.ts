@@ -1,5 +1,5 @@
 import { getCurrentUser } from '@/lib/auth'
-import { createClient } from '@/lib/supabase'
+import { createApiSupabaseClient } from '@/lib/supabase'
 import {
   createResourceSchema,
   resourceFiltersSchema,
@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from 'next/server'
 // GET /api/resources - List resources with filtering and pagination
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = createApiSupabaseClient(request)
     const { searchParams } = new URL(request.url)
 
     // Parse and validate query parameters
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = createResourceSchema.parse(body)
 
-    const supabase = createClient()
+    const supabase = createApiSupabaseClient(request)
 
     // Create resource data
     const resourceData = {

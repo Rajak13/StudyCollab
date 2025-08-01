@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAuth } from '@/hooks/use-auth'
-import { useDeleteResource } from '@/hooks/use-resources'
+import { useDeleteResource, useVoteResource } from '@/hooks/use-resources'
 import { Resource } from '@/types/database'
 import { formatDistanceToNow } from 'date-fns'
 import {
@@ -69,6 +69,7 @@ export function ResourceCard({
   const [isVoting, setIsVoting] = useState(false)
   const { user } = useAuth()
   const deleteResource = useDeleteResource()
+  const voteResource = useVoteResource()
 
   const IconComponent = resourceTypeIcons[resource.type]
   const typeColorClass = resourceTypeColors[resource.type]
@@ -82,8 +83,10 @@ export function ResourceCard({
 
     setIsVoting(true)
     try {
-      // TODO: Implement voting API
-      console.log(`Voting ${voteType} on resource ${resource.id}`)
+      await voteResource.mutateAsync({
+        resourceId: resource.id,
+        voteType,
+      })
     } catch (error) {
       console.error('Error voting:', error)
     } finally {

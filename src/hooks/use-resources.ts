@@ -235,3 +235,101 @@ export function usePopularSubjects() {
     },
   })
 }
+
+// Vote on a resource
+export function useVoteResource() {
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+
+  return useMutation({
+    mutationFn: async ({
+      resourceId,
+      voteType,
+    }: {
+      resourceId: string
+      voteType: 'UPVOTE' | 'DOWNVOTE'
+    }): Promise<{ upvotes: number; downvotes: number; score: number }> => {
+      const response = await fetch(`/api/resources/${resourceId}/vote`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ type: voteType }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to vote')
+      }
+
+      const result: ApiResponse<{
+        upvotes: number
+        downvotes: number
+        score: number
+      }> = await response.json()
+      if (result.error) {
+        throw new Error(result.error)
+      }
+      return result.data!
+    },
+    onSuccess: (data, variables) => {
+      // Update the specific resource in cache
+      queryClient.setQueryData(
+        ['resource', variables.resourceId],
+        (old: Resource) => {
+          if (old) {
+            return {
+              ...old,
+              upvotes: data.upvotes,
+              downvotes: data.downvotes,
+              score: data.score,
+            }
+          }
+          return old
+        }
+      )
+
+      // Invalidate resources list to refetch
+      queryClient.invalidateQueries({ queryKey: ['resources'] })
+      queryClient.invalidateQueries({ queryKey: ['my-resources'] })
+      queryClient.invalidateQueries({ queryKey: ['trending-resources'] })
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      })
+    },
+  })
+}
+
+// Get trending resources
+export function useTrendingResources(
+  options: { limit?: number; days?: number } = {}
+) {
+  const { limit = 10, days = 7 } = options
+
+  return useQuery({
+    queryKey: ['trending-resources', limit, days],
+    queryFn: async (): Promise<Resource[]> => {
+      const params = new URLSearchParams({
+        limit: limit.toString(),
+        days: days.toString(),
+      })
+
+      const response = await fetch(
+        `/api/resources/trending?${params.toString()}`
+      )
+      if (!response.ok) {
+        throw new Error('Failed to fetch trending resources')
+      }
+      const data: ApiResponse<Resource[]> = await response.json()
+      if (data.error) {
+        throw new Error(data.error)
+      }
+      return data.data!
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+}

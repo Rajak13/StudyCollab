@@ -1,4 +1,6 @@
 export { ResourceCard } from './resource-card'
+export { ResourceDetail } from './resource-detail'
 export { ResourceEditDialog } from './resource-edit-dialog'
 export { ResourceList } from './resource-list'
+export { ResourceManagement } from './resource-management'
 export { ResourceUploadForm } from './resource-upload-form'

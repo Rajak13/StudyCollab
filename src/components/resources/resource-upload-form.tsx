@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/components/ui/use-toast'
+import { useAuth } from '@/hooks/use-auth'
 import { useCreateResource } from '@/hooks/use-resources'
 import type { CreateResourceFormData } from '@/lib/validations/resources'
 import {
@@ -63,6 +64,7 @@ export function ResourceUploadForm({
   const [isUploading, setIsUploading] = useState(false)
 
   const { toast } = useToast()
+  const { user } = useAuth()
   const createResource = useCreateResource()
 
   const form = useForm<CreateResourceFormData>({
@@ -87,6 +89,20 @@ export function ResourceUploadForm({
       toast({
         title: 'Invalid File',
         description: validation.error,
+        variant: 'destructive',
+      })
+      return
+    }
+
+    // Additional security checks
+    if (
+      file.name.includes('..') ||
+      file.name.includes('/') ||
+      file.name.includes('\\')
+    ) {
+      toast({
+        title: 'Invalid File Name',
+        description: 'File name contains invalid characters',
         variant: 'destructive',
       })
       return
@@ -144,10 +160,56 @@ export function ResourceUploadForm({
     }
   }
 
-  const uploadFile = async (file: File): Promise<string> => {
-    // TODO: Implement actual file upload to Supabase Storage
-    // For now, return a placeholder URL
-    return `https://placeholder.com/files/${file.name}`
+  const uploadFileToStorage = async (file: File): Promise<string> => {
+    // Import the upload function dynamically to avoid SSR issues
+    const { uploadFile, getFileType, normalizeMimeType } = await import(
+      '@/lib/file-upload'
+    )
+
+    // Get current user from the component's auth hook
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
+    // Upload file to Supabase Storage
+    const uploadResult = await uploadFile(file, user.id)
+
+    if (!uploadResult.success) {
+      throw new Error(uploadResult.error || 'Failed to upload file')
+    }
+
+    // Create file record in database
+    const normalizedMimeType = normalizeMimeType(file)
+    const fileType = getFileType(normalizedMimeType, file.name)
+
+    const fileData = {
+      name: file.name,
+      original_name: file.name,
+      file_path: uploadResult.file_path!,
+      file_url: uploadResult.file_url!,
+      file_size: file.size,
+      mime_type: normalizedMimeType,
+      file_type: fileType,
+      description: '',
+      tags: [],
+      folder_id: null,
+      is_public: false,
+    }
+
+    const response = await fetch('/api/files', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(fileData),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error || 'Failed to create file record')
+    }
+
+    return uploadResult.file_url!
   }
 
   const onSubmit = async (data: CreateResourceFormData) => {
@@ -159,7 +221,7 @@ export function ResourceUploadForm({
 
       // Upload file if one is selected
       if (selectedFile) {
-        fileUrl = await uploadFile(selectedFile)
+        fileUrl = await uploadFileToStorage(selectedFile)
         fileSize = selectedFile.size
       }
 

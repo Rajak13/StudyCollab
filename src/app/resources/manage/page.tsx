@@ -1,11 +1,11 @@
 'use client'
 
 import { ProtectedRoute } from '@/components/auth/protected-route'
-import { FileManager } from '@/components/files/file-manager'
 import { DashboardLayout } from '@/components/layout'
+import { ResourceManagement } from '@/components/resources/resource-management'
 import { useAuth } from '@/hooks/use-auth'
 
-function FilesContent() {
+function ResourceManageContent() {
   const { user } = useAuth()
 
   const displayName = user?.user_metadata?.name || user?.email || 'User'
@@ -21,17 +21,17 @@ function FilesContent() {
 
   return (
     <DashboardLayout user={layoutUser}>
-      <div className="container mx-auto px-4 py-8">
-        <FileManager />
+      <div className="container mx-auto p-6">
+        <ResourceManagement />
       </div>
     </DashboardLayout>
   )
 }
 
-export default function FilesPage() {
+export default function ResourceManagePage() {
   return (
     <ProtectedRoute>
-      <FilesContent />
+      <ResourceManageContent />
     </ProtectedRoute>
   )
 }

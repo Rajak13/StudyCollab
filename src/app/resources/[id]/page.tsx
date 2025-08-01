@@ -2,9 +2,15 @@
 
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { DashboardLayout } from '@/components/layout'
+import { ResourceDetail } from '@/components/resources/resource-detail'
 import { useAuth } from '@/hooks/use-auth'
+import * as React from 'react'
 
-function SearchContent() {
+interface ResourceDetailPageProps {
+  params: Promise<{ id: string }>
+}
+
+function ResourceDetailContent({ resourceId }: { resourceId: string }) {
   const { user } = useAuth()
 
   const displayName = user?.user_metadata?.name || user?.email || 'User'
@@ -21,29 +27,28 @@ function SearchContent() {
   return (
     <DashboardLayout user={layoutUser}>
       <div className="container mx-auto p-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">Search</h1>
-          <p className="text-muted-foreground">
-            Search through your notes, tasks, and study materials
-          </p>
-        </div>
-
-        <div className="rounded-lg border bg-card p-8 text-center">
-          <h2 className="mb-2 text-xl font-semibold">Search Coming Soon</h2>
-          <p className="text-muted-foreground">
-            This feature is under development. You&apos;ll be able to search
-            across all your content here.
-          </p>
-        </div>
+        <ResourceDetail resourceId={resourceId} />
       </div>
     </DashboardLayout>
   )
 }
 
-export default function SearchPage() {
+export default function ResourceDetailPage({
+  params,
+}: ResourceDetailPageProps) {
+  const [resourceId, setResourceId] = React.useState<string | null>(null)
+
+  React.useEffect(() => {
+    params.then(({ id }) => setResourceId(id))
+  }, [params])
+
+  if (!resourceId) {
+    return <div>Loading...</div>
+  }
+
   return (
     <ProtectedRoute>
-      <SearchContent />
+      <ResourceDetailContent resourceId={resourceId} />
     </ProtectedRoute>
   )
 }

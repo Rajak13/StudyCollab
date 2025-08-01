@@ -1,5 +1,5 @@
 import { getCurrentUser } from '@/lib/auth'
-import { createClient } from '@/lib/supabase'
+import { createApiSupabaseClient } from '@/lib/supabase'
 import { updateResourceSchema } from '@/lib/validations/resources'
 import { ApiResponse, Resource } from '@/types/database'
 import { NextRequest, NextResponse } from 'next/server'
@@ -11,7 +11,7 @@ export async function GET(
 ) {
   const { id } = await params
   try {
-    const supabase = createClient()
+    const supabase = createApiSupabaseClient(request)
 
     const { data: resource, error } = await supabase
       .from('resources')
@@ -80,7 +80,7 @@ export async function PUT(
     const body = await request.json()
     const validatedData = updateResourceSchema.parse(body)
 
-    const supabase = createClient()
+    const supabase = createApiSupabaseClient(request)
 
     // Check if resource exists and user owns it
     const { data: existingResource, error: fetchError } = await supabase
@@ -172,7 +172,7 @@ export async function DELETE(
         { status: 401 }
       )
     }
-    const supabase = createClient()
+    const supabase = createApiSupabaseClient(request)
 
     // Check if resource exists and user owns it
     const { data: existingResource, error: fetchError } = await supabase
