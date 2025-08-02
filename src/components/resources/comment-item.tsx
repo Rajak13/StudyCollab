@@ -17,6 +17,7 @@ import {
 import { Comment } from '@/types/database'
 import { formatDistanceToNow } from 'date-fns'
 import { Edit, MoreHorizontal, Reply, Trash2, User } from 'lucide-react'
+import Image from 'next/image'
 import { useState } from 'react'
 
 interface CommentItemProps {
@@ -105,9 +106,11 @@ export function CommentItem({
         {/* Avatar */}
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
           {comment.user?.avatar_url ? (
-            <img
+            <Image
               src={comment.user.avatar_url}
-              alt={comment.user.name || 'User'}
+              alt={`Avatar of ${comment.user.name || 'User'}`}
+              width={32}
+              height={32}
               className="h-8 w-8 rounded-full object-cover"
             />
           ) : (

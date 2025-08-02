@@ -154,7 +154,7 @@ const navigationItems: NavItem[] = [
   },
   {
     title: 'Study Groups',
-    href: '/groups',
+    href: '/study-groups',
     icon: (
       <svg
         className="h-4 w-4"

@@ -21,6 +21,7 @@ import {
   Music,
   Video,
 } from 'lucide-react'
+import Image from 'next/image'
 import { useState } from 'react'
 
 interface FilePreviewProps {
@@ -55,10 +56,12 @@ export function FilePreview({ file, open, onOpenChange }: FilePreviewProps) {
       return (
         <div className="relative">
           {!imageError ? (
-            <img
+            <Image
               src={file.file_url}
-              alt={file.name}
-              className="mx-auto max-h-96 max-w-full rounded-lg"
+              alt={`Preview of ${file.name}`}
+              width={800}
+              height={600}
+              className="mx-auto max-h-96 max-w-full rounded-lg object-contain"
               onError={() => setImageError(true)}
             />
           ) : (

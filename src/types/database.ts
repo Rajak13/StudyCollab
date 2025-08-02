@@ -125,6 +125,9 @@ export interface StudyGroup {
   subject?: string | null
   university?: string | null
   is_private: boolean
+  is_archived: boolean
+  archived_at?: string | null
+  last_activity_at: string
   owner_id: string
   created_at: string
   updated_at: string
@@ -139,6 +142,19 @@ export interface GroupMember {
   joined_at: string
   user_id: string
   group_id: string
+  // Relations
+  user?: Profile
+  group?: StudyGroup
+}
+
+export interface GroupJoinRequest {
+  id: string
+  user_id: string
+  group_id: string
+  message?: string | null
+  status: 'PENDING' | 'APPROVED' | 'REJECTED'
+  created_at: string
+  updated_at: string
   // Relations
   user?: Profile
   group?: StudyGroup
@@ -470,4 +486,44 @@ export interface FileFilters {
   search?: string
   sort_by?: 'name' | 'created_at' | 'file_size' | 'download_count'
   sort_order?: 'asc' | 'desc'
+}
+
+// Study Group form data types
+export interface CreateStudyGroupData {
+  name: string
+  description?: string
+  subject?: string
+  university?: string
+  is_private?: boolean
+}
+
+export interface UpdateStudyGroupData {
+  name?: string
+  description?: string
+  subject?: string
+  university?: string
+  is_private?: boolean
+  is_archived?: boolean
+  archived_at?: string | null
+  last_activity_at?: string
+}
+
+export interface CreateJoinRequestData {
+  group_id: string
+  message?: string
+}
+
+export interface UpdateJoinRequestData {
+  status: 'APPROVED' | 'REJECTED'
+}
+
+export interface StudyGroupFilters {
+  subject?: string[]
+  university?: string[]
+  is_private?: boolean
+  search?: string
+  sort_by?: 'name' | 'created_at' | 'member_count'
+  sort_order?: 'asc' | 'desc'
+  page?: number
+  limit?: number
 }

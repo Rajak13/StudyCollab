@@ -48,3 +48,4 @@ supabase/config.toml
 supabase/migrations/
 supabase/migrations/*.sql
 supabase/*.sql
+supabase/.md

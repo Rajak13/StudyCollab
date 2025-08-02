@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Camera, Loader2, User } from 'lucide-react'
 import Image from 'next/image'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/components/ui/use-toast'
 import { useAuth } from '@/hooks/use-auth'
+import { useProfile } from '@/hooks/use-profile'
 import {
   profileUpdateSchema,
   type ProfileUpdateFormData,
@@ -25,24 +26,32 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
   const [avatarUploading, setAvatarUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { user, updateProfile, uploadAvatar, loading } = useAuth()
+  const { profile, refreshProfile } = useProfile()
   const { toast } = useToast()
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<ProfileUpdateFormData>({
     resolver: zodResolver(profileUpdateSchema),
-    defaultValues: {
-      name: user?.user_metadata?.name || '',
-      university: user?.user_metadata?.university || '',
-      major: user?.user_metadata?.major || '',
-      graduationYear: user?.user_metadata?.graduationYear || undefined,
-      bio: user?.user_metadata?.bio || '',
-    },
   })
 
-  const currentAvatar = user?.user_metadata?.avatar
+  // Reset form when profile data changes
+  useEffect(() => {
+    if (profile) {
+      reset({
+        name: profile.name || '',
+        university: profile.university || '',
+        major: profile.major || '',
+        graduationYear: profile.graduation_year || undefined,
+        bio: profile.bio || '',
+      })
+    }
+  }, [profile, reset])
+
+  const currentAvatar = profile?.avatar_url || user?.user_metadata?.avatar
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click()
@@ -103,7 +112,7 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
       updates.university = data.university.trim()
     if (data.major && data.major.trim() !== '')
       updates.major = data.major.trim()
-    if (data.graduationYear) updates.graduationYear = data.graduationYear
+    if (data.graduationYear) updates.graduation_year = data.graduationYear
     if (data.bio && data.bio.trim() !== '') updates.bio = data.bio.trim()
 
     // Only proceed if there are updates to make
@@ -115,24 +124,43 @@ export function ProfileForm({ onSuccess }: ProfileFormProps) {
       return
     }
 
-    const { error } = await updateProfile(updates)
+    try {
+      // Call the API route directly for better reliability
+      const response = await fetch('/api/auth/user', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates),
+      })
 
-    if (error) {
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update profile')
+      }
+
+      // Refresh profile data to update the form
+      refreshProfile()
+
+      // Also update the auth store to keep UI in sync
+      await updateProfile(updates)
+
+      toast({
+        title: 'Profile updated',
+        description: 'Your profile has been updated successfully.',
+      })
+
+      if (onSuccess) {
+        onSuccess()
+      }
+    } catch (error) {
       toast({
         title: 'Update failed',
-        description: error,
+        description:
+          error instanceof Error ? error.message : 'Failed to update profile',
         variant: 'destructive',
       })
-      return
-    }
-
-    toast({
-      title: 'Profile updated',
-      description: 'Your profile has been updated successfully.',
-    })
-
-    if (onSuccess) {
-      onSuccess()
     }
   }
 

@@ -39,6 +39,15 @@ export function SignupForm({
     const { error } = await signUp(data.email, data.password, data.name)
 
     if (error) {
+      // Check if it's an email confirmation message
+      if (error.includes('check your email') || error.includes('confirm')) {
+        toast({
+          title: 'Check your email',
+          description: error,
+        })
+        return
+      }
+
       toast({
         title: 'Signup failed',
         description: error,

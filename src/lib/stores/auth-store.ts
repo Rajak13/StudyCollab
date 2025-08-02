@@ -179,13 +179,19 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
         }
       }
 
-      // Get updated user data
+      // Get updated user data from Supabase auth
       const {
         data: { user: updatedUser },
       } = await supabase.auth.getUser()
 
+      // Force a session refresh to get the latest user metadata
+      const {
+        data: { session: refreshedSession },
+      } = await supabase.auth.refreshSession()
+
       set({
-        user: updatedUser,
+        user: refreshedSession?.user || updatedUser,
+        session: refreshedSession,
         loading: false,
       })
 
@@ -206,7 +212,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       // Create unique filename
       const fileExt = file.name.split('.').pop()
       const fileName = `${user.id}-${Date.now()}.${fileExt}`
-
 
       // Upload file to Supabase Storage
       const { error: uploadError } = await supabase.storage
@@ -251,24 +256,34 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       // Get initial session
       const {
         data: { session },
+        error,
       } = await supabase.auth.getSession()
+
+      if (error) {
+        console.error('Error getting session:', error)
+      }
 
       set({
         user: session?.user ?? null,
-        session,
+        session: session ?? null,
         initialized: true,
       })
 
       // Listen for auth changes
       supabase.auth.onAuthStateChange((event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id)
         set({
           user: session?.user ?? null,
-          session,
+          session: session ?? null,
         })
       })
     } catch (error) {
       console.error('Error initializing auth:', error)
-      set({ initialized: true })
+      set({
+        user: null,
+        session: null,
+        initialized: true,
+      })
     }
   },
 

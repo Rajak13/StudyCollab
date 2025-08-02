@@ -2,6 +2,7 @@
 
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { DashboardLayout } from '@/components/layout'
+import { StudyGroupsManager } from '@/components/study-groups/study-groups-manager'
 import { useAuth } from '@/hooks/use-auth'
 
 function StudyGroupsContent() {
@@ -28,15 +29,7 @@ function StudyGroupsContent() {
           </p>
         </div>
 
-        <div className="rounded-lg border bg-card p-8 text-center">
-          <h2 className="mb-2 text-xl font-semibold">
-            Study Groups Coming Soon
-          </h2>
-          <p className="text-muted-foreground">
-            This feature is under development. You&apos;ll be able to create and
-            join study groups here.
-          </p>
-        </div>
+        <StudyGroupsManager />
       </div>
     </DashboardLayout>
   )

@@ -24,7 +24,16 @@ import {
 } from '@/lib/validations/resources'
 import { ResourceType } from '@/types/database'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { File, FileText, Image, Link, Upload, Video, X } from 'lucide-react'
+import {
+  File,
+  FileText,
+  Image as ImageIcon,
+  Link,
+  Upload,
+  Video,
+  X,
+} from 'lucide-react'
+import Image from 'next/image'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -37,7 +46,7 @@ const resourceTypeIcons = {
   PDF: FileText,
   DOCX: FileText,
   PPT: FileText,
-  IMAGE: Image,
+  IMAGE: ImageIcon,
   VIDEO: Video,
   LINK: Link,
   OTHER: File,
@@ -306,9 +315,11 @@ export function ResourceUploadForm({
                 </div>
                 {filePreview && (
                   <div className="mt-4">
-                    <img
+                    <Image
                       src={filePreview}
-                      alt="Preview"
+                      alt={`Preview of ${selectedFile.name}`}
+                      width={200}
+                      height={128}
                       className="h-32 max-w-full rounded object-cover"
                     />
                   </div>

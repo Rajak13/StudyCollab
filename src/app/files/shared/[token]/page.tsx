@@ -18,7 +18,7 @@ import {
   Music,
   Video,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 interface SharedFilePageProps {
   params: Promise<{ token: string }>
@@ -62,13 +62,7 @@ export default function SharedFilePage({ params }: SharedFilePageProps) {
     })
   }, [params])
 
-  useEffect(() => {
-    if (token) {
-      fetchShareData()
-    }
-  }, [token])
-
-  const fetchShareData = async () => {
+  const fetchShareData = useCallback(async () => {
     if (!token) return
 
     try {
@@ -84,12 +78,18 @@ export default function SharedFilePage({ params }: SharedFilePageProps) {
       const data = await response.json()
       setShareData(data.data)
       setIsAuthenticated(!data.data.requires_password)
-    } catch (error) {
+    } catch {
       setError('Failed to load share')
     } finally {
       setLoading(false)
     }
-  }
+  }, [token])
+
+  useEffect(() => {
+    if (token) {
+      fetchShareData()
+    }
+  }, [token, fetchShareData])
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -117,7 +117,7 @@ export default function SharedFilePage({ params }: SharedFilePageProps) {
         title: 'Success',
         description: 'Access granted',
       })
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to verify password',
@@ -162,7 +162,7 @@ export default function SharedFilePage({ params }: SharedFilePageProps) {
         title: 'Success',
         description: 'Download started',
       })
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Download failed',

@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAuth } from '@/hooks/use-auth'
+import { useProfile } from '@/hooks/use-profile'
 import { LogOut, Settings, User } from 'lucide-react'
 import Link from 'next/link'
 
@@ -28,6 +29,7 @@ export function UserInfo({
   showDetails = true,
 }: UserInfoProps) {
   const { user, signOut } = useAuth()
+  const { profile } = useProfile()
 
   if (!user) {
     return (
@@ -51,11 +53,14 @@ export function UserInfo({
   }
 
   const displayName =
-    user.user_metadata?.name || user.email?.split('@')[0] || 'User'
+    profile?.name ||
+    user.user_metadata?.name ||
+    user.email?.split('@')[0] ||
+    'User'
   const displayEmail = user.email || 'No email'
-  const avatarUrl = user.user_metadata?.avatar_url
-  const university = user.user_metadata?.university
-  const major = user.user_metadata?.major
+  const avatarUrl = profile?.avatar_url || user.user_metadata?.avatar_url
+  const university = profile?.university || user.user_metadata?.university
+  const major = profile?.major || user.user_metadata?.major
   const isEmailVerified = user.email_confirmed_at !== null
 
   if (variant === 'dropdown') {

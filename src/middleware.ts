@@ -56,9 +56,20 @@ export async function middleware(req: NextRequest) {
   )
 
   // Refresh session if expired - required for Server Components
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+  let session = null
+  try {
+    const {
+      data: { session: sessionData },
+      error,
+    } = await supabase.auth.getSession()
+
+    if (!error && sessionData) {
+      session = sessionData
+    }
+  } catch (error) {
+    console.error('Session parsing error in middleware:', error)
+    // Continue with null session to handle gracefully
+  }
 
   // Protected routes that require authentication
   const protectedRoutes = [
