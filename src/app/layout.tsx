@@ -1,5 +1,6 @@
 import { AuthProvider } from '@/components/auth'
 import { ErrorBoundary } from '@/components/error-boundary'
+import { NotificationProvider } from '@/components/providers/notification-provider'
 import { QueryProvider } from '@/components/providers/query-provider'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
@@ -34,8 +35,10 @@ export default function RootLayout({
           >
             <QueryProvider>
               <AuthProvider>
-                {children}
-                <Toaster />
+                <NotificationProvider>
+                  {children}
+                  <Toaster />
+                </NotificationProvider>
               </AuthProvider>
             </QueryProvider>
           </ThemeProvider>

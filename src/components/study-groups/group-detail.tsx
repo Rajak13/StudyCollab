@@ -12,8 +12,9 @@ import {
 } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/components/ui/use-toast'
-import { useStudyGroup } from '@/hooks/use-study-groups'
+import { useDeleteStudyGroup, useStudyGroup } from '@/hooks/use-study-groups'
 import { cn } from '@/lib/utils'
+import { GroupRole } from '@/types/database'
 import {
   Activity,
   Archive,
@@ -21,13 +22,18 @@ import {
   MessageCircle,
   Share2,
   Shield,
+  Trash2,
   User,
-  Users,
+  UserPlus,
+  Users
 } from 'lucide-react'
 import { useState } from 'react'
 import { GroupActivities } from './group-activities'
 import { GroupChat } from './group-chat'
+import { GroupEditDialog } from './group-edit-dialog'
+import { GroupMembers } from './group-members'
 import { GroupSharedResources } from './group-shared-resources'
+import { JoinRequests } from './join-requests'
 
 interface GroupDetailProps {
   groupId: string
@@ -36,8 +42,10 @@ interface GroupDetailProps {
 
 export function GroupDetail({ groupId, className }: GroupDetailProps) {
   const [showArchiveDialog, setShowArchiveDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const { data: groupData, isLoading, error } = useStudyGroup(groupId)
+  const deleteStudyGroup = useDeleteStudyGroup()
   const group = groupData?.data
 
   const handleArchiveGroup = async () => {
@@ -57,13 +65,24 @@ export function GroupDetail({ groupId, className }: GroupDetailProps) {
       })
 
       setShowArchiveDialog(false)
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
-        description:
-          error instanceof Error ? error.message : 'Failed to archive group',
+        description: 'Failed to archive group',
         variant: 'destructive',
       })
+    }
+  }
+
+  const handleDeleteGroup = async () => {
+    try {
+      await deleteStudyGroup.mutateAsync(groupId)
+      setShowDeleteDialog(false)
+      // Navigate back to study groups page
+      window.location.href = '/study-groups'
+    } catch {
+      // Error is handled by the mutation
+      setShowDeleteDialog(false)
     }
   }
 
@@ -150,45 +169,112 @@ export function GroupDetail({ groupId, className }: GroupDetailProps) {
               )}
 
               {isOwner && !group.is_archived && (
-                <Dialog
-                  open={showArchiveDialog}
-                  onOpenChange={setShowArchiveDialog}
-                >
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <Archive className="mr-2 h-4 w-4" />
-                      Archive
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Archive Group</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <p className="text-muted-foreground">
-                        Are you sure you want to archive this group? Archived
-                        groups are read-only and won&apos;t appear in active
-                        group lists.
-                      </p>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => setShowArchiveDialog(false)}
-                          className="flex-1"
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          onClick={handleArchiveGroup}
-                          className="flex-1"
-                        >
-                          Archive Group
-                        </Button>
+                <>
+                  <GroupEditDialog
+                    group={group}
+                    onUpdate={() => window.location.reload()}
+                  />
+
+                  <Dialog
+                    open={showArchiveDialog}
+                    onOpenChange={setShowArchiveDialog}
+                  >
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Archive className="mr-2 h-4 w-4" />
+                        Archive
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Archive Group</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <p className="text-muted-foreground">
+                          Are you sure you want to archive this group? Archived
+                          groups are read-only and won&apos;t appear in active
+                          group lists.
+                        </p>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => setShowArchiveDialog(false)}
+                            className="flex-1"
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            onClick={handleArchiveGroup}
+                            className="flex-1"
+                          >
+                            Archive Group
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                    </DialogContent>
+                  </Dialog>
+
+                  <Dialog
+                    open={showDeleteDialog}
+                    onOpenChange={setShowDeleteDialog}
+                  >
+                    <DialogTrigger asChild>
+                      <Button variant="destructive" size="sm">
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Delete Group</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <p className="text-muted-foreground">
+                          Are you sure you want to permanently delete this group?
+                          This action cannot be undone and will remove all group data,
+                          including messages, shared resources, and member information.
+                        </p>
+                        <div className="rounded-lg bg-destructive/10 p-3">
+                          <p className="text-sm font-medium text-destructive">
+                            ⚠️ This is a permanent action
+                          </p>
+                          <p className="text-sm text-destructive/80">
+                            All group content will be permanently lost.
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => setShowDeleteDialog(false)}
+                            className="flex-1"
+                            disabled={deleteStudyGroup.isPending}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            onClick={handleDeleteGroup}
+                            className="flex-1"
+                            disabled={deleteStudyGroup.isPending}
+                          >
+                            {deleteStudyGroup.isPending ? (
+                              <>
+                                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                Deleting...
+                              </>
+                            ) : (
+                              <>
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete Group
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </>
               )}
             </div>
           </div>
@@ -197,7 +283,7 @@ export function GroupDetail({ groupId, className }: GroupDetailProps) {
 
       {/* Group Content Tabs */}
       <Tabs defaultValue="chat" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="chat" className="flex items-center gap-2">
             <MessageCircle className="h-4 w-4" />
             Chat
@@ -206,13 +292,19 @@ export function GroupDetail({ groupId, className }: GroupDetailProps) {
             <Share2 className="h-4 w-4" />
             Resources
           </TabsTrigger>
-          <TabsTrigger value="activity" className="flex items-center gap-2">
-            <Activity className="h-4 w-4" />
-            Activity
-          </TabsTrigger>
           <TabsTrigger value="members" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Members
+          </TabsTrigger>
+          {(group.user_role === 'OWNER' || group.user_role === 'ADMIN') && (
+            <TabsTrigger value="requests" className="flex items-center gap-2">
+              <UserPlus className="h-4 w-4" />
+              Requests
+            </TabsTrigger>
+          )}
+          <TabsTrigger value="activity" className="flex items-center gap-2">
+            <Activity className="h-4 w-4" />
+            Activity
           </TabsTrigger>
         </TabsList>
 
@@ -243,21 +335,14 @@ export function GroupDetail({ groupId, className }: GroupDetailProps) {
         </TabsContent>
 
         <TabsContent value="members" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Group Members</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="py-8 text-center">
-                <div className="mb-2 text-4xl">👥</div>
-                <p className="text-muted-foreground">
-                  Member management functionality will be implemented in the
-                  next phase.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <GroupMembers groupId={groupId} userRole={group.user_role as GroupRole | null} />
         </TabsContent>
+
+        {(group.user_role === 'OWNER' || group.user_role === 'ADMIN') && (
+          <TabsContent value="requests" className="mt-6">
+            <JoinRequests groupId={groupId} userRole={group.user_role as GroupRole | null} />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   )

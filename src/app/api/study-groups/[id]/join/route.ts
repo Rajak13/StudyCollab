@@ -32,7 +32,6 @@ function createApiClient(request: NextRequest) {
 }
 
 const joinGroupSchema = z.object({
-  group_id: z.string().uuid(),
   message: z.string().optional(),
 })
 
@@ -53,13 +52,13 @@ export async function POST(
     const supabase = createApiClient(request)
 
     // Check if group exists
-    const { data: group } = await supabase
+    const { data: group, error: groupError } = await supabase
       .from('study_groups')
       .select('id, name, is_private, owner_id')
       .eq('id', groupId)
       .single()
 
-    if (!group) {
+    if (groupError || !group) {
       return NextResponse.json({ error: 'Group not found' }, { status: 404 })
     }
 
@@ -69,11 +68,11 @@ export async function POST(
       .select('id')
       .eq('group_id', groupId)
       .eq('user_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (existingMember) {
       return NextResponse.json(
-        { error: 'Already a member of this group' },
+        { error: 'You are already a member of this group' },
         { status: 400 }
       )
     }

@@ -143,7 +143,24 @@ export interface GroupMember {
   user_id: string
   group_id: string
   // Relations
-  user?: Profile
+  user?: {
+    id: string
+    email?: string
+    user_metadata?: {
+      name?: string
+      full_name?: string
+      avatar_url?: string
+    }
+    name?: string
+    avatar_url?: string
+  }
+  profile?: {
+    id: string
+    name?: string | null
+    full_name?: string | null
+    email?: string
+    avatar_url?: string | null
+  }
   group?: StudyGroup
 }
 
@@ -156,7 +173,24 @@ export interface GroupJoinRequest {
   created_at: string
   updated_at: string
   // Relations
-  user?: Profile
+  user?: {
+    id: string
+    email?: string
+    user_metadata?: {
+      name?: string
+      full_name?: string
+      avatar_url?: string
+    }
+    name?: string
+    avatar_url?: string
+  }
+  profile?: {
+    id: string
+    name?: string | null
+    full_name?: string | null
+    email?: string
+    avatar_url?: string | null
+  }
   group?: StudyGroup
 }
 
@@ -509,7 +543,6 @@ export interface UpdateStudyGroupData {
 }
 
 export interface CreateJoinRequestData {
-  group_id: string
   message?: string
 }
 

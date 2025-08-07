@@ -113,13 +113,41 @@ export async function GET(
     const userIds = [...new Set(messages?.map((m) => m.user_id) || [])]
 
     // Fetch user data separately
-    const { data: users } = await supabase
+    console.log('Fetching user data for IDs:', userIds)
+    const { data: users, error: usersError } = await supabase
       .from('profiles')
       .select('id, name, avatar_url')
       .in('id', userIds)
+    
+    console.log('Users query result:', { users, usersError })
 
     // Create user lookup map
     const userMap = new Map(users?.map((u) => [u.id, u]) || [])
+
+    // For users not found in profiles, try to get from auth
+    const missingUserIds = userIds.filter(id => !userMap.has(id))
+    console.log('Missing user IDs from profiles:', missingUserIds)
+    
+    if (missingUserIds.length > 0) {
+      for (const userId of missingUserIds) {
+        try {
+          const { data: authUser } = await supabase.auth.admin.getUserById(userId)
+          if (authUser.user) {
+            userMap.set(userId, {
+              id: userId,
+              name: authUser.user.user_metadata?.name || 
+                    authUser.user.user_metadata?.full_name || 
+                    authUser.user.email?.split('@')[0] || 
+                    'Unknown User',
+              avatar_url: authUser.user.user_metadata?.avatar_url || null
+            })
+            console.log('Added auth user data for:', userId, authUser.user.user_metadata)
+          }
+        } catch (error) {
+          console.error('Error fetching auth user:', userId, error)
+        }
+      }
+    }
 
     // Get reply message IDs
     const replyIds =

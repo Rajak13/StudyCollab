@@ -111,7 +111,8 @@ async function joinGroup(
     body: JSON.stringify(data),
   })
   if (!response.ok) {
-    throw new Error('Failed to join group')
+    const errorData = await response.json().catch(() => ({ error: 'Failed to join group' }))
+    throw new Error(errorData.error || 'Failed to join group')
   }
   return response.json()
 }
@@ -130,9 +131,38 @@ async function fetchGroupMembers(
   groupId: string
 ): Promise<ApiResponse<GroupMember[]>> {
   const response = await fetch(`/api/study-groups/${groupId}/members`)
+  
   if (!response.ok) {
-    throw new Error('Failed to fetch group members')
+    const errorData = await response.json().catch(() => ({}))
+    
+    console.error('fetchGroupMembers error:', {
+      groupId,
+      status: response.status,
+      statusText: response.statusText,
+      errorData
+    })
+    
+    if (response.status === 403) {
+      throw new Error(
+        errorData.error || 'You do not have permission to view members for this group'
+      )
+    }
+    
+    if (response.status === 401) {
+      throw new Error('Please log in to view group members')
+    }
+    
+    if (response.status === 404) {
+      throw new Error(
+        errorData.error || 'Study group not found'
+      )
+    }
+    
+    throw new Error(
+      errorData.error || `Failed to fetch group members (${response.status})`
+    )
   }
+  
   return response.json()
 }
 
@@ -140,9 +170,32 @@ async function fetchJoinRequests(
   groupId: string
 ): Promise<ApiResponse<GroupJoinRequest[]>> {
   const response = await fetch(`/api/study-groups/${groupId}/requests`)
+  
   if (!response.ok) {
-    throw new Error('Failed to fetch join requests')
+    const errorData = await response.json().catch(() => ({}))
+    
+    console.error('fetchJoinRequests error:', {
+      groupId,
+      status: response.status,
+      statusText: response.statusText,
+      errorData
+    })
+    
+    if (response.status === 403) {
+      throw new Error(
+        errorData.error || 'You do not have permission to view join requests for this group'
+      )
+    }
+    
+    if (response.status === 401) {
+      throw new Error('Please log in to view join requests')
+    }
+    
+    throw new Error(
+      errorData.error || `Failed to fetch join requests (${response.status})`
+    )
   }
+  
   return response.json()
 }
 
@@ -221,8 +274,12 @@ export function useCreateStudyGroup() {
 
   return useMutation({
     mutationFn: createStudyGroup,
-    onSuccess: () => {
+    onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['study-groups'] })
+      // Also invalidate the specific group members query for the new group
+      if (response.data?.id) {
+        queryClient.invalidateQueries({ queryKey: ['group-members', response.data.id] })
+      }
       toast({
         title: 'Success',
         description: 'Study group created successfully!',
@@ -336,14 +393,31 @@ export function useGroupMembers(groupId: string) {
     queryKey: ['group-members', groupId],
     queryFn: () => fetchGroupMembers(groupId),
     enabled: !!groupId,
+    retry: (failureCount, error) => {
+      // Don't retry 403 or 404 errors
+      if (error instanceof Error && (
+        error.message.includes('permission') || 
+        error.message.includes('not found')
+      )) {
+        return false
+      }
+      return failureCount < 3
+    },
   })
 }
 
-export function useJoinRequests(groupId: string) {
+export function useJoinRequests(groupId: string, userRole?: string | null) {
   return useQuery({
     queryKey: ['join-requests', groupId],
     queryFn: () => fetchJoinRequests(groupId),
-    enabled: !!groupId,
+    enabled: !!groupId && (userRole === 'OWNER' || userRole === 'ADMIN'),
+    retry: (failureCount, error) => {
+      // Don't retry 403 errors
+      if (error instanceof Error && error.message.includes('permission')) {
+        return false
+      }
+      return failureCount < 3
+    },
   })
 }
 

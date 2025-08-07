@@ -1,4 +1,5 @@
 import { getCurrentUser } from '@/lib/auth'
+import { createServiceSupabaseClient } from '@/lib/supabase'
 import { createServerClient } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -186,9 +187,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = createStudyGroupSchema.parse(body)
 
-    const supabase = createApiClient(request)
+    const serviceSupabase = createServiceSupabaseClient()
 
-    const { data: group, error } = await supabase
+    // Create the group using service client to bypass RLS
+    const { data: group, error } = await serviceSupabase
       .from('study_groups')
       .insert([
         {
@@ -205,6 +207,46 @@ export async function POST(request: NextRequest) {
         { error: 'Failed to create study group' },
         { status: 500 }
       )
+    }
+
+    console.log('Group created successfully:', {
+      groupId: group.id,
+      groupName: group.name,
+      ownerId: group.owner_id,
+      userId: user.id
+    })
+
+    // Add the owner as a member of the group using service client
+    const { error: membershipError } = await serviceSupabase
+      .from('group_members')
+      .insert([
+        {
+          group_id: group.id,
+          user_id: user.id,
+          role: 'OWNER',
+          joined_at: new Date().toISOString(),
+        },
+      ])
+
+    if (membershipError) {
+      if (membershipError.code === '23505') {
+        // Duplicate key error - owner is already in the group_members table
+        console.log('Owner already exists in group members (duplicate key):', {
+          groupId: group.id,
+          userId: user.id,
+          error: membershipError.message
+        })
+      } else {
+        console.error('Error adding owner to group members:', membershipError)
+        // Don't fail the entire request, but log the error
+        // The owner can still access the group through ownership
+      }
+    } else {
+      console.log('Owner added to group members successfully:', {
+        groupId: group.id,
+        userId: user.id,
+        role: 'OWNER'
+      })
     }
 
     // Transform the response

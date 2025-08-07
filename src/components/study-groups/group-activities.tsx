@@ -4,9 +4,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
-  formatActivityMessage,
-  getActivityIcon,
-  useGroupActivities,
+    formatActivityMessage,
+    getActivityIcon,
+    useGroupActivities,
 } from '@/hooks/use-group-activities'
 import { cn } from '@/lib/utils'
 import { formatDistanceToNow } from 'date-fns'
@@ -34,16 +34,17 @@ export function GroupActivities({
 
   const getUserName = (
     user: {
-      user_metadata?: { name?: string }
+      id: string
       name?: string
       email?: string
+      user_metadata?: { name?: string }
     } | null
   ) => {
-    if (user?.user_metadata?.name) {
-      return user.user_metadata.name
-    }
     if (user?.name) {
       return user.name
+    }
+    if (user?.user_metadata?.name) {
+      return user.user_metadata.name
     }
     if (user?.email) {
       return user.email.split('@')[0]
@@ -53,18 +54,19 @@ export function GroupActivities({
 
   const getUserAvatar = (
     user: {
-      user_metadata?: { avatar_url?: string }
       avatar_url?: string
+      user_metadata?: { avatar_url?: string }
     } | null
   ) => {
-    return user?.user_metadata?.avatar_url || user?.avatar_url
+    return user?.avatar_url || user?.user_metadata?.avatar_url
   }
 
   const getUserInitials = (
     user: {
-      user_metadata?: { name?: string }
+      id: string
       name?: string
       email?: string
+      user_metadata?: { name?: string }
     } | null
   ) => {
     const name = getUserName(user)

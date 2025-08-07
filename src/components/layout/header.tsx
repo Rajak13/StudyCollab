@@ -5,15 +5,16 @@ import Image from 'next/image'
 import Link from 'next/link'
 import * as React from 'react'
 import { LogoutButton } from '../auth/logout-button'
+import { NotificationCenter } from '../notifications/notification-center'
 import { ThemeToggle } from '../theme-toggle'
 import { Button } from '../ui/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
 
 interface HeaderProps {
@@ -95,6 +96,12 @@ export function Header({
         {/* Right side actions */}
         <div className="flex items-center space-x-2">
           <ThemeToggle />
+
+          {user ? (
+            <>
+              <NotificationCenter />
+            </>
+          ) : null}
 
           {user ? (
             <div className="flex items-center space-x-2">

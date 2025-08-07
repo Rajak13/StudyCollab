@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { CreateStudyGroupDialog } from './create-study-group-dialog'
 import { StudyGroupFilters } from './study-group-filters'
 import { StudyGroupsList } from './study-groups-list'
+import { UserJoinRequests } from './user-join-requests'
 
 export function StudyGroupsManager() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
@@ -112,16 +113,7 @@ export function StudyGroupsManager() {
         </TabsContent>
 
         <TabsContent value="requests" className="mt-6">
-          <div className="rounded-lg border bg-card p-8 text-center">
-            <h3 className="mb-2 text-lg font-semibold">Join Requests</h3>
-            <p className="text-muted-foreground">
-              This section will show pending join requests for groups you
-              manage.
-            </p>
-            <p className="mt-2 text-xs text-muted-foreground">
-              Join request management will be implemented in the next phase.
-            </p>
-          </div>
+          <UserJoinRequests />
         </TabsContent>
       </Tabs>
 

@@ -61,9 +61,14 @@ export async function GET(
       .from('study_groups')
       .select('*')
       .eq('id', groupId)
-      .single()
+      .maybeSingle()
 
-    if (error || !group) {
+    if (error) {
+      console.error('Database error when fetching group:', error)
+      return NextResponse.json({ error: 'Database error' }, { status: 500 })
+    }
+
+    if (!group) {
       return NextResponse.json({ error: 'Group not found' }, { status: 404 })
     }
 
@@ -74,7 +79,7 @@ export async function GET(
         .select('role')
         .eq('group_id', groupId)
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle()
 
       if (!membership && group.owner_id !== user.id) {
         return NextResponse.json({ error: 'Access denied' }, { status: 403 })
@@ -87,7 +92,7 @@ export async function GET(
       .select('role')
       .eq('group_id', groupId)
       .eq('user_id', user.id)
-      .single()
+      .maybeSingle()
 
     // Get member count
     const { count: memberCount } = await supabase
@@ -130,11 +135,16 @@ export async function PUT(
     const supabase = createApiClient(request)
 
     // Check if user is the owner of the group
-    const { data: group } = await supabase
+    const { data: group, error: groupError } = await supabase
       .from('study_groups')
       .select('owner_id')
       .eq('id', groupId)
-      .single()
+      .maybeSingle()
+
+    if (groupError) {
+      console.error('Database error when checking group ownership:', groupError)
+      return NextResponse.json({ error: 'Database error' }, { status: 500 })
+    }
 
     if (!group) {
       return NextResponse.json({ error: 'Group not found' }, { status: 404 })
@@ -197,11 +207,16 @@ export async function DELETE(
     const supabase = createApiClient(request)
 
     // Check if user is the owner of the group
-    const { data: group } = await supabase
+    const { data: group, error: groupError } = await supabase
       .from('study_groups')
       .select('owner_id, name')
       .eq('id', groupId)
-      .single()
+      .maybeSingle()
+
+    if (groupError) {
+      console.error('Database error when checking group for deletion:', groupError)
+      return NextResponse.json({ error: 'Database error' }, { status: 500 })
+    }
 
     if (!group) {
       return NextResponse.json({ error: 'Group not found' }, { status: 404 })
@@ -214,17 +229,22 @@ export async function DELETE(
       )
     }
 
-    // Delete the group (cascade will handle related records)
-    const { error } = await supabase
-      .from('study_groups')
-      .delete()
-      .eq('id', groupId)
+    // Use the safe deletion function to avoid foreign key constraint violations
+    const { data: deletionResult, error } = await supabase
+      .rpc('delete_study_group_safely', { group_id_param: groupId })
 
     if (error) {
       console.error('Error deleting study group:', error)
       return NextResponse.json(
-        { error: 'Failed to delete study group' },
+        { error: 'Failed to delete study group', details: error },
         { status: 500 }
+      )
+    }
+
+    if (!deletionResult) {
+      return NextResponse.json(
+        { error: 'Group not found or already deleted' },
+        { status: 404 }
       )
     }
 

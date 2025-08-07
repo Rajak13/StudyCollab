@@ -1,5 +1,5 @@
 import { getCurrentUser } from '@/lib/auth'
-import { createClient } from '@/lib/supabase'
+import { createClient, createServiceSupabaseClient } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(
@@ -14,35 +14,62 @@ export async function GET(
 
     const { id } = await params
     const supabase = createClient()
+    const serviceSupabase = createServiceSupabaseClient()
 
-    // Check if user has access to view members (is a member or group is public)
-    const { data: group, error: groupError } = await supabase
+    // Check if the group exists using service role to bypass RLS
+    const { data: group, error: groupError } = await serviceSupabase
       .from('study_groups')
-      .select('is_private')
+      .select('id, name, owner_id, is_private')
       .eq('id', id)
-      .single()
+      .maybeSingle()
 
     if (groupError) {
-      if (groupError.code === 'PGRST116') {
-        return NextResponse.json(
-          { error: 'Study group not found' },
-          { status: 404 }
-        )
-      }
+      console.error('Database error when checking group:', {
+        error: groupError,
+        groupId: id,
+        userId: user.id,
+      })
       return NextResponse.json(
-        { error: 'Failed to fetch study group' },
+        { error: 'Database error' },
         { status: 500 }
       )
     }
 
-    // If group is private, check if user is a member
+    if (!group) {
+      console.error('Group not found:', {
+        groupId: id,
+        userId: user.id,
+      })
+      return NextResponse.json(
+        { error: 'Study group not found' },
+        { status: 404 }
+      )
+    }
+
+    console.log('Group found:', {
+      groupId: id,
+      groupName: group.name,
+      ownerId: group.owner_id,
+      isPrivate: group.is_private,
+      userId: user.id,
+      isOwner: group.owner_id === user.id,
+    })
+
+    // First, fix any membership consistency issues for this group
+    if (group.owner_id === user.id) {
+      // Ensure the owner is in the group_members table
+      await supabase
+        .rpc('fix_group_membership_consistency')
+    }
+
+    // If group is private, check if user is a member using service role
     if (group.is_private) {
-      const { data: membership } = await supabase
+      const { data: membership } = await serviceSupabase
         .from('group_members')
         .select('id')
         .eq('group_id', id)
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle()
 
       if (!membership) {
         return NextResponse.json(
@@ -52,15 +79,10 @@ export async function GET(
       }
     }
 
-    // Get group members
-    const { data: members, error } = await supabase
+    // Get group members with user data from auth.users using service client
+    const { data: members, error } = await serviceSupabase
       .from('group_members')
-      .select(
-        `
-        *,
-        user:profiles!group_members_user_id_fkey(id, name, avatar_url, university, major)
-      `
-      )
+      .select('*')
       .eq('group_id', id)
       .order('joined_at', { ascending: true })
 
@@ -72,7 +94,54 @@ export async function GET(
       )
     }
 
-    return NextResponse.json({ data: members || [] })
+    console.log('Raw members data:', {
+      groupId: id,
+      membersCount: members?.length || 0,
+      members: members
+    })
+
+    // Get user data for each member using service client for auth.admin
+    const membersWithUsers = await Promise.all(
+      (members || []).map(async (member) => {
+        try {
+          const { data: userData, error: userError } = await serviceSupabase.auth.admin.getUserById(
+            member.user_id
+          )
+          
+          if (userError) {
+            console.error('Error fetching user data:', userError, 'for user:', member.user_id)
+          }
+          
+          // Also try to get profile data from profiles table
+          const { data: profileData } = await serviceSupabase
+            .from('profiles')
+            .select('*')
+            .eq('id', member.user_id)
+            .maybeSingle()
+          
+          return {
+            ...member,
+            user: userData.user,
+            profile: profileData,
+          }
+        } catch (error) {
+          console.error('Error in user data fetch:', error, 'for user:', member.user_id)
+          return {
+            ...member,
+            user: null,
+            profile: null,
+          }
+        }
+      })
+    )
+
+    console.log('Final members with users:', {
+      groupId: id,
+      membersWithUsersCount: membersWithUsers.length,
+      membersWithUsers: membersWithUsers
+    })
+
+    return NextResponse.json({ data: membersWithUsers || [] })
   } catch (error) {
     console.error('Error in group members GET:', error)
     return NextResponse.json(

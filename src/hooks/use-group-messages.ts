@@ -19,8 +19,10 @@ export interface GroupMessage {
   updated_at: string
   user: {
     id: string
-    email: string
-    user_metadata: {
+    name?: string
+    avatar_url?: string
+    email?: string
+    user_metadata?: {
       name?: string
       avatar_url?: string
     }
@@ -30,8 +32,10 @@ export interface GroupMessage {
     content: string
     user: {
       id: string
-      email: string
-      user_metadata: {
+      name?: string
+      avatar_url?: string
+      email?: string
+      user_metadata?: {
         name?: string
         avatar_url?: string
       }

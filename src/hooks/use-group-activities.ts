@@ -21,8 +21,10 @@ export interface GroupActivity {
   created_at: string
   user: {
     id: string
-    email: string
-    user_metadata: {
+    name?: string
+    avatar_url?: string
+    email?: string
+    user_metadata?: {
       name?: string
       avatar_url?: string
     }
@@ -91,7 +93,7 @@ export function useRecentGroupActivities(groupId: string, limit: number = 10) {
 // Helper function to format activity messages
 export function formatActivityMessage(activity: GroupActivity): string {
   const userName =
-    activity.user?.user_metadata?.name || activity.user?.email || 'Unknown User'
+    activity.user?.name || activity.user?.user_metadata?.name || activity.user?.email || 'Unknown User'
 
   switch (activity.activity_type) {
     case 'MEMBER_JOINED':

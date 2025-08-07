@@ -10,9 +10,15 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useJoinGroup, useLeaveGroup } from '@/hooks/use-study-groups'
+import { useDeleteStudyGroup, useJoinGroup, useLeaveGroup } from '@/hooks/use-study-groups'
 import { PaginatedResponse, StudyGroup } from '@/types/database'
 import { formatDistanceToNow } from 'date-fns'
 import {
@@ -21,7 +27,9 @@ import {
   Globe,
   GraduationCap,
   Lock,
-  Users,
+  MoreVertical,
+  Trash2,
+  Users
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -50,6 +58,7 @@ export function StudyGroupsList({
 }: StudyGroupsListProps) {
   const joinGroupMutation = useJoinGroup()
   const leaveGroupMutation = useLeaveGroup()
+  const deleteGroupMutation = useDeleteStudyGroup()
 
   if (isLoading) {
     return (
@@ -111,7 +120,7 @@ export function StudyGroupsList({
     try {
       await joinGroupMutation.mutateAsync({
         id: groupId,
-        data: { group_id: groupId },
+        data: { message: 'I would like to join this group' },
       })
     } catch {
       // Error is handled by the mutation
@@ -123,6 +132,16 @@ export function StudyGroupsList({
       await leaveGroupMutation.mutateAsync(groupId)
     } catch {
       // Error is handled by the mutation
+    }
+  }
+
+  const handleDeleteGroup = async (groupId: string, groupName: string) => {
+    if (confirm(`Are you sure you want to permanently delete "${groupName}"? This action cannot be undone.`)) {
+      try {
+        await deleteGroupMutation.mutateAsync(groupId)
+      } catch {
+        // Error is handled by the mutation
+      }
     }
   }
 
@@ -216,7 +235,25 @@ export function StudyGroupsList({
                           View Group
                         </Button>
                       </Link>
-                      {group.user_role !== 'OWNER' && (
+                      {group.user_role === 'OWNER' ? (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteGroup(group.id, group.name)}
+                              className="text-destructive focus:text-destructive"
+                              disabled={deleteGroupMutation.isPending}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete Group
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      ) : (
                         <Button
                           variant="destructive"
                           size="sm"
