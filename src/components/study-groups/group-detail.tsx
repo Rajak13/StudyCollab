@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/components/ui/use-toast'
+import { useAuth } from '@/hooks/use-auth'
 import { useDeleteStudyGroup, useStudyGroup } from '@/hooks/use-study-groups'
 import { cn } from '@/lib/utils'
 import { GroupRole } from '@/types/database'
@@ -20,6 +21,7 @@ import {
   Archive,
   Crown,
   MessageCircle,
+  PenTool,
   Share2,
   Shield,
   Trash2,
@@ -28,6 +30,7 @@ import {
   Users
 } from 'lucide-react'
 import { useState } from 'react'
+import { StudyBoard } from '../study-board'
 import { GroupActivities } from './group-activities'
 import { GroupChat } from './group-chat'
 import { GroupEditDialog } from './group-edit-dialog'
@@ -46,7 +49,12 @@ export function GroupDetail({ groupId, className }: GroupDetailProps) {
 
   const { data: groupData, isLoading, error } = useStudyGroup(groupId)
   const deleteStudyGroup = useDeleteStudyGroup()
+  const { user } = useAuth()
   const group = groupData?.data
+
+  // Get user info for the study board
+  const userId = user?.id || ''
+  const userName = user?.user_metadata?.name || user?.email || 'Anonymous'
 
   const handleArchiveGroup = async () => {
     try {
@@ -283,10 +291,14 @@ export function GroupDetail({ groupId, className }: GroupDetailProps) {
 
       {/* Group Content Tabs */}
       <Tabs defaultValue="chat" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="chat" className="flex items-center gap-2">
             <MessageCircle className="h-4 w-4" />
             Chat
+          </TabsTrigger>
+          <TabsTrigger value="board" className="flex items-center gap-2">
+            <PenTool className="h-4 w-4" />
+            Study Board
           </TabsTrigger>
           <TabsTrigger value="resources" className="flex items-center gap-2">
             <Share2 className="h-4 w-4" />
@@ -317,6 +329,14 @@ export function GroupDetail({ groupId, className }: GroupDetailProps) {
               <GroupChat groupId={groupId} />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="board" className="mt-6">
+          <StudyBoard
+            groupId={groupId}
+            userId={userId}
+            userName={userName}
+          />
         </TabsContent>
 
         <TabsContent value="resources" className="mt-6">

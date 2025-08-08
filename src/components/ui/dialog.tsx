@@ -1,3 +1,5 @@
+'use client'
+
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import * as React from 'react'
 // Uncomment the line below after installing lucide-react
@@ -129,5 +131,6 @@ export {
   DialogOverlay,
   DialogPortal,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 }
+

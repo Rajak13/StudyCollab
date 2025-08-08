@@ -8,8 +8,24 @@ export function createLazyComponent<T extends ComponentType<any>>(
   fallback?: ComponentType
 ) {
   const LazyComponent = lazy(importFn)
-  
+
   // Return component with error boundary wrapper
+  return LazyComponent
+}
+
+/**
+ * Create lazy component for named exports
+ */
+export function createLazyNamedComponent<T extends ComponentType<any>>(
+  importFn: () => Promise<any>,
+  componentName: string,
+  fallback?: ComponentType
+) {
+  const LazyComponent = lazy(async () => {
+    const module = await importFn()
+    return { default: module[componentName] }
+  })
+
   return LazyComponent
 }
 
@@ -19,7 +35,7 @@ export function createLazyComponent<T extends ComponentType<any>>(
 export function preloadComponent(importFn: () => Promise<any>) {
   // Start loading the component
   const componentPromise = importFn()
-  
+
   // Return a function to check if it's loaded
   return {
     promise: componentPromise,
@@ -40,21 +56,21 @@ export const LazyComponents = {
   // Dashboard components
   Dashboard: createLazyComponent(() => import('@/components/dashboard/dashboard')),
   DashboardSettings: createLazyComponent(() => import('@/components/dashboard/dashboard-settings')),
-  
+
   // Task components
   TaskManager: createLazyComponent(() => import('@/components/tasks/task-manager')),
   TaskCalendarView: createLazyComponent(() => import('@/components/tasks/task-calendar-view')),
   TaskStatistics: createLazyComponent(() => import('@/components/tasks/task-statistics')),
-  
+
   // Note components
   NoteEditor: createLazyComponent(() => import('@/components/notes/note-editor')),
   TiptapEditor: createLazyComponent(() => import('@/components/notes/tiptap-editor')),
-  
+
   // Study group components
   StudyGroupsManager: createLazyComponent(() => import('@/components/study-groups/study-groups-manager')),
   GroupDetail: createLazyComponent(() => import('@/components/study-groups/group-detail')),
   GroupChat: createLazyComponent(() => import('@/components/study-groups/group-chat')),
-  
+
   // File components
   FileManager: createLazyComponent(() => import('@/components/files/file-manager')),
   FilePreview: createLazyComponent(() => import('@/components/files/file-preview')),
@@ -70,7 +86,7 @@ export function preloadCriticalComponents() {
     () => import('@/components/tasks/task-manager'),
     () => import('@/components/notes/note-editor'),
   ]
-  
+
   criticalComponents.forEach(importFn => {
     preloadComponent(importFn)
   })
@@ -87,7 +103,7 @@ export function preloadRouteComponents(route: string) {
     '/study-groups': () => import('@/components/study-groups/study-groups-manager'),
     '/files': () => import('@/components/files/file-manager'),
   }
-  
+
   const importFn = routeComponentMap[route]
   if (importFn) {
     preloadComponent(importFn)

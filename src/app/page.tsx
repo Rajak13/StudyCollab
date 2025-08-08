@@ -1,3 +1,5 @@
+'use client'
+
 import { InteractiveFAQ } from '@/components/landing/interactive-faq'
 import { Navigation } from '@/components/landing/navigation'
 import { Button } from '@/components/ui/button'
@@ -423,6 +425,137 @@ export default function Home() {
                   Start Free Today
                 </Button>
               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Desktop App Download Section */}
+      <section className="bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 py-20 text-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <div className="mb-8 inline-flex items-center rounded-full bg-white/10 px-6 py-3 backdrop-blur-sm">
+              <span className="mr-2 text-2xl">💻</span>
+              <span className="font-medium">Now Available</span>
+            </div>
+            
+            <h2 className="mb-6 text-4xl font-bold md:text-5xl">
+              StudyCollab Desktop App
+            </h2>
+            
+            <p className="mx-auto mb-12 max-w-3xl text-xl text-gray-300">
+              Get the full StudyCollab experience with our native desktop application. 
+              Enjoy offline access, system notifications, global shortcuts, and seamless file integration.
+            </p>
+
+            <div className="mb-12 grid grid-cols-1 gap-6 md:grid-cols-3">
+              <div className="rounded-2xl bg-white/5 p-6 backdrop-blur-sm">
+                <div className="mb-4 text-3xl">🔔</div>
+                <h3 className="mb-2 text-lg font-semibold">Smart Notifications</h3>
+                <p className="text-sm text-gray-400">
+                  Never miss deadlines with native system notifications and reminders
+                </p>
+              </div>
+              
+              <div className="rounded-2xl bg-white/5 p-6 backdrop-blur-sm">
+                <div className="mb-4 text-3xl">⌨️</div>
+                <h3 className="mb-2 text-lg font-semibold">Global Shortcuts</h3>
+                <p className="text-sm text-gray-400">
+                  Quick access to StudyCollab features from anywhere on your system
+                </p>
+              </div>
+              
+              <div className="rounded-2xl bg-white/5 p-6 backdrop-blur-sm">
+                <div className="mb-4 text-3xl">📁</div>
+                <h3 className="mb-2 text-lg font-semibold">File Integration</h3>
+                <p className="text-sm text-gray-400">
+                  Drag & drop files directly and open StudyCollab files automatically
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <Button
+                size="lg"
+                className="group bg-white px-8 py-6 text-lg text-slate-900 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-gray-100 hover:shadow-xl"
+                onClick={() => {
+                  // Detect user's OS and provide appropriate download
+                  const userAgent = navigator.userAgent;
+                  let downloadUrl = '#';
+                  let fileName = 'StudyCollab-Setup';
+                  
+                  if (userAgent.includes('Windows')) {
+                    downloadUrl = '/downloads/StudyCollab-Setup.exe';
+                    fileName = 'StudyCollab-Setup.exe';
+                  } else if (userAgent.includes('Mac')) {
+                    downloadUrl = '/downloads/StudyCollab.dmg';
+                    fileName = 'StudyCollab.dmg';
+                  } else if (userAgent.includes('Linux')) {
+                    downloadUrl = '/downloads/StudyCollab.AppImage';
+                    fileName = 'StudyCollab.AppImage';
+                  }
+                  
+                  // For now, show setup instructions since we don't have built packages yet
+                  window.open('/docs/desktop-app-local-setup.md', '_blank');
+                }}
+              >
+                <span className="mr-2 transition-transform group-hover:scale-110">
+                  ⬇️
+                </span>
+                Download for {typeof window !== 'undefined' && navigator.userAgent.includes('Windows') ? 'Windows' : 
+                             typeof window !== 'undefined' && navigator.userAgent.includes('Mac') ? 'macOS' : 
+                             typeof window !== 'undefined' && navigator.userAgent.includes('Linux') ? 'Linux' : 'Desktop'}
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="lg"
+                className="group border-white/20 px-8 py-6 text-lg text-white transition-all duration-300 hover:scale-105 hover:border-white/40 hover:bg-white/10"
+                onClick={() => window.open('https://github.com/studycollab/studycollab-desktop/releases', '_blank')}
+              >
+                <span className="mr-2 transition-transform group-hover:scale-110">
+                  📋
+                </span>
+                View All Releases
+              </Button>
+            </div>
+
+            <div className="mt-8 flex items-center justify-center gap-8 text-sm text-gray-400">
+              <div className="flex items-center gap-2">
+                <span className="text-green-400">✓</span>
+                Windows 10+
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-green-400">✓</span>
+                macOS 10.14+
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-green-400">✓</span>
+                Linux (Ubuntu 18.04+)
+              </div>
+            </div>
+
+            <div className="mt-12 rounded-2xl bg-white/5 p-8 backdrop-blur-sm">
+              <h3 className="mb-4 text-xl font-semibold">Want to build it yourself?</h3>
+              <p className="mb-6 text-gray-300">
+                StudyCollab is open source! Follow our setup guide to build and run the desktop app locally.
+              </p>
+              <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <Button
+                  variant="outline"
+                  className="border-white/20 text-white hover:bg-white/10"
+                  onClick={() => window.open('/docs/desktop-app-local-setup.md', '_blank')}
+                >
+                  📖 Setup Guide
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-white/20 text-white hover:bg-white/10"
+                  onClick={() => window.open('https://github.com/studycollab/studycollab', '_blank')}
+                >
+                  🔗 GitHub Repository
+                </Button>
+              </div>
             </div>
           </div>
         </div>

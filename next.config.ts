@@ -19,6 +19,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+    esmExternals: true,
+  },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = [...(config.externals || []), 'socket.io']
+    }
+    return config
+  },
 }
 
 export default nextConfig

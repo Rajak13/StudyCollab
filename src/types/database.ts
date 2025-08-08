@@ -560,3 +560,163 @@ export interface StudyGroupFilters {
   page?: number
   limit?: number
 }
+
+// Study Board Types
+export interface StudyBoard {
+  id: string
+  group_id: string
+  name: string
+  description?: string | null
+  canvas_data: Record<string, unknown>
+  template_type?: string | null
+  settings: BoardSettings
+  version: number
+  created_by?: string | null
+  created_at: string
+  updated_at: string
+  last_modified_by?: string | null
+  last_modified_at: string
+  // Relations
+  group?: StudyGroup
+  creator?: Profile | null
+  elements?: CanvasElement[]
+  permissions?: BoardPermission[]
+  changes?: BoardChange[]
+}
+
+export interface CanvasElement {
+  id: string
+  board_id: string
+  element_type: ElementType
+  position: Point
+  properties: Record<string, unknown>
+  layer_index: number
+  created_by?: string | null
+  created_at: string
+  updated_at: string
+  updated_by?: string | null
+  // Relations
+  board?: StudyBoard
+  creator?: Profile | null
+}
+
+export interface UserPresence {
+  user_id: string
+  board_id: string
+  cursor_position?: Point | null
+  current_tool?: string | null
+  is_active: boolean
+  last_seen: string
+  session_id: string
+  // Relations
+  user?: Profile
+  board?: StudyBoard
+}
+
+export interface BoardPermission {
+  id: string
+  board_id: string
+  user_id: string
+  permission_level: PermissionLevel
+  granted_by?: string | null
+  granted_at: string
+  // Relations
+  board?: StudyBoard
+  user?: Profile
+  granter?: Profile | null
+}
+
+export interface BoardChange {
+  id: string
+  board_id: string
+  element_id?: string | null
+  change_type: ChangeType
+  change_data: Record<string, unknown>
+  user_id?: string | null
+  version: number
+  timestamp: string
+  applied: boolean
+  // Relations
+  board?: StudyBoard
+  element?: CanvasElement | null
+  user?: Profile | null
+}
+
+// Study Board related types
+export interface Point {
+  x: number
+  y: number
+}
+
+export interface BoardSettings {
+  width: number
+  height: number
+  backgroundColor: string
+  gridEnabled: boolean
+  snapToGrid: boolean
+  gridSize: number
+}
+
+// Study Board enums
+export type ElementType = 'text' | 'drawing' | 'sticky' | 'shape'
+export type PermissionLevel = 'VIEW' | 'EDIT' | 'ADMIN'
+export type ChangeType = 'add' | 'update' | 'delete' | 'board_update'
+
+// Study Board form data types
+export interface CreateStudyBoardData {
+  group_id: string
+  name?: string
+  description?: string
+  template_type?: string
+  settings?: Partial<BoardSettings>
+}
+
+export interface UpdateStudyBoardData {
+  name?: string
+  description?: string
+  canvas_data?: Record<string, unknown>
+  template_type?: string
+  settings?: Partial<BoardSettings>
+}
+
+export interface CreateCanvasElementData {
+  board_id: string
+  element_type: ElementType
+  position: Point
+  properties: Record<string, unknown>
+  layer_index?: number
+}
+
+export interface UpdateCanvasElementData {
+  element_type?: ElementType
+  position?: Point
+  properties?: Record<string, unknown>
+  layer_index?: number
+}
+
+export interface CreateBoardPermissionData {
+  board_id: string
+  user_id: string
+  permission_level: PermissionLevel
+}
+
+export interface UpdateBoardPermissionData {
+  permission_level: PermissionLevel
+}
+
+export interface UpdateUserPresenceData {
+  cursor_position?: Point | null
+  current_tool?: string | null
+  session_id?: string
+}
+
+export interface StudyBoardFilters {
+  group_id?: string
+  template_type?: string[]
+  created_by?: string
+  search?: string
+  sort_by?: 'name' | 'created_at' | 'updated_at' | 'last_modified_at'
+  sort_order?: 'asc' | 'desc'
+  page?: number
+  limit?: number
+}

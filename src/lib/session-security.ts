@@ -61,7 +61,7 @@ export class SecureSessionManager {
       if (!sessionCookie) return null
 
       const session: SessionData = JSON.parse(sessionCookie.value)
-      
+
       // Check if session is expired
       if (Date.now() - session.lastActivity > this.SESSION_TIMEOUT) {
         return null
@@ -94,6 +94,8 @@ export class SecureSessionManager {
     return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('')
   }
 
+
+
   /**
    * Validate CSRF token
    */
@@ -103,13 +105,44 @@ export class SecureSessionManager {
 
     // Constant-time comparison
     if (headerToken.length !== sessionToken.length) return false
-    
+
     let result = 0
     for (let i = 0; i < headerToken.length; i++) {
       result |= headerToken.charCodeAt(i) ^ sessionToken.charCodeAt(i)
     }
-    
+
     return result === 0
+  }
+
+  /**
+   * Get client IP address from request (public method)
+   */
+  static getClientIP(request: NextRequest): string | null {
+    // Check various headers that might contain the real IP
+    const forwardedFor = request.headers.get('x-forwarded-for')
+    if (forwardedFor) {
+      // x-forwarded-for can contain multiple IPs, take the first one
+      return forwardedFor.split(',')[0].trim()
+    }
+
+    const realIP = request.headers.get('x-real-ip')
+    if (realIP) {
+      return realIP.trim()
+    }
+
+    const cfConnectingIP = request.headers.get('cf-connecting-ip')
+    if (cfConnectingIP) {
+      return cfConnectingIP.trim()
+    }
+
+    // Fallback to connection remote address (may not be available in all environments)
+    const xForwardedHost = request.headers.get('x-forwarded-host')
+    if (xForwardedHost) {
+      return xForwardedHost.split(',')[0].trim()
+    }
+
+    // Return null if no IP can be determined
+    return null
   }
 
   /**
@@ -134,7 +167,7 @@ export class SecureSessionManager {
     }
 
     // Check for IP address changes (if available)
-    const currentIP = request.ip
+    const currentIP = this.getClientIP(request)
     const sessionIP = request.headers.get('x-session-ip')
     if (sessionIP && currentIP && sessionIP !== currentIP) {
       reasons.push('IP address change detected')
@@ -219,7 +252,7 @@ export class PasswordSecurity {
     const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@$!%*?&'
     const array = new Uint8Array(length)
     crypto.getRandomValues(array)
-    
+
     return Array.from(array, byte => charset[byte % charset.length]).join('')
   }
 }
@@ -244,9 +277,9 @@ export class AccountLockout {
       if (now - existing.lastAttempt > this.LOCKOUT_DURATION) {
         this.attempts.set(identifier, { count: 1, lastAttempt: now })
       } else {
-        this.attempts.set(identifier, { 
-          count: existing.count + 1, 
-          lastAttempt: now 
+        this.attempts.set(identifier, {
+          count: existing.count + 1,
+          lastAttempt: now
         })
       }
     } else {
@@ -262,7 +295,7 @@ export class AccountLockout {
     if (!attempt) return false
 
     const now = Date.now()
-    
+
     // If lockout duration has passed, remove the entry
     if (now - attempt.lastAttempt > this.LOCKOUT_DURATION) {
       this.attempts.delete(identifier)
