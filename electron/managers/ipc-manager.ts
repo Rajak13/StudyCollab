@@ -149,16 +149,28 @@ export class IPCManager {
       return await this.offlineDataManager.getData(key);
     });
 
-    ipcMain.handle('offline-data-set', async (event, key: string, value: any) => {
-      await this.offlineDataManager.setData(key, value);
+    ipcMain.handle('offline-data-set', async (event, key: string, value: any, entityType?: string) => {
+      await this.offlineDataManager.setData(key, value, entityType);
     });
 
-    ipcMain.handle('offline-data-remove', async (event, key: string) => {
-      await this.offlineDataManager.removeData(key);
+    ipcMain.handle('offline-data-remove', async (event, key: string, entityType?: string) => {
+      await this.offlineDataManager.removeData(key, entityType);
     });
 
     ipcMain.handle('offline-data-clear', async () => {
       await this.offlineDataManager.clearData();
+    });
+
+    ipcMain.handle('offline-data-get-by-type', async (event, entityType: string) => {
+      return await this.offlineDataManager.getDataByType(entityType);
+    });
+
+    ipcMain.handle('offline-data-get-conflicts', async () => {
+      return await this.offlineDataManager.getConflictedEntities();
+    });
+
+    ipcMain.handle('offline-data-resolve-conflict', async (event, entityId: string, resolvedData: any) => {
+      await this.offlineDataManager.resolveConflictManually(entityId, resolvedData);
     });
   }
 

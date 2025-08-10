@@ -16,6 +16,10 @@ class WindowManager {
                 windowState: {
                     width: 1200,
                     height: 800,
+                    x: undefined,
+                    y: undefined,
+                    isMaximized: false,
+                    isFullScreen: false,
                 },
             },
         });
@@ -102,7 +106,7 @@ class WindowManager {
         });
     }
     getWindowState() {
-        const savedState = this.store.get('windowState');
+        const savedState = this.store['windowState'];
         const primaryDisplay = electron_1.screen.getPrimaryDisplay();
         const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
         // Ensure window fits on screen
@@ -146,7 +150,7 @@ class WindowManager {
             isMaximized: this.mainWindow.isMaximized(),
             isFullScreen: this.mainWindow.isFullScreen(),
         };
-        this.store.set('windowState', windowState);
+        this.store['windowState'] = windowState;
     }
     getMainWindow() {
         return this.mainWindow;

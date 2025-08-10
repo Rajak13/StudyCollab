@@ -24,9 +24,12 @@ export interface ElectronAPI {
   
   // Offline data management
   getOfflineData: (key: string) => Promise<any>;
-  setOfflineData: (key: string, value: any) => Promise<void>;
-  removeOfflineData: (key: string) => Promise<void>;
+  setOfflineData: (key: string, value: any, entityType?: string) => Promise<void>;
+  removeOfflineData: (key: string, entityType?: string) => Promise<void>;
   clearOfflineData: () => Promise<void>;
+  getDataByType: (entityType: string) => Promise<Record<string, any>>;
+  getConflictedEntities: () => Promise<any[]>;
+  resolveConflictManually: (entityId: string, resolvedData: any) => Promise<void>;
   
   // Sync operations
   triggerSync: () => void;
@@ -92,9 +95,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   
   // Offline data management
   getOfflineData: (key: string) => ipcRenderer.invoke('offline-data-get', key),
-  setOfflineData: (key: string, value: any) => ipcRenderer.invoke('offline-data-set', key, value),
-  removeOfflineData: (key: string) => ipcRenderer.invoke('offline-data-remove', key),
+  setOfflineData: (key: string, value: any, entityType?: string) => 
+    ipcRenderer.invoke('offline-data-set', key, value, entityType),
+  removeOfflineData: (key: string, entityType?: string) => 
+    ipcRenderer.invoke('offline-data-remove', key, entityType),
   clearOfflineData: () => ipcRenderer.invoke('offline-data-clear'),
+  getDataByType: (entityType: string) => ipcRenderer.invoke('offline-data-get-by-type', entityType),
+  getConflictedEntities: () => ipcRenderer.invoke('offline-data-get-conflicts'),
+  resolveConflictManually: (entityId: string, resolvedData: any) => 
+    ipcRenderer.invoke('offline-data-resolve-conflict', entityId, resolvedData),
   
   // Sync operations
   triggerSync: () => ipcRenderer.send('trigger-sync'),

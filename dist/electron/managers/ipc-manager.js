@@ -117,14 +117,23 @@ class IPCManager {
         electron_1.ipcMain.handle('offline-data-get', async (event, key) => {
             return await this.offlineDataManager.getData(key);
         });
-        electron_1.ipcMain.handle('offline-data-set', async (event, key, value) => {
-            await this.offlineDataManager.setData(key, value);
+        electron_1.ipcMain.handle('offline-data-set', async (event, key, value, entityType) => {
+            await this.offlineDataManager.setData(key, value, entityType);
         });
-        electron_1.ipcMain.handle('offline-data-remove', async (event, key) => {
-            await this.offlineDataManager.removeData(key);
+        electron_1.ipcMain.handle('offline-data-remove', async (event, key, entityType) => {
+            await this.offlineDataManager.removeData(key, entityType);
         });
         electron_1.ipcMain.handle('offline-data-clear', async () => {
             await this.offlineDataManager.clearData();
+        });
+        electron_1.ipcMain.handle('offline-data-get-by-type', async (event, entityType) => {
+            return await this.offlineDataManager.getDataByType(entityType);
+        });
+        electron_1.ipcMain.handle('offline-data-get-conflicts', async () => {
+            return await this.offlineDataManager.getConflictedEntities();
+        });
+        electron_1.ipcMain.handle('offline-data-resolve-conflict', async (event, entityId, resolvedData) => {
+            await this.offlineDataManager.resolveConflictManually(entityId, resolvedData);
         });
     }
     setupSyncHandlers() {

@@ -210,7 +210,7 @@ export function useMultipleLoading(keys: string[]) {
  */
 export function useDebouncedLoading(key: string, delay: number = 300) {
   const { setLoading, isLoading } = useLoadingStore()
-  const timeoutRef = React.useRef<NodeJS.Timeout>()
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null)
   
   const debouncedSetLoading = React.useCallback((loading: boolean) => {
     if (timeoutRef.current) {

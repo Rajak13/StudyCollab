@@ -5,58 +5,50 @@ export interface Point {
 
 export interface CanvasElement {
   id: string;
-  type: 'text' | 'drawing' | 'sticky' | 'shape';
-  position: Point;
-  properties: Record<string, any>;
-  layer: number;
-  createdBy?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  type: 'pen' | 'eraser' | 'text' | 'sticky' | 'rectangle' | 'circle' | 'triangle' | 'line';
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation: number;
+  scaleX: number;
+  scaleY: number;
+  fill: string;
+  stroke: string;
+  strokeWidth: number;
+  text?: string;
+  fontSize?: number;
+  points?: number[];
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
 }
 
 export interface TextElement extends CanvasElement {
   type: 'text';
-  properties: {
-    text: string;
-    fontSize: number;
-    fontFamily: string;
-    color: string;
-    width?: number;
-    height?: number;
-  };
+  text: string;
+  fontSize: number;
+  width: number;
+  height: number;
 }
 
 export interface DrawingElement extends CanvasElement {
-  type: 'drawing';
-  properties: {
-    path: string;
-    strokeWidth: number;
-    strokeColor: string;
-    fill?: string;
-  };
+  type: 'pen' | 'eraser';
+  points: number[];
 }
 
 export interface StickyElement extends CanvasElement {
   type: 'sticky';
-  properties: {
-    text: string;
-    color: string;
-    width: number;
-    height: number;
-    fontSize: number;
-  };
+  text: string;
+  width: number;
+  height: number;
+  fontSize: number;
 }
 
 export interface ShapeElement extends CanvasElement {
-  type: 'shape';
-  properties: {
-    shapeType: 'rectangle' | 'circle' | 'triangle' | 'line';
-    width: number;
-    height: number;
-    fill?: string;
-    stroke?: string;
-    strokeWidth?: number;
-  };
+  type: 'rectangle' | 'circle' | 'triangle' | 'line';
+  width: number;
+  height: number;
 }
 
 export interface CanvasState {
@@ -73,7 +65,7 @@ export interface CanvasChange {
   timestamp: number;
 }
 
-export type DrawingTool = 'select' | 'pen' | 'text' | 'sticky' | 'rectangle' | 'circle' | 'triangle' | 'line';
+export type DrawingTool = 'select' | 'pen' | 'eraser' | 'text' | 'sticky' | 'rectangle' | 'circle' | 'triangle' | 'line';
 
 export interface CanvasSettings {
   width: number;

@@ -2,6 +2,44 @@ import { createClient } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
+// Type definitions for the RPC function response
+interface BoardWithElementsResponse {
+  board_data: {
+    id: string
+    group_id: string
+    name: string
+    description?: string
+    canvas_data: Record<string, unknown>
+    template_type?: string
+    settings: {
+      width: number
+      height: number
+      backgroundColor: string
+      gridEnabled: boolean
+      snapToGrid: boolean
+      gridSize: number
+    }
+    version: number
+    created_by?: string
+    created_at: string
+    updated_at: string
+    last_modified_by?: string
+    last_modified_at: string
+  }
+  elements_data: Array<{
+    id: string
+    board_id: string
+    element_type: 'text' | 'drawing' | 'sticky' | 'shape'
+    position: { x: number; y: number }
+    properties: Record<string, unknown>
+    layer_index: number
+    created_by?: string
+    created_at: string
+    updated_at: string
+    updated_by?: string
+  }>
+}
+
 // Validation schemas
 const updateBoardSchema = z.object({
   name: z.string().min(1).max(255).optional(),
@@ -24,7 +62,7 @@ export async function GET(
 ) {
   try {
     const supabase = createClient()
-    
+
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -50,6 +88,9 @@ export async function GET(
       return NextResponse.json({ error: 'Board not found' }, { status: 404 })
     }
 
+    // Type assertion for the RPC response
+    const typedBoardData = boardData as BoardWithElementsResponse
+
     // Get board permissions for the user
     const { data: permission } = await supabase
       .from('board_permissions')
@@ -73,8 +114,8 @@ export async function GET(
       .eq('is_active', true)
 
     const response = {
-      board: boardData.board_data,
-      elements: boardData.elements_data,
+      board: typedBoardData.board_data,
+      elements: typedBoardData.elements_data,
       user_permission: permission?.permission_level || 'VIEW',
       active_presence: presence || []
     }
@@ -93,7 +134,7 @@ export async function PUT(
 ) {
   try {
     const supabase = createClient()
-    
+
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -130,7 +171,7 @@ export async function PUT(
       .eq('user_id', user.id)
       .single()
 
-    const hasEditPermission = 
+    const hasEditPermission =
       board.created_by === user.id ||
       board.group_members.role === 'OWNER' ||
       board.group_members.role === 'ADMIN' ||
@@ -192,7 +233,7 @@ export async function DELETE(
 ) {
   try {
     const supabase = createClient()
-    
+
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -225,7 +266,7 @@ export async function DELETE(
       .eq('user_id', user.id)
       .single()
 
-    const hasDeletePermission = 
+    const hasDeletePermission =
       board.created_by === user.id ||
       board.group_members.role === 'OWNER' ||
       board.group_members.role === 'ADMIN' ||

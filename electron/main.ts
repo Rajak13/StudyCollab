@@ -1,4 +1,8 @@
+import { ChildProcess, fork } from 'child_process';
 import { app, BrowserWindow, shell } from 'electron';
+import http from 'http';
+import { join } from 'path';
+import { pathToFileURL } from 'url';
 import { AutoUpdaterManager } from './managers/auto-updater-manager';
 import { IPCManager } from './managers/ipc-manager';
 import { OfflineDataManager } from './managers/offline-data-manager';
@@ -14,6 +18,8 @@ class StudyCollabApp {
   private ipcManager: IPCManager;
   private autoUpdaterManager: AutoUpdaterManager;
   private offlineDataManager: OfflineDataManager;
+  private serverProcess: ChildProcess | null = null;
+  private serverLoaded: boolean = false;
 
   constructor() {
     this.windowManager = new WindowManager();
@@ -68,10 +74,19 @@ class StudyCollabApp {
     app.on('will-quit', () => {
       // Cleanup is now handled by SystemIntegrationManager
       this.systemIntegrationManager.cleanup();
+      if (this.serverProcess) {
+        try { this.serverProcess.kill(); } catch {}
+      }
     });
   }
 
   private async onReady() {
+    // In production, start the bundled Next.js server first
+    if (!isDev()) {
+      await this.startEmbeddedServer();
+      await this.waitForServerReady('http://localhost:3000', 30000);
+    }
+
     // Create main window
     await this.windowManager.createMainWindow();
     
@@ -83,8 +98,7 @@ class StudyCollabApp {
       this.autoUpdaterManager.checkForUpdates();
     }
     
-    // Initialize offline sync
-    await this.offlineDataManager.initialize();
+    // Offline data is initialized in initializeManagers
   }
 
   private async initializeManagers() {
@@ -126,6 +140,68 @@ class StudyCollabApp {
     // Cleanup system integration
     this.systemIntegrationManager.cleanup();
   }
+
+  private async startEmbeddedServer(): Promise<void> {
+    try {
+      // Ensure a port is set for the server (default to 3000)
+      if (!process.env.PORT) {
+        process.env.PORT = '3000';
+      }
+
+      // Resolve path to the bundled server.js
+      // When packaged, __dirname points to app.asar/dist/electron
+      const serverPathCandidates = [
+        join(__dirname, '../../server.js'),
+      ];
+
+      const serverPath = serverPathCandidates.find((p) => p);
+      if (serverPath) {
+        try {
+          // Try dynamic import to run in-process (works with asar)
+          const fileUrl = pathToFileURL(serverPath).href;
+          await import(fileUrl);
+          this.serverLoaded = true;
+        } catch (err) {
+          // Fallback to fork if dynamic import fails
+          this.serverProcess = fork(serverPath, [], {
+            env: { ...process.env, PORT: process.env.PORT || '3000', NODE_ENV: 'production' },
+            stdio: 'inherit',
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to start embedded server:', error);
+    }
+  }
+
+  private async waitForServerReady(url: string, timeoutMs: number): Promise<void> {
+    const start = Date.now();
+    const tryRequest = (): Promise<boolean> => {
+      return new Promise((resolve) => {
+        try {
+          const req = http.get(url, (res) => {
+            // Any HTTP response means server is up
+            res.resume();
+            resolve(true);
+          });
+          req.on('error', () => resolve(false));
+          req.setTimeout(3000, () => {
+            req.destroy();
+            resolve(false);
+          });
+        } catch {
+          resolve(false);
+        }
+      });
+    };
+
+    while (Date.now() - start < timeoutMs) {
+      const ok = await tryRequest();
+      if (ok) return;
+      await new Promise((r) => setTimeout(r, 500));
+    }
+    console.warn('Server did not become ready within timeout; proceeding anyway.');
+  }
 }
 
 // Initialize the application
@@ -136,7 +212,7 @@ studyCollabApp.initialize().catch(console.error);
 app.setAsDefaultProtocolClient('studycollab');
 
 // Handle file associations on Windows/Linux
-app.on('second-instance', (event, commandLine, workingDirectory) => {
+app.on('second-instance', (event, commandLine) => {
   // Someone tried to run a second instance, focus our window instead
   const mainWindow = studyCollabApp['windowManager'].getMainWindow();
   if (mainWindow) {

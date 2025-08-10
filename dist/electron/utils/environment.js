@@ -7,7 +7,7 @@ const isDev = () => {
 };
 exports.isDev = isDev;
 const getAppUrl = () => {
-    // For now, use localhost for both dev and prod since studycollab.app doesn't exist
+    // In production we run a bundled Next.js server on localhost
     return 'http://localhost:3000';
 };
 exports.getAppUrl = getAppUrl;

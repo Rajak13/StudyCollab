@@ -129,12 +129,12 @@ export function useRealtime(options: UseRealtimeOptions = {}): UseRealtimeReturn
 }
 
 export function usePresence(groupId?: string) {
-  const [presence, setPresence] = useState<Map<string, UserPresence>>(new Map())
+  const [presence, setPresence] = useState<Map<string, UserPresence & { user: any }>>(new Map())
   const { on, off, isConnected } = useRealtime({ groupId })
 
   useEffect(() => {
     const handleUserJoined = (data: { userId: string; user: any; presence: UserPresence }) => {
-      setPresence(prev => new Map(prev.set(data.userId, data.presence)))
+      setPresence(prev => new Map(prev.set(data.userId, { ...data.presence, user: data.user })))
     }
 
     const handleUserLeft = (data: { userId: string }) => {
@@ -145,14 +145,18 @@ export function usePresence(groupId?: string) {
       })
     }
 
-    const handlePresenceUpdated = (data: UserPresence) => {
-      setPresence(prev => new Map(prev.set(data.userId, data)))
+    const handlePresenceUpdated = (data: UserPresence & { user?: any }) => {
+      setPresence(prev => {
+        const existing = prev.get(data.userId)
+        const updated = { ...data, user: data.user || existing?.user }
+        return new Map(prev.set(data.userId, updated))
+      })
     }
 
     const handleGroupPresence = (members: Array<{ userId: string; user: any; presence: UserPresence }>) => {
-      const newPresence = new Map<string, UserPresence>()
+      const newPresence = new Map<string, UserPresence & { user: any }>()
       members.forEach(member => {
-        newPresence.set(member.userId, member.presence)
+        newPresence.set(member.userId, { ...member.presence, user: member.user })
       })
       setPresence(newPresence)
     }

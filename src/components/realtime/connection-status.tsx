@@ -1,12 +1,12 @@
 'use client'
 
 import {
-    AlertCircle,
-    CheckCircle,
-    Loader2,
-    RefreshCw,
-    Wifi,
-    WifiOff
+  AlertCircle,
+  CheckCircle,
+  Loader2,
+  RefreshCw,
+  Wifi,
+  WifiOff
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useRealtime } from '../../hooks/use-realtime'
@@ -24,7 +24,7 @@ export function ConnectionStatusIndicator({
   showDetails = false,
   showReconnectButton = true 
 }: ConnectionStatusProps) {
-  const { isConnected, connectionStatus, reconnect } = useRealtime({ autoConnect: true })
+  const { isConnected, connectionStatus, connect } = useRealtime({ autoConnect: true })
   const [isReconnecting, setIsReconnecting] = useState(false)
 
   const getStatusIcon = () => {
@@ -79,7 +79,7 @@ export function ConnectionStatusIndicator({
   const handleReconnect = async () => {
     setIsReconnecting(true)
     try {
-      await reconnect()
+      await connect()
     } catch (error) {
       console.error('Manual reconnect failed:', error)
     } finally {

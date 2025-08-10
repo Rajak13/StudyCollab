@@ -479,32 +479,13 @@ export default function Home() {
                 size="lg"
                 className="group bg-white px-8 py-6 text-lg text-slate-900 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-gray-100 hover:shadow-xl"
                 onClick={() => {
-                  // Detect user's OS and provide appropriate download
-                  const userAgent = navigator.userAgent;
-                  let downloadUrl = '#';
-                  let fileName = 'StudyCollab-Setup';
-                  
-                  if (userAgent.includes('Windows')) {
-                    downloadUrl = '/downloads/StudyCollab-Setup.exe';
-                    fileName = 'StudyCollab-Setup.exe';
-                  } else if (userAgent.includes('Mac')) {
-                    downloadUrl = '/downloads/StudyCollab.dmg';
-                    fileName = 'StudyCollab.dmg';
-                  } else if (userAgent.includes('Linux')) {
-                    downloadUrl = '/downloads/StudyCollab.AppImage';
-                    fileName = 'StudyCollab.AppImage';
-                  }
-                  
-                  // For now, show setup instructions since we don't have built packages yet
-                  window.open('/docs/desktop-app-local-setup.md', '_blank');
+                  window.location.href = '/api/download';
                 }}
               >
                 <span className="mr-2 transition-transform group-hover:scale-110">
                   ⬇️
                 </span>
-                Download for {typeof window !== 'undefined' && navigator.userAgent.includes('Windows') ? 'Windows' : 
-                             typeof window !== 'undefined' && navigator.userAgent.includes('Mac') ? 'macOS' : 
-                             typeof window !== 'undefined' && navigator.userAgent.includes('Linux') ? 'Linux' : 'Desktop'}
+                Download Desktop App
               </Button>
               
               <Button

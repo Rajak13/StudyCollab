@@ -4,11 +4,11 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
 } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/components/ui/use-toast'
@@ -17,26 +17,38 @@ import { useDeleteStudyGroup, useStudyGroup } from '@/hooks/use-study-groups'
 import { cn } from '@/lib/utils'
 import { GroupRole } from '@/types/database'
 import {
-  Activity,
-  Archive,
-  Crown,
-  MessageCircle,
-  PenTool,
-  Share2,
-  Shield,
-  Trash2,
-  User,
-  UserPlus,
-  Users
+    Activity,
+    Archive,
+    Crown,
+    MessageCircle,
+    PenTool,
+    Share2,
+    Shield,
+    Trash2,
+    User,
+    UserPlus,
+    Users
 } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import { useState } from 'react'
-import { StudyBoard } from '../study-board'
 import { GroupActivities } from './group-activities'
 import { GroupChat } from './group-chat'
 import { GroupEditDialog } from './group-edit-dialog'
 import { GroupMembers } from './group-members'
 import { GroupSharedResources } from './group-shared-resources'
 import { JoinRequests } from './join-requests'
+
+const StudyBoard = dynamic(() => import('../study-board').then(mod => ({ default: mod.StudyBoard })), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-96 bg-gray-50 rounded-lg">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+        <p className="text-muted-foreground">Loading Study Board...</p>
+      </div>
+    </div>
+  )
+})
 
 interface GroupDetailProps {
   groupId: string
@@ -46,6 +58,7 @@ interface GroupDetailProps {
 export function GroupDetail({ groupId, className }: GroupDetailProps) {
   const [showArchiveDialog, setShowArchiveDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [tab, setTab] = useState<string>('chat')
 
   const { data: groupData, isLoading, error } = useStudyGroup(groupId)
   const deleteStudyGroup = useDeleteStudyGroup()
@@ -290,7 +303,7 @@ export function GroupDetail({ groupId, className }: GroupDetailProps) {
       </Card>
 
       {/* Group Content Tabs */}
-      <Tabs defaultValue="chat" className="w-full">
+      <Tabs defaultValue="chat" value={tab} onValueChange={setTab} className="w-full">
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="chat" className="flex items-center gap-2">
             <MessageCircle className="h-4 w-4" />
@@ -336,6 +349,7 @@ export function GroupDetail({ groupId, className }: GroupDetailProps) {
             groupId={groupId}
             userId={userId}
             userName={userName}
+            active={tab === 'board'}
           />
         </TabsContent>
 

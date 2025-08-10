@@ -21,9 +21,12 @@ electron_1.contextBridge.exposeInMainWorld('electronAPI', {
     getPlatform: () => electron_1.ipcRenderer.invoke('app-get-platform'),
     // Offline data management
     getOfflineData: (key) => electron_1.ipcRenderer.invoke('offline-data-get', key),
-    setOfflineData: (key, value) => electron_1.ipcRenderer.invoke('offline-data-set', key, value),
-    removeOfflineData: (key) => electron_1.ipcRenderer.invoke('offline-data-remove', key),
+    setOfflineData: (key, value, entityType) => electron_1.ipcRenderer.invoke('offline-data-set', key, value, entityType),
+    removeOfflineData: (key, entityType) => electron_1.ipcRenderer.invoke('offline-data-remove', key, entityType),
     clearOfflineData: () => electron_1.ipcRenderer.invoke('offline-data-clear'),
+    getDataByType: (entityType) => electron_1.ipcRenderer.invoke('offline-data-get-by-type', entityType),
+    getConflictedEntities: () => electron_1.ipcRenderer.invoke('offline-data-get-conflicts'),
+    resolveConflictManually: (entityId, resolvedData) => electron_1.ipcRenderer.invoke('offline-data-resolve-conflict', entityId, resolvedData),
     // Sync operations
     triggerSync: () => electron_1.ipcRenderer.send('trigger-sync'),
     getSyncStatus: () => electron_1.ipcRenderer.invoke('get-sync-status'),

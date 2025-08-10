@@ -1,6 +1,8 @@
 import { AuthProvider } from '@/components/auth'
 import { ErrorBoundary } from '@/components/error-boundary'
+import { PlatformLayout } from '@/components/platform/platform-layout'
 import { NotificationProvider } from '@/components/providers/notification-provider'
+import { PlatformProvider } from '@/components/providers/platform-provider'
 import { QueryProvider } from '@/components/providers/query-provider'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Toaster } from '@/components/ui/toaster'
@@ -34,12 +36,16 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <QueryProvider>
-              <AuthProvider>
-                <NotificationProvider>
-                  {children}
-                  <Toaster />
-                </NotificationProvider>
-              </AuthProvider>
+              <PlatformProvider>
+                <AuthProvider>
+                  <NotificationProvider>
+                    <PlatformLayout>
+                      {children}
+                    </PlatformLayout>
+                    <Toaster />
+                  </NotificationProvider>
+                </AuthProvider>
+              </PlatformProvider>
             </QueryProvider>
           </ThemeProvider>
         </ErrorBoundary>

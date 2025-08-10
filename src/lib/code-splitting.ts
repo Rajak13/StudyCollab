@@ -54,26 +54,31 @@ export function preloadComponent(importFn: () => Promise<any>) {
  */
 export const LazyComponents = {
   // Dashboard components
-  Dashboard: createLazyComponent(() => import('@/components/dashboard/dashboard')),
-  DashboardSettings: createLazyComponent(() => import('@/components/dashboard/dashboard-settings')),
+  Dashboard: createLazyNamedComponent(
+    () => import('@/components/dashboard/dashboard'),
+    'Dashboard'
+  ),  
+  DashboardSettings: createLazyNamedComponent(
+    () => import('@/components/dashboard/dashboard-settings'),
+  'DashboardSettings'),
 
   // Task components
-  TaskManager: createLazyComponent(() => import('@/components/tasks/task-manager')),
-  TaskCalendarView: createLazyComponent(() => import('@/components/tasks/task-calendar-view')),
-  TaskStatistics: createLazyComponent(() => import('@/components/tasks/task-statistics')),
+  TaskManager: createLazyNamedComponent(() => import('@/components/tasks/task-manager'), 'TaskManager'),
+  TaskCalendarView: createLazyNamedComponent(() => import('@/components/tasks/task-calendar-view'), 'TaskCalendarView'),
+  TaskStatistics: createLazyNamedComponent(() => import('@/components/tasks/task-statistics'), 'TaskStatistics'),
 
   // Note components
-  NoteEditor: createLazyComponent(() => import('@/components/notes/note-editor')),
-  TiptapEditor: createLazyComponent(() => import('@/components/notes/tiptap-editor')),
+  NoteEditor: createLazyNamedComponent(() => import('@/components/notes/note-editor'), 'NoteEditor'),
+  TiptapEditor: createLazyNamedComponent(() => import('@/components/notes/tiptap-editor'), 'TiptapEditor'),
 
   // Study group components
-  StudyGroupsManager: createLazyComponent(() => import('@/components/study-groups/study-groups-manager')),
-  GroupDetail: createLazyComponent(() => import('@/components/study-groups/group-detail')),
-  GroupChat: createLazyComponent(() => import('@/components/study-groups/group-chat')),
+  StudyGroupsManager: createLazyNamedComponent(() => import('@/components/study-groups/study-groups-manager'), 'StudyGroupsManager'),
+  GroupDetail: createLazyNamedComponent(() => import('@/components/study-groups/group-detail'), 'GroupDetail'),
+  GroupChat: createLazyNamedComponent(() => import('@/components/study-groups/group-chat'), 'GroupChat'),
 
   // File components
-  FileManager: createLazyComponent(() => import('@/components/files/file-manager')),
-  FilePreview: createLazyComponent(() => import('@/components/files/file-preview')),
+  FileManager: createLazyNamedComponent(() => import('@/components/files/file-manager'), 'FileManager'),
+  FilePreview: createLazyNamedComponent(() => import('@/components/files/file-preview'), 'FilePreview'),
 }
 
 /**

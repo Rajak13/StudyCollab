@@ -12,16 +12,40 @@ interface WindowState {
   isFullScreen?: boolean;
 }
 
+interface DesktopConfig {
+  customLogo?: string;
+  hideMenuBar: boolean;
+  customTitleBar: boolean;
+  systemTrayIntegration: boolean;
+  multiWindowSupport: boolean;
+}
+
+interface StoreSchema {
+  windowState: WindowState;
+  desktopConfig: DesktopConfig;
+}
+
 export class WindowManager {
   private mainWindow: BrowserWindow | null = null;
-  private store: Store<{ windowState: WindowState }>;
+  private secondaryWindows: Map<string, BrowserWindow> = new Map();
+  private store: Store<StoreSchema>;
 
   constructor() {
-    this.store = new Store({
+    this.store = new Store<StoreSchema>({
       defaults: {
         windowState: {
           width: 1200,
           height: 800,
+          x: undefined,
+          y: undefined,
+          isMaximized: false,
+          isFullScreen: false,
+        },
+        desktopConfig: {
+          hideMenuBar: true,
+          customTitleBar: true,
+          systemTrayIntegration: true,
+          multiWindowSupport: true,
         },
       },
     });
@@ -29,6 +53,7 @@ export class WindowManager {
 
   async createMainWindow(): Promise<BrowserWindow> {
     const windowState = this.getWindowState();
+    const config = this.getDesktopConfig();
 
     this.mainWindow = new BrowserWindow({
       ...windowState,
@@ -36,14 +61,26 @@ export class WindowManager {
       minHeight: 600,
       show: false,
       icon: this.getAppIcon(),
+      frame: !config.customTitleBar,
+      titleBarStyle: this.getTitleBarStyle(config),
+      titleBarOverlay: config.customTitleBar && process.platform === 'win32' ? {
+        color: '#1f2937',
+        symbolColor: '#ffffff',
+        height: 32
+      } : undefined,
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
         preload: getPreloadPath(),
         webSecurity: !isDev(),
       },
-      titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     });
+
+    // Hide menu bar if configured
+    if (config.hideMenuBar) {
+      this.mainWindow.setMenuBarVisibility(false);
+      this.mainWindow.setAutoHideMenuBar(true);
+    }
 
     // Handle window events
     this.setupWindowEvents();
@@ -60,11 +97,11 @@ export class WindowManager {
     this.mainWindow.once('ready-to-show', () => {
       if (this.mainWindow) {
         this.mainWindow.show();
-        
+
         if (windowState.isMaximized) {
           this.mainWindow.maximize();
         }
-        
+
         if (windowState.isFullScreen) {
           this.mainWindow.setFullScreen(true);
         }
@@ -120,7 +157,7 @@ export class WindowManager {
   }
 
   private getWindowState(): WindowState {
-    const savedState = (this.store as any).get('windowState');
+    const savedState = (this.store as any)['windowState'];
     const primaryDisplay = screen.getPrimaryDisplay();
     const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
 
@@ -173,7 +210,7 @@ export class WindowManager {
       isFullScreen: this.mainWindow.isFullScreen(),
     };
 
-    (this.store as any).set('windowState', windowState);
+    (this.store as any)['windowState'] = windowState;
   }
 
   getMainWindow(): BrowserWindow | null {

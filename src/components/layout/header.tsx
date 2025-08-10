@@ -16,6 +16,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
+import { SyncStatusIndicator } from '../offline/sync-status-indicator'
 
 interface HeaderProps {
   className?: string
@@ -95,6 +96,7 @@ export function Header({
 
         {/* Right side actions */}
         <div className="flex items-center space-x-2">
+          <SyncStatusIndicator />
           <ThemeToggle />
 
           {user ? (

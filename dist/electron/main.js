@@ -1,6 +1,46 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const child_process_1 = require("child_process");
 const electron_1 = require("electron");
+const http_1 = __importDefault(require("http"));
+const path_1 = require("path");
+const url_1 = require("url");
 const auto_updater_manager_1 = require("./managers/auto-updater-manager");
 const ipc_manager_1 = require("./managers/ipc-manager");
 const offline_data_manager_1 = require("./managers/offline-data-manager");
@@ -10,6 +50,8 @@ const window_manager_1 = require("./managers/window-manager");
 const environment_1 = require("./utils/environment");
 class StudyCollabApp {
     constructor() {
+        this.serverProcess = null;
+        this.serverLoaded = false;
         this.windowManager = new window_manager_1.WindowManager();
         this.systemTrayManager = new system_tray_manager_1.SystemTrayManager();
         this.systemIntegrationManager = new system_integration_manager_1.SystemIntegrationManager();
@@ -52,9 +94,20 @@ class StudyCollabApp {
         electron_1.app.on('will-quit', () => {
             // Cleanup is now handled by SystemIntegrationManager
             this.systemIntegrationManager.cleanup();
+            if (this.serverProcess) {
+                try {
+                    this.serverProcess.kill();
+                }
+                catch { }
+            }
         });
     }
     async onReady() {
+        // In production, start the bundled Next.js server first
+        if (!(0, environment_1.isDev)()) {
+            await this.startEmbeddedServer();
+            await this.waitForServerReady('http://localhost:3000', 30000);
+        }
         // Create main window
         await this.windowManager.createMainWindow();
         // Setup system tray
@@ -63,8 +116,7 @@ class StudyCollabApp {
         if (!(0, environment_1.isDev)()) {
             this.autoUpdaterManager.checkForUpdates();
         }
-        // Initialize offline sync
-        await this.offlineDataManager.initialize();
+        // Offline data is initialized in initializeManagers
     }
     async initializeManagers() {
         await this.ipcManager.initialize();
@@ -98,6 +150,67 @@ class StudyCollabApp {
         // Cleanup system integration
         this.systemIntegrationManager.cleanup();
     }
+    async startEmbeddedServer() {
+        try {
+            // Ensure a port is set for the server (default to 3000)
+            if (!process.env.PORT) {
+                process.env.PORT = '3000';
+            }
+            // Resolve path to the bundled server.js
+            // When packaged, __dirname points to app.asar/dist/electron
+            const serverPathCandidates = [
+                (0, path_1.join)(__dirname, '../../server.js'),
+            ];
+            const serverPath = serverPathCandidates.find((p) => p);
+            if (serverPath) {
+                try {
+                    // Try dynamic import to run in-process (works with asar)
+                    const fileUrl = (0, url_1.pathToFileURL)(serverPath).href;
+                    await Promise.resolve(`${fileUrl}`).then(s => __importStar(require(s)));
+                    this.serverLoaded = true;
+                }
+                catch (err) {
+                    // Fallback to fork if dynamic import fails
+                    this.serverProcess = (0, child_process_1.fork)(serverPath, [], {
+                        env: { ...process.env, PORT: process.env.PORT || '3000', NODE_ENV: 'production' },
+                        stdio: 'inherit',
+                    });
+                }
+            }
+        }
+        catch (error) {
+            console.error('Failed to start embedded server:', error);
+        }
+    }
+    async waitForServerReady(url, timeoutMs) {
+        const start = Date.now();
+        const tryRequest = () => {
+            return new Promise((resolve) => {
+                try {
+                    const req = http_1.default.get(url, (res) => {
+                        // Any HTTP response means server is up
+                        res.resume();
+                        resolve(true);
+                    });
+                    req.on('error', () => resolve(false));
+                    req.setTimeout(3000, () => {
+                        req.destroy();
+                        resolve(false);
+                    });
+                }
+                catch {
+                    resolve(false);
+                }
+            });
+        };
+        while (Date.now() - start < timeoutMs) {
+            const ok = await tryRequest();
+            if (ok)
+                return;
+            await new Promise((r) => setTimeout(r, 500));
+        }
+        console.warn('Server did not become ready within timeout; proceeding anyway.');
+    }
 }
 // Initialize the application
 const studyCollabApp = new StudyCollabApp();
@@ -105,7 +218,7 @@ studyCollabApp.initialize().catch(console.error);
 // Handle protocol for file associations
 electron_1.app.setAsDefaultProtocolClient('studycollab');
 // Handle file associations on Windows/Linux
-electron_1.app.on('second-instance', (event, commandLine, workingDirectory) => {
+electron_1.app.on('second-instance', (event, commandLine) => {
     // Someone tried to run a second instance, focus our window instead
     const mainWindow = studyCollabApp['windowManager'].getMainWindow();
     if (mainWindow) {

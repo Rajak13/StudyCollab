@@ -24,14 +24,17 @@ interface UserCursor {
   tool?: string
 }
 
-export function PresenceIndicator({ 
-  groupId, 
+export function PresenceIndicator({
+  groupId,
   className,
   maxVisible = 5,
   showCursors = false,
   showTools = false
 }: PresenceIndicatorProps) {
-  const { groupMembers, userCursors, userTools, isConnected } = useGroupRealtime(groupId)
+  const realtimeData = useGroupRealtime(groupId)
+  const { groupMembers = [], isConnected = false } = realtimeData
+  const userCursors = realtimeData.userCursors || new Map()
+  const userTools = new Map() // Temporarily disable user tools
   const [cursors, setCursors] = useState<UserCursor[]>([])
 
   // Update cursors when data changes
@@ -41,11 +44,11 @@ export function PresenceIndicator({
     const activeCursors: UserCursor[] = []
     userCursors.forEach((cursor, userId) => {
       const member = groupMembers.find(m => m.userId === userId)
-      if (member && member.presence.isActive) {
+      if (member && member.isActive) {
         activeCursors.push({
           userId,
-          user: member.user,
-          cursor,
+          user: member,
+          cursor: cursor,
           tool: userTools.get(userId),
         })
       }
@@ -53,7 +56,7 @@ export function PresenceIndicator({
     setCursors(activeCursors)
   }, [userCursors, userTools, groupMembers, showCursors])
 
-  const activeMembers = groupMembers.filter(member => member.presence.isActive)
+  const activeMembers = groupMembers.filter(member => member.isActive)
   const visibleMembers = activeMembers.slice(0, maxVisible)
   const hiddenCount = Math.max(0, activeMembers.length - maxVisible)
 
@@ -74,7 +77,7 @@ export function PresenceIndicator({
               currentTool={userTools.get(member.userId)}
             />
           ))}
-          
+
           {hiddenCount > 0 && (
             <div className="flex items-center justify-center w-8 h-8 bg-gray-100 border-2 border-white rounded-full text-xs font-medium text-gray-600">
               +{hiddenCount}
@@ -99,20 +102,20 @@ export function PresenceIndicator({
 }
 
 interface MemberAvatarProps {
-  member: { userId: string; user: any; presence: UserPresence }
+  member: UserPresence & { user: any }
   showTool?: boolean
   currentTool?: string
 }
 
 function MemberAvatar({ member, showTool, currentTool }: MemberAvatarProps) {
   const getStatusColor = () => {
-    if (!member.presence.isActive) return 'bg-gray-400'
+    if (!member.isActive) return 'bg-gray-400'
     return 'bg-green-400'
   }
 
   const getToolIcon = () => {
     if (!showTool || !currentTool) return null
-    
+
     switch (currentTool) {
       case 'pen':
       case 'pencil':
@@ -130,21 +133,21 @@ function MemberAvatar({ member, showTool, currentTool }: MemberAvatarProps) {
       <TooltipTrigger asChild>
         <div className="relative">
           <Avatar className="w-8 h-8 border-2 border-white">
-            <AvatarImage 
-              src={member.user.avatar_url} 
+            <AvatarImage
+              src={member.user.avatar_url}
               alt={member.user.name}
             />
             <AvatarFallback className="text-xs">
               {member.user.name?.charAt(0)?.toUpperCase() || '?'}
             </AvatarFallback>
           </Avatar>
-          
+
           {/* Status indicator */}
           <div className={cn(
             'absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white',
             getStatusColor()
           )} />
-          
+
           {/* Tool indicator */}
           {showTool && currentTool && (
             <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center text-white">
@@ -157,7 +160,7 @@ function MemberAvatar({ member, showTool, currentTool }: MemberAvatarProps) {
         <div className="text-sm">
           <div className="font-medium">{member.user.name}</div>
           <div className="text-xs text-gray-500">
-            {member.presence.isActive ? 'Active' : 'Away'}
+            {member.isActive ? 'Active' : 'Away'}
             {currentTool && ` • Using ${currentTool}`}
           </div>
         </div>
@@ -208,7 +211,7 @@ function LiveCursor({ cursor }: LiveCursorProps) {
           strokeWidth="1"
         />
       </svg>
-      
+
       {/* User name label */}
       <div
         className="absolute top-5 left-2 px-2 py-1 rounded text-xs font-medium text-white shadow-lg whitespace-nowrap"
@@ -226,11 +229,11 @@ function LiveCursor({ cursor }: LiveCursorProps) {
 // Simplified presence count component
 export function PresenceCount({ groupId, className }: { groupId: string; className?: string }) {
   const { groupMembers, isConnected } = useGroupRealtime(groupId)
-  
+
   if (!isConnected) return null
-  
-  const activeCount = groupMembers.filter(m => m.presence.isActive).length
-  
+
+  const activeCount = groupMembers.filter(m => m.isActive).length
+
   if (activeCount === 0) return null
 
   return (
@@ -256,7 +259,7 @@ export function useUserPresence(groupId: string) {
       if (throttleTimer) return
 
       throttleTimer = setTimeout(() => {
-        updateCursor({ x: e.clientX, y: e.clientY })
+        updateCursor(groupId, { x: e.clientX, y: e.clientY })
         throttleTimer = null
       }, 50) // Throttle to 20fps
     }
@@ -270,7 +273,7 @@ export function useUserPresence(groupId: string) {
 
   const setTool = (tool: string) => {
     setCurrentTool(tool)
-    changeTool(tool)
+    changeTool(groupId, tool)
   }
 
   return {

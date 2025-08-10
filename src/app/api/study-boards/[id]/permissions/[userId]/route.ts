@@ -1,6 +1,19 @@
-import { createClient } from '@/lib/supabase'
-import { NextRequest, NextResponse } from 'next/server'
-import { z } from 'zod'
+import { createClient } from '@/lib/supabase';
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+
+// Type for board with group members
+interface BoardWithGroup {
+  id: string;
+  created_by?: string;
+  group: {
+    id: string;
+    group_members: Array<{
+      user_id: string;
+      role: string;
+    }>;
+  };
+}
 
 // Validation schemas
 const updatePermissionSchema = z.object({

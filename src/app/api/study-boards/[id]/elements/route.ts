@@ -32,7 +32,7 @@ export async function GET(
 ) {
   try {
     const supabase = createClient()
-    
+
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -87,7 +87,7 @@ export async function POST(
 ) {
   try {
     const supabase = createClient()
-    
+
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -125,10 +125,10 @@ export async function POST(
       .eq('user_id', user.id)
       .single()
 
-    const hasEditPermission = 
+    const hasEditPermission =
       board.created_by === user.id ||
-      board.group_members.role === 'OWNER' ||
-      board.group_members.role === 'ADMIN' ||
+      board.group_members[0]?.role === 'OWNER' ||
+      board.group_members[0]?.role === 'ADMIN' ||
       permission?.permission_level === 'EDIT' ||
       permission?.permission_level === 'ADMIN'
 
@@ -174,7 +174,7 @@ export async function PUT(
 ) {
   try {
     const supabase = createClient()
-    
+
     // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -212,10 +212,10 @@ export async function PUT(
       .eq('user_id', user.id)
       .single()
 
-    const hasEditPermission = 
+    const hasEditPermission =
       board.created_by === user.id ||
-      board.group_members.role === 'OWNER' ||
-      board.group_members.role === 'ADMIN' ||
+      board.group_members[0]?.role === 'OWNER' ||
+      board.group_members[0]?.role === 'ADMIN' ||
       permission?.permission_level === 'EDIT' ||
       permission?.permission_level === 'ADMIN'
 
@@ -257,7 +257,7 @@ export async function PUT(
       }
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       data: updatedElements,
       errors: errors.length > 0 ? errors : undefined
     })

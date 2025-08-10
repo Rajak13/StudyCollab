@@ -1,7 +1,7 @@
 'use client'
 
-import { UserCursor } from '@/lib/collaboration/yjs-canvas-provider'
 import { Point } from '@/types/study-board'
+import { UserCursor } from './collaborative-canvas'
 
 interface PresenceIndicatorsProps {
   cursors: Map<string, UserCursor>
