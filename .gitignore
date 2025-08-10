@@ -49,3 +49,12 @@ supabase/migrations/
 supabase/migrations/*.sql
 supabase/*.sql
 supabase/.md
+
+# electron builds
+/release
+/dist
+*.exe
+*.dmg
+*.deb
+*.rpm
+*.AppImage
