@@ -509,9 +509,9 @@ export default function Home() {
               <Button
                 size="lg"
                 className="group bg-white px-8 py-6 text-lg text-slate-900 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-gray-100 hover:shadow-xl"
-                onClick={async () => {
-                  const { triggerDownload } = await import('@/lib/downloads');
-                  triggerDownload();
+                onClick={() => {
+                  // Check if releases exist first
+                  window.open('https://github.com/Rajak13/StudyCollab/releases', '_blank');
                 }}
               >
                 <span className="mr-2 transition-transform group-hover:scale-110">

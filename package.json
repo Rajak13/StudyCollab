@@ -38,6 +38,7 @@
     "electron:publish:linux": "npm run electron:build && electron-builder --linux --publish=always",
     "build-electron": "node scripts/build-electron.js",
     "build-electron:skip-native": "node scripts/build-electron.js --skip-native",
+    "create-release": "node scripts/create-first-release.js",
     "build-electron:pack": "node scripts/build-electron.js --pack-only"
   },
   "lint-staged": {
