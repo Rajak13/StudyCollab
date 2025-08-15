@@ -198,7 +198,7 @@ export class YjsCanvasProvider {
         updatedAt: element.updatedAt ? new Date(element.updatedAt) : new Date(),
       })
     })
-    return elements.sort((a, b) => a.layer - b.layer)
+    return elements.sort((a, b) => (a as any).layer - (b as any).layer)
   }
 
   clearCanvas(): void {

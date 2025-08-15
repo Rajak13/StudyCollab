@@ -1,0 +1,170 @@
+name: Build and Release Desktop App
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+        
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build Next.js app
+        run: npm run build
+        env:
+          NODE_ENV: production
+          
+      - name: Compile Electron
+        run: npm run electron:compile
+        
+      - name: Build Electron app (Windows)
+        if: matrix.os == 'windows-latest'
+        run: npm run electron:dist:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Build Electron app (macOS)
+        if: matrix.os == 'macos-latest'
+        run: npm run electron:dist:mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+          
+      - name: Build Electron app (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: npm run electron:dist:linux
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.os }}
+          path: |
+            release/*.exe
+            release/*.dmg
+            release/*.zip
+            release/*.AppImage
+            release/*.deb
+            release/*.rpm
+            release/latest*.yml
+          retention-days: 5
+          
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+          
+      - name: Display structure of downloaded files
+        run: ls -la ./artifacts/
+        
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.inputs.version || github.ref_name }}
+          release_name: StudyCollab Desktop ${{ github.event.inputs.version || github.ref_name }}
+          body: |
+            ## StudyCollab Desktop App Release
+            
+            ### What's New
+            - Enhanced desktop experience with native features
+            - Improved performance and stability
+            - Better system integration
+            
+            ### Download Instructions
+            - **Windows**: Download the `.exe` installer
+            - **macOS**: Download the `.dmg` file
+            - **Linux**: Download the `.AppImage` for universal compatibility, or `.deb`/`.rpm` for your distribution
+            
+            ### System Requirements
+            - **Windows**: Windows 10 or later
+            - **macOS**: macOS 10.14 (Mojave) or later
+            - **Linux**: Ubuntu 18.04 or equivalent
+            
+            ### Installation
+            1. Download the appropriate file for your operating system
+            2. Run the installer and follow the setup wizard
+            3. Launch StudyCollab from your applications menu or desktop shortcut
+            
+            For more information, visit our [documentation](https://studycollab.app/docs).
+          draft: false
+          prerelease: false
+          
+      - name: Upload Windows Installer
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/release-windows-latest/StudyCollab-Setup-*.exe
+          asset_name: StudyCollab-Setup-Windows.exe
+          asset_content_type: application/octet-stream
+        continue-on-error: true
+        
+      - name: Upload macOS DMG
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/release-macos-latest/StudyCollab-*.dmg
+          asset_name: StudyCollab-macOS.dmg
+          asset_content_type: application/octet-stream
+        continue-on-error: true
+        
+      - name: Upload Linux AppImage
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/release-ubuntu-latest/StudyCollab-*.AppImage
+          asset_name: StudyCollab-Linux.AppImage
+          asset_content_type: application/octet-stream
+        continue-on-error: true
+        
+      - name: Upload auto-updater files
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/release-windows-latest/latest.yml
+          asset_name: latest.yml
+          asset_content_type: text/yaml
+        continue-on-error: true

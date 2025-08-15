@@ -3,10 +3,10 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useNotificationStore } from '@/lib/stores/notification-store'
@@ -14,15 +14,15 @@ import { cn } from '@/lib/utils'
 import { Notification, NotificationType } from '@/types/notifications'
 import { formatDistanceToNow } from 'date-fns'
 import {
-  Bell,
-  Crown,
-  MessageCircle,
-  Share2,
-  UserCheck,
-  UserMinus,
-  UserPlus,
-  Users,
-  X
+    Bell,
+    Crown,
+    MessageCircle,
+    Share2,
+    UserCheck,
+    UserMinus,
+    UserPlus,
+    Users,
+    X
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React from 'react'
@@ -69,6 +69,28 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
         return <Share2 className="h-4 w-4 text-purple-500" />
       case 'GROUP_ARCHIVED':
         return <Users className="h-4 w-4 text-gray-500" />
+      case 'TASK_DUE_SOON':
+        return <Bell className="h-4 w-4 text-orange-500" />
+      case 'TASK_CREATED':
+        return <Bell className="h-4 w-4 text-blue-500" />
+      case 'TASK_COMPLETED':
+        return <Bell className="h-4 w-4 text-green-500" />
+      case 'NOTE_SHARED':
+        return <Share2 className="h-4 w-4 text-blue-500" />
+      case 'NOTE_COMMENTED':
+        return <MessageCircle className="h-4 w-4 text-purple-500" />
+      case 'NOTE_COLLABORATION_INVITE':
+        return <UserPlus className="h-4 w-4 text-green-500" />
+      case 'SYSTEM_ERROR':
+        return <X className="h-4 w-4 text-red-500" />
+      case 'SYSTEM_WARNING':
+        return <Bell className="h-4 w-4 text-yellow-500" />
+      case 'SYSTEM_SUCCESS':
+        return <Bell className="h-4 w-4 text-green-500" />
+      case 'SYNC_CONFLICT':
+        return <Bell className="h-4 w-4 text-orange-500" />
+      case 'BACKUP_CREATED':
+        return <Bell className="h-4 w-4 text-blue-500" />
       default:
         return <Bell className="h-4 w-4" />
     }

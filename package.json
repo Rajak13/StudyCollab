@@ -1,6 +1,12 @@
 {
   "name": "studycollab-mvp",
   "version": "0.1.0",
+  "description": "StudyCollab - Your Academic Companion. A comprehensive platform for students to manage tasks, take notes, share resources, and collaborate in study groups.",
+  "author": {
+    "name": "StudyCollab Team",
+    "email": "support@studycollab.app",
+    "url": "https://studycollab.app"
+  },
   "private": true,
   "scripts": {
     "dev": "npx ts-node --project tsconfig.server.json server.ts",
@@ -10,17 +16,29 @@
     "dev:next": "next dev",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "prepare": "husky install",
     "setup-desktop": "node install-desktop.js",
     "electron": "electron dist/electron/main.js",
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && npm run electron:compile && electron dist/electron/main.js\"",
     "electron:compile": "tsc --project tsconfig.electron.json",
     "electron:build": "npm run build && npm run electron:compile",
+    "electron:rebuild": "electron-rebuild",
+    "postinstall": "electron-builder install-app-deps",
     "electron:pack": "npm run electron:build && electron-builder --dir",
     "electron:dist": "npm run electron:build && electron-builder",
     "electron:dist:win": "npm run electron:build && electron-builder --win",
     "electron:dist:mac": "npm run electron:build && electron-builder --mac",
-    "electron:dist:linux": "npm run electron:build && electron-builder --linux"
+    "electron:dist:linux": "npm run electron:build && electron-builder --linux",
+    "electron:publish": "npm run electron:build && electron-builder --publish=always",
+    "electron:publish:win": "npm run electron:build && electron-builder --win --publish=always",
+    "electron:publish:mac": "npm run electron:build && electron-builder --mac --publish=always",
+    "electron:publish:linux": "npm run electron:build && electron-builder --linux --publish=always",
+    "build-electron": "node scripts/build-electron.js",
+    "build-electron:skip-native": "node scripts/build-electron.js --skip-native",
+    "build-electron:pack": "node scripts/build-electron.js --pack-only"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -106,8 +124,11 @@
     "zustand": "^5.0.7"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.7.0",
+    "@testing-library/react": "^16.3.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/electron": "^1.6.12",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22.17.1",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
@@ -119,11 +140,14 @@
     "eslint": "^9.33.0",
     "eslint-config-next": "15.4.6",
     "husky": "^9.0.0",
+    "jest": "^30.0.5",
+    "jest-environment-jsdom": "^30.0.5",
     "lint-staged": "^15.2.0",
     "postcss": "^8.4.32",
     "prettier": "^3.3.0",
     "prettier-plugin-tailwindcss": "^0.6.0",
     "tailwindcss": "^3.4.0",
+    "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2",
     "wait-on": "^8.0.4"
@@ -136,6 +160,8 @@
     "directories": {
       "output": "release"
     },
+    "buildDependenciesFromSource": false,
+    "nodeGypRebuild": false,
     "files": [
       "dist/electron/**/*",
       ".next/**/*",
@@ -178,6 +204,40 @@
       ]
     },
     "win": {
+      "icon": "assets/icon.ico",
+      "verifyUpdateCodeSignature": false,
+      "requestedExecutionLevel": "asInvoker",
+      "fileAssociations": [
+        {
+          "ext": "scnote",
+          "name": "StudyCollab Note",
+          "description": "StudyCollab Note File",
+          "icon": "assets/note-icon.ico",
+          "role": "Editor"
+        },
+        {
+          "ext": "sctask",
+          "name": "StudyCollab Task",
+          "description": "StudyCollab Task File",
+          "icon": "assets/task-icon.ico",
+          "role": "Editor"
+        },
+        {
+          "ext": "scboard",
+          "name": "StudyCollab Board",
+          "description": "StudyCollab Study Board File",
+          "icon": "assets/board-icon.ico",
+          "role": "Editor"
+        }
+      ],
+      "protocols": [
+        {
+          "name": "StudyCollab Protocol",
+          "schemes": [
+            "studycollab"
+          ]
+        }
+      ],
       "target": [
         {
           "target": "nsis",
@@ -222,13 +282,29 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
       "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
+      "createStartMenuShortcut": true,
+      "shortcutName": "StudyCollab",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "include": "build/installer.nsh",
+      "guid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
     },
-    "publish": {
-      "provider": "github",
-      "owner": "studycollab",
-      "repo": "studycollab-desktop"
-    }
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "studycollab",
+        "repo": "studycollab-desktop",
+        "releaseType": "release"
+      },
+      {
+        "provider": "generic",
+        "url": "https://studycollab.app/api/releases/"
+      }
+    ]
   }
 }

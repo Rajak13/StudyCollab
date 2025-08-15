@@ -18,7 +18,7 @@ const handle = app.getRequestHandler()
 require('events').EventEmitter.defaultMaxListeners = 20
 
 app.prepare().then(() => {
-    const server = createServer(async (req: { url: any }, res: { statusCode: number; end: (arg0: string) => void }) => {
+    const server = createServer(async (req, res) => {
         try {
             const parsedUrl = parse(req.url!, true)
             await handle(req, res, parsedUrl)
@@ -38,7 +38,7 @@ app.prepare().then(() => {
     console.log('Yjs collaboration server initialized')
 
     server
-        .once('error', (err: any) => {
+        .once('error', (err) => {
             console.error(err)
             process.exit(1)
         })

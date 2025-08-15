@@ -8,6 +8,7 @@ const electron_1 = require("electron");
 const electron_store_1 = __importDefault(require("electron-store"));
 const fs_1 = require("fs");
 const auto_updater_manager_1 = require("./auto-updater-manager");
+const branding_manager_1 = require("./branding-manager");
 const offline_data_manager_1 = require("./offline-data-manager");
 const window_manager_1 = require("./window-manager");
 class IPCManager {
@@ -15,13 +16,17 @@ class IPCManager {
         this.windowManager = new window_manager_1.WindowManager();
         this.offlineDataManager = new offline_data_manager_1.OfflineDataManager();
         this.autoUpdaterManager = new auto_updater_manager_1.AutoUpdaterManager();
+        this.brandingManager = new branding_manager_1.BrandingManager();
         this.systemIntegrationManager = {}; // Will be set later
         this.settingsStore = new electron_store_1.default({ name: 'settings' });
     }
-    setManagers(windowManager, offlineDataManager, autoUpdaterManager, systemIntegrationManager) {
+    setManagers(windowManager, offlineDataManager, autoUpdaterManager, brandingManager, systemIntegrationManager) {
         this.windowManager = windowManager;
         this.offlineDataManager = offlineDataManager;
         this.autoUpdaterManager = autoUpdaterManager;
+        if (brandingManager) {
+            this.brandingManager = brandingManager;
+        }
         if (systemIntegrationManager) {
             this.systemIntegrationManager = systemIntegrationManager;
         }
@@ -36,6 +41,7 @@ class IPCManager {
         this.setupNotificationHandlers();
         this.setupAutoUpdaterHandlers();
         this.setupSettingsHandlers();
+        this.setupBrandingHandlers();
         this.setupSystemIntegrationHandlers();
     }
     setupWindowHandlers() {
@@ -172,6 +178,29 @@ class IPCManager {
         });
         electron_1.ipcMain.handle('settings-set', (event, key, value) => {
             this.settingsStore.set(key, value);
+        });
+    }
+    setupBrandingHandlers() {
+        electron_1.ipcMain.handle('branding-set-window-title', async (event, title) => {
+            await this.brandingManager.setWindowTitle(title);
+        });
+        electron_1.ipcMain.handle('branding-set-window-icon', async (event, iconPath) => {
+            await this.brandingManager.setWindowIcon(iconPath);
+        });
+        electron_1.ipcMain.handle('branding-set-tray-icon', async (event, iconPath) => {
+            await this.brandingManager.setTrayIcon(iconPath);
+        });
+        electron_1.ipcMain.handle('branding-set-tray-tooltip', async (event, tooltip) => {
+            await this.brandingManager.setTrayTooltip(tooltip);
+        });
+        electron_1.ipcMain.handle('branding-set-app-name', async (event, name) => {
+            await this.brandingManager.setAppName(name);
+        });
+        electron_1.ipcMain.handle('config-file-read', async (event, fileName) => {
+            return await this.brandingManager.readConfigFile(fileName);
+        });
+        electron_1.ipcMain.handle('config-file-write', async (event, fileName, content) => {
+            await this.brandingManager.writeConfigFile(fileName, content);
         });
     }
     setupSystemIntegrationHandlers() {

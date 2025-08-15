@@ -61,6 +61,14 @@ electron_1.contextBridge.exposeInMainWorld('electronAPI', {
     // File associations
     handleFileOpen: (filePath) => electron_1.ipcRenderer.send('handle-file-open', filePath),
     handleProtocolUrl: (url) => electron_1.ipcRenderer.send('handle-protocol-url', url),
+    // Branding operations
+    setWindowTitle: (title) => electron_1.ipcRenderer.invoke('branding-set-window-title', title),
+    setWindowIcon: (iconPath) => electron_1.ipcRenderer.invoke('branding-set-window-icon', iconPath),
+    setTrayIcon: (iconPath) => electron_1.ipcRenderer.invoke('branding-set-tray-icon', iconPath),
+    setTrayTooltip: (tooltip) => electron_1.ipcRenderer.invoke('branding-set-tray-tooltip', tooltip),
+    setAppName: (name) => electron_1.ipcRenderer.invoke('branding-set-app-name', name),
+    readConfigFile: (fileName) => electron_1.ipcRenderer.invoke('config-file-read', fileName),
+    writeConfigFile: (fileName, content) => electron_1.ipcRenderer.invoke('config-file-write', fileName, content),
 });
 // Also expose a flag to indicate we're in Electron
 electron_1.contextBridge.exposeInMainWorld('isElectron', true);

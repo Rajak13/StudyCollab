@@ -4,7 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { csrfProtection, inputSanitizer, rateLimiter } from './security'
+import { csrfProtection, inputSanitizer } from './security'
 import { createClient } from './supabase'
 
 export interface ApiContext {
@@ -22,29 +22,36 @@ export function withRateLimit(
   handler: ApiHandler,
   options: { windowMs?: number; maxRequests?: number } = {}
 ) {
-  const limiter = new (class extends rateLimiter.constructor {
-    constructor() {
-      super(options.windowMs, options.maxRequests)
-    }
-  })()
+  const windowMs = options.windowMs ?? 60_000
+  const maxRequests = options.maxRequests ?? 60
+  const requests = new Map<string, number[]>()
 
   return async (context: ApiContext): Promise<NextResponse> => {
-    const identifier = context.req.ip || 'anonymous'
-    
-    if (!limiter.isAllowed(identifier)) {
+    const now = Date.now()
+    const identifier = (context as any).ip ?? 'anonymous'
+
+    const timestamps = requests.get(identifier) || []
+    const fresh = timestamps.filter((t) => now - t < windowMs)
+    fresh.push(now)
+    requests.set(identifier, fresh)
+
+    const remaining = Math.max(0, maxRequests - fresh.length)
+    if (fresh.length > maxRequests) {
       return NextResponse.json(
         { error: 'Too many requests' },
-        { 
+        {
           status: 429,
           headers: {
-            'X-RateLimit-Remaining': limiter.getRemaining(identifier).toString(),
-            'Retry-After': '60'
-          }
-        }
+            'X-RateLimit-Remaining': remaining.toString(),
+            'Retry-After': Math.ceil(windowMs / 1000).toString(),
+          },
+        },
       )
     }
 
-    return handler(context)
+    const response = await handler(context)
+    response.headers.set('X-RateLimit-Remaining', remaining.toString())
+    return response
   }
 }
 

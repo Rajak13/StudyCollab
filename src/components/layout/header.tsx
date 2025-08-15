@@ -5,18 +5,20 @@ import Image from 'next/image'
 import Link from 'next/link'
 import * as React from 'react'
 import { LogoutButton } from '../auth/logout-button'
+import { LogoDisplay } from '../branding/logo-display'
 import { NotificationCenter } from '../notifications/notification-center'
+import { SyncStatusIndicator } from '../offline/sync-status-indicator'
 import { ThemeToggle } from '../theme-toggle'
 import { Button } from '../ui/button'
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
-import { SyncStatusIndicator } from '../offline/sync-status-indicator'
+import { useBranding } from '@/hooks/use-branding'
 
 interface HeaderProps {
   className?: string
@@ -38,6 +40,7 @@ export function Header({
   user,
 }: HeaderProps) {
   const [isProfileOpen, setIsProfileOpen] = React.useState(false)
+  const { config } = useBranding()
 
   return (
     <header
@@ -83,13 +86,21 @@ export function Header({
 
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
-            </div>
+            <LogoDisplay
+              type="navbar"
+              width={32}
+              height={32}
+              className="rounded-lg"
+              fallback={
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                  </svg>
+                </div>
+              }
+            />
             <span className="hidden font-bold sm:inline-block">
-              StudyCollab
+              {config.appName}
             </span>
           </Link>
         </div>

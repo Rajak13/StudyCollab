@@ -1,5 +1,7 @@
 'use client'
 
+import { FeedbackSystem } from '@/components/landing/feedback-system'
+import { HeroImage } from '@/components/landing/hero-image'
 import { InteractiveFAQ } from '@/components/landing/interactive-faq'
 import { Navigation } from '@/components/landing/navigation'
 import { Button } from '@/components/ui/button'
@@ -18,130 +20,182 @@ export default function Home() {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/10">
-        <div className="bg-grid-pattern absolute inset-0 opacity-5"></div>
+      <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-background via-primary/5 to-secondary/10 dark:from-background dark:via-primary/10 dark:to-secondary/5">
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -right-40 -top-40 h-80 w-80 animate-pulse rounded-full bg-gradient-to-br from-primary/20 to-purple-600/20 blur-3xl"></div>
           <div className="absolute -bottom-40 -left-40 h-80 w-80 animate-pulse rounded-full bg-gradient-to-br from-purple-600/20 to-pink-600/20 blur-3xl delay-1000"></div>
+          <div className="absolute top-1/4 left-1/4 h-32 w-32 animate-bounce rounded-full bg-gradient-to-br from-green-400/10 to-primary/10 blur-2xl delay-500"></div>
         </div>
 
-        <div className="container relative mx-auto px-4 py-24">
-          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
-            <div className="text-center lg:text-left">
-              <div className="mb-6 inline-flex items-center rounded-full border border-primary/20 bg-gradient-to-r from-primary/10 to-purple-600/10 px-4 py-2 text-sm font-medium text-primary backdrop-blur-sm">
-                <span className="mr-2 animate-bounce">🇳🇵</span>
-                Made in Nepal for Students Worldwide
+        <div className="container relative mx-auto px-4 py-12">
+          <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
+            {/* Left Column - Content */}
+            <div className="text-center lg:text-left space-y-8">
+              <div className="space-y-6">
+                <div className="inline-flex items-center rounded-full border border-primary/20 bg-card/80 px-6 py-3 text-sm font-medium text-primary backdrop-blur-sm shadow-sm">
+                  <span className="mr-2 animate-bounce">🎓</span>
+                  The Future of Student Productivity
+                </div>
+                
+                <h1 className="text-5xl font-bold tracking-tight text-foreground md:text-6xl lg:text-7xl">
+                  Study Smarter,{' '}
+                  <span className="bg-gradient-to-r from-primary via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                    Together
+                  </span>
+                </h1>
+                
+                <p className="text-xl leading-relaxed text-muted-foreground md:text-2xl max-w-2xl">
+                  Transform your academic journey with StudyCollab's all-in-one platform. 
+                  Organize tasks, collaborate with peers, and achieve your goals with powerful tools designed for modern students.
+                </p>
               </div>
-              <h1 className="mb-6 text-5xl font-bold tracking-tight text-foreground md:text-7xl">
-                Your Academic Life,{' '}
-                <span className="animate-pulse bg-gradient-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                  Organized
-                </span>
-              </h1>
-              <p className="mb-8 text-xl leading-relaxed text-muted-foreground md:text-2xl">
-                StudyCollab combines personal productivity with community-driven
-                learning. Manage tasks, take notes, share resources, and
-                collaborate with fellow students in one powerful platform.
-              </p>
 
-              {/* Stats Row */}
-              <div className="mb-8 grid grid-cols-3 gap-4 rounded-2xl border border-primary/10 bg-white/50 p-6 backdrop-blur-sm">
+              {/* Feature highlights */}
+              <div className="grid grid-cols-3 gap-4 rounded-2xl border border-border bg-card/60 p-6 backdrop-blur-sm shadow-lg">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">1000+</div>
-                  <div className="text-sm text-muted-foreground">
-                    Active Students
-                  </div>
+                  <div className="text-3xl mb-2">📋</div>
+                  <div className="text-sm font-medium text-card-foreground">Smart Tasks</div>
                 </div>
-                <div className="border-x border-primary/10 text-center">
-                  <div className="text-2xl font-bold text-purple-600">50+</div>
-                  <div className="text-sm text-muted-foreground">
-                    Universities
-                  </div>
+                <div className="border-x border-border text-center">
+                  <div className="text-3xl mb-2">📝</div>
+                  <div className="text-sm font-medium text-card-foreground">Rich Notes</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">99%</div>
-                  <div className="text-sm text-muted-foreground">
-                    Satisfaction
-                  </div>
+                  <div className="text-3xl mb-2">👥</div>
+                  <div className="text-sm font-medium text-card-foreground">Study Groups</div>
                 </div>
               </div>
 
-              <div className="mb-12 flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
+              {/* CTA Buttons */}
+              <div className="flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
                 <Link href="/signup">
                   <Button
                     size="lg"
-                    className="group bg-gradient-to-r from-primary to-purple-600 px-8 py-6 text-lg shadow-lg transition-all duration-300 hover:scale-105 hover:from-primary/90 hover:to-purple-600/90 hover:shadow-xl"
+                    className="group bg-gradient-to-r from-primary to-purple-600 px-8 py-4 text-lg font-semibold shadow-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl"
                   >
                     <span className="mr-2 transition-transform group-hover:scale-110">
                       🚀
                     </span>
-                    Start Your Journey
+                    Get Started Free
                   </Button>
                 </Link>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="group border-primary/20 px-8 py-6 text-lg transition-all duration-300 hover:scale-105 hover:border-primary/40 hover:bg-primary/5 hover:text-foreground"
-                >
-                  <span className="mr-2 transition-transform group-hover:scale-110">
-                    ▶️
-                  </span>
-                  Watch Demo
-                </Button>
+                <Link href="#features">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="group border-2 px-8 py-4 text-lg font-semibold transition-all duration-300 hover:scale-105"
+                  >
+                    <span className="mr-2 transition-transform group-hover:scale-110">
+                      📖
+                    </span>
+                    Explore Features
+                  </Button>
+                </Link>
               </div>
 
+              {/* Trust indicators */}
               <div className="flex items-center justify-center gap-8 text-sm text-muted-foreground lg:justify-start">
                 <div className="group flex items-center gap-2">
-                  <span className="text-green-500 transition-transform group-hover:scale-110">
-                    ✓
-                  </span>
-                  Completely Free
+                  <span className="text-green-500 transition-transform group-hover:scale-110">✓</span>
+                  100% Free
                 </div>
                 <div className="group flex items-center gap-2">
-                  <span className="text-green-500 transition-transform group-hover:scale-110">
-                    ✓
-                  </span>
-                  No credit card required
+                  <span className="text-green-500 transition-transform group-hover:scale-110">✓</span>
+                  No Setup Required
                 </div>
                 <div className="group flex items-center gap-2">
-                  <span className="text-green-500 transition-transform group-hover:scale-110">
-                    ✓
-                  </span>
+                  <span className="text-green-500 transition-transform group-hover:scale-110">✓</span>
                   Open Source
                 </div>
               </div>
             </div>
 
+            {/* Right Column - Visual with hero-books.png */}
             <div className="relative">
-              <div className="relative rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 to-purple-600/10 p-8 backdrop-blur-sm">
-                <div className="flex aspect-video items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-white to-gray-50 shadow-2xl">
-                  <div className="relative text-center">
-                    <div className="animate-float mb-4 text-8xl">📚</div>
-                    <h3 className="mb-2 text-2xl font-bold text-gray-800">
-                      StudyCollab Dashboard
-                    </h3>
-                    <p className="text-gray-600">Your academic companion</p>
+              {/* Hero Books Image Background */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-20 dark:opacity-10">
+                <img
+                  src="/hero-books.png"
+                  alt="Study Books"
+                  className="w-full h-full object-contain max-w-lg"
+                />
+              </div>
 
-                    {/* Simulated UI elements */}
-                    <div className="absolute -left-8 -top-4 h-2 w-16 animate-pulse rounded-full bg-primary/30"></div>
-                    <div className="absolute -left-6 -top-2 h-2 w-12 animate-pulse rounded-full bg-purple-600/30 delay-300"></div>
-                    <div className="absolute -bottom-4 -right-8 h-2 w-20 animate-pulse rounded-full bg-green-500/30 delay-700"></div>
+              {/* Main dashboard mockup */}
+              <div className="relative rounded-3xl border border-border bg-card/10 p-8 backdrop-blur-sm shadow-2xl">
+                <div className="aspect-[4/3] overflow-hidden rounded-2xl bg-gradient-to-br from-card to-muted shadow-2xl">
+                  {/* Dashboard header */}
+                  <div className="flex items-center justify-between border-b border-border p-4">
+                    <div className="flex items-center gap-3">
+                      <HeroImage width={32} height={32} />
+                      <span className="font-semibold text-card-foreground">StudyCollab</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="h-2 w-2 rounded-full bg-red-400"></div>
+                      <div className="h-2 w-2 rounded-full bg-yellow-400"></div>
+                      <div className="h-2 w-2 rounded-full bg-green-400"></div>
+                    </div>
+                  </div>
+                  
+                  {/* Dashboard content */}
+                  <div className="p-6 space-y-4">
+                    {/* Stats cards */}
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="rounded-lg bg-primary/10 p-3 text-center">
+                        <div className="text-lg font-bold text-primary">12</div>
+                        <div className="text-xs text-primary/70">Tasks</div>
+                      </div>
+                      <div className="rounded-lg bg-purple-500/10 p-3 text-center">
+                        <div className="text-lg font-bold text-purple-600 dark:text-purple-400">8</div>
+                        <div className="text-xs text-purple-600/70 dark:text-purple-400/70">Notes</div>
+                      </div>
+                      <div className="rounded-lg bg-green-500/10 p-3 text-center">
+                        <div className="text-lg font-bold text-green-600 dark:text-green-400">3</div>
+                        <div className="text-xs text-green-600/70 dark:text-green-400/70">Groups</div>
+                      </div>
+                    </div>
+                    
+                    {/* Task list mockup */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
+                        <div className="h-3 w-3 rounded-full bg-primary"></div>
+                        <div className="h-2 flex-1 rounded bg-muted-foreground/20"></div>
+                      </div>
+                      <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
+                        <div className="h-3 w-3 rounded-full bg-green-500"></div>
+                        <div className="h-2 flex-1 rounded bg-muted-foreground/20"></div>
+                      </div>
+                      <div className="flex items-center gap-3 rounded-lg bg-muted p-3">
+                        <div className="h-3 w-3 rounded-full bg-purple-500"></div>
+                        <div className="h-2 flex-1 rounded bg-muted-foreground/20"></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* Enhanced floating elements */}
-                <div className="absolute -right-4 -top-4 animate-bounce rounded-full bg-gradient-to-br from-primary to-primary/80 p-3 text-primary-foreground shadow-lg">
-                  <span className="text-xl">✨</span>
+                {/* Floating feature badges */}
+                <div className="absolute -right-6 -top-6 animate-bounce rounded-full bg-gradient-to-br from-primary to-primary/80 p-4 text-primary-foreground shadow-xl">
+                  <span className="text-xl">📊</span>
                 </div>
-                <div className="absolute -bottom-4 -left-4 animate-pulse rounded-full bg-gradient-to-br from-purple-600 to-purple-600/80 p-3 text-white shadow-lg">
+                <div className="absolute -bottom-6 -left-6 animate-pulse rounded-full bg-gradient-to-br from-purple-500 to-purple-600 p-4 text-white shadow-xl delay-300">
                   <span className="text-xl">🎯</span>
                 </div>
-                <div className="absolute -right-8 top-1/2 animate-bounce rounded-full bg-gradient-to-br from-green-500 to-green-500/80 p-2 text-white shadow-lg delay-500">
-                  <span className="text-sm">📊</span>
+                <div className="absolute -right-8 top-1/2 animate-bounce rounded-full bg-gradient-to-br from-green-500 to-green-600 p-3 text-white shadow-xl delay-700">
+                  <span className="text-lg">✨</span>
                 </div>
-                <div className="absolute -left-8 top-1/4 animate-pulse rounded-full bg-gradient-to-br from-orange-500 to-orange-500/80 p-2 text-white shadow-lg delay-1000">
-                  <span className="text-sm">📝</span>
+                <div className="absolute -left-8 top-1/4 animate-pulse rounded-full bg-gradient-to-br from-orange-500 to-orange-600 p-3 text-white shadow-xl delay-1000">
+                  <span className="text-lg">📝</span>
+                </div>
+              </div>
+
+              {/* Additional floating elements */}
+              <div className="absolute top-8 right-8 animate-float rounded-lg bg-card/80 p-3 shadow-lg backdrop-blur-sm border border-border">
+                <div className="text-xs font-medium text-muted-foreground">Live Collaboration</div>
+                <div className="flex -space-x-2 mt-1">
+                  <div className="h-6 w-6 rounded-full bg-primary border-2 border-card"></div>
+                  <div className="h-6 w-6 rounded-full bg-green-500 border-2 border-card"></div>
+                  <div className="h-6 w-6 rounded-full bg-purple-500 border-2 border-card"></div>
                 </div>
               </div>
             </div>
@@ -154,11 +208,10 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-4xl font-bold">
-              Trusted by Students Across Nepal
+              Trusted by Students Worldwide
             </h2>
             <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
-              Join thousands of students who are already transforming their
-              academic journey
+              Join students who are transforming their academic journey with better organization and collaboration
             </p>
           </div>
 
@@ -212,29 +265,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* University logos */}
-          <div className="mt-16 text-center">
-            <p className="mb-8 text-muted-foreground">
-              Trusted by students from top universities
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-8 opacity-60">
-              <div className="rounded-lg border bg-white p-4 shadow-sm">
-                <span className="font-bold text-primary">TU</span>
-              </div>
-              <div className="rounded-lg border bg-white p-4 shadow-sm">
-                <span className="font-bold text-primary">KU</span>
-              </div>
-              <div className="rounded-lg border bg-white p-4 shadow-sm">
-                <span className="font-bold text-primary">PU</span>
-              </div>
-              <div className="rounded-lg border bg-white p-4 shadow-sm">
-                <span className="font-bold text-primary">IOE</span>
-              </div>
-              <div className="rounded-lg border bg-white p-4 shadow-sm">
-                <span className="font-bold text-primary">IOM</span>
-              </div>
-            </div>
-          </div>
+
         </div>
       </section>
 
@@ -478,8 +509,9 @@ export default function Home() {
               <Button
                 size="lg"
                 className="group bg-white px-8 py-6 text-lg text-slate-900 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-gray-100 hover:shadow-xl"
-                onClick={() => {
-                  window.location.href = '/api/download';
+                onClick={async () => {
+                  const { triggerDownload } = await import('@/lib/downloads');
+                  triggerDownload();
                 }}
               >
                 <span className="mr-2 transition-transform group-hover:scale-110">
@@ -605,15 +637,14 @@ export default function Home() {
 
               <div className="group flex items-start space-x-4">
                 <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-orange-500/80 transition-transform group-hover:scale-110">
-                  <span className="text-xl text-white">🇳🇵</span>
+                  <span className="text-xl text-white">🌍</span>
                 </div>
                 <div>
                   <h3 className="mb-2 text-xl font-semibold transition-colors group-hover:text-orange-500">
-                    Made for Nepali Students
+                    Built for Students Worldwide
                   </h3>
                   <p className="text-muted-foreground">
-                    Built with deep understanding of the Nepali education system
-                    and student needs, by students for students.
+                    Designed with deep understanding of student needs and modern learning requirements, by students for students.
                   </p>
                 </div>
               </div>
@@ -663,109 +694,49 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section id="testimonials" className="py-20">
+      {/* Community Section */}
+      <section id="community" className="py-20">
         <div className="container mx-auto px-4">
           <div className="mb-16 text-center">
             <h2 className="mb-4 text-4xl font-bold">
-              Loved by Students in Nepal and Beyond
+              Join the StudyCollab Community
             </h2>
             <p className="text-xl text-muted-foreground">
-              See what students are saying about StudyCollab
+              Connect with students, share knowledge, and grow together
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-white to-primary/5 transition-all duration-500 hover:-translate-y-4 hover:shadow-2xl hover:shadow-primary/10">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
-              <CardContent className="relative z-10 pt-6">
-                <div className="mb-4 flex items-center justify-between">
-                  <div className="flex text-lg text-yellow-400 transition-transform group-hover:scale-110">
-                    {'★'.repeat(5)}
-                  </div>
-                  <div className="text-2xl opacity-20 transition-opacity group-hover:opacity-40">
-                    &ldquo;
-                  </div>
-                </div>
-                <p className="mb-6 text-lg leading-relaxed text-muted-foreground transition-colors group-hover:text-foreground/80">
-                  &ldquo;StudyCollab ले मेरो पढाइको तरिका नै बदलिदियो। Task
-                  management र note-taking features अति राम्रो छ!&rdquo;
+              <CardContent className="relative z-10 pt-6 text-center">
+                <div className="mb-4 text-4xl">🤝</div>
+                <h3 className="mb-4 text-xl font-semibold">Collaborative Learning</h3>
+                <p className="text-muted-foreground">
+                  Work together with fellow students in study groups, share resources, and learn from each other's experiences.
                 </p>
-                <div className="flex items-center">
-                  <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-primary/10 transition-transform group-hover:scale-110">
-                    <span className="text-lg font-bold">सु</span>
-                  </div>
-                  <div>
-                    <div className="text-lg font-semibold transition-colors group-hover:text-primary">
-                      Sujata Sharma
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Computer Engineering, IOE Pulchowk
-                    </div>
-                  </div>
-                </div>
               </CardContent>
             </Card>
 
             <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-white to-purple-600/5 transition-all duration-500 hover:-translate-y-4 hover:shadow-2xl hover:shadow-purple-600/10">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
-              <CardContent className="relative z-10 pt-6">
-                <div className="mb-4 flex items-center justify-between">
-                  <div className="flex text-lg text-yellow-400 transition-transform group-hover:scale-110">
-                    {'★'.repeat(5)}
-                  </div>
-                  <div className="text-2xl opacity-20 transition-opacity group-hover:opacity-40">
-                    &ldquo;
-                  </div>
-                </div>
-                <p className="mb-6 text-lg leading-relaxed text-muted-foreground transition-colors group-hover:text-foreground/80">
-                  &ldquo;Study groups feature ले साथीहरूसँग collaborate गर्न
-                  धेरै सजिलो बनायो। My grades improved significantly!&rdquo;
+              <CardContent className="relative z-10 pt-6 text-center">
+                <div className="mb-4 text-4xl">📚</div>
+                <h3 className="mb-4 text-xl font-semibold">Knowledge Sharing</h3>
+                <p className="text-muted-foreground">
+                  Access a vast library of shared study materials, notes, and resources contributed by the community.
                 </p>
-                <div className="flex items-center">
-                  <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-purple-600/20 to-purple-600/10 transition-transform group-hover:scale-110">
-                    <span className="text-lg font-bold">अ</span>
-                  </div>
-                  <div>
-                    <div className="text-lg font-semibold transition-colors group-hover:text-purple-600">
-                      Arjun Thapa
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Business Studies, TU
-                    </div>
-                  </div>
-                </div>
               </CardContent>
             </Card>
 
             <Card className="group relative overflow-hidden border-0 bg-gradient-to-br from-white to-green-500/5 transition-all duration-500 hover:-translate-y-4 hover:shadow-2xl hover:shadow-green-500/10">
               <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
-              <CardContent className="relative z-10 pt-6">
-                <div className="mb-4 flex items-center justify-between">
-                  <div className="flex text-lg text-yellow-400 transition-transform group-hover:scale-110">
-                    {'★'.repeat(5)}
-                  </div>
-                  <div className="text-2xl opacity-20 transition-opacity group-hover:opacity-40">
-                    &ldquo;
-                  </div>
-                </div>
-                <p className="mb-6 text-lg leading-relaxed text-muted-foreground transition-colors group-hover:text-foreground/80">
-                  &ldquo;Resource sharing is a game-changer! अरू students को
-                  notes र materials पाउन सकिन्छ easily।&rdquo;
+              <CardContent className="relative z-10 pt-6 text-center">
+                <div className="mb-4 text-4xl">🎯</div>
+                <h3 className="mb-4 text-xl font-semibold">Goal Achievement</h3>
+                <p className="text-muted-foreground">
+                  Stay motivated and achieve your academic goals with peer support, progress tracking, and accountability.
                 </p>
-                <div className="flex items-center">
-                  <div className="mr-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-green-500/20 to-green-500/10 transition-transform group-hover:scale-110">
-                    <span className="text-lg font-bold">प्र</span>
-                  </div>
-                  <div>
-                    <div className="text-lg font-semibold transition-colors group-hover:text-green-500">
-                      Priya Gurung
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Psychology, KU
-                    </div>
-                  </div>
-                </div>
               </CardContent>
             </Card>
           </div>
@@ -774,6 +745,9 @@ export default function Home() {
 
       {/* Interactive FAQ Section */}
       <InteractiveFAQ />
+
+      {/* Feedback System */}
+      <FeedbackSystem />
 
       {/* CTA Section */}
       <section className="bg-gradient-to-br from-primary/5 to-purple-600/5 py-20">
@@ -804,7 +778,7 @@ export default function Home() {
               </Button>
             </div>
             <p className="text-sm text-muted-foreground">
-              No credit card required • Always free • Made with ❤️ in Nepal
+              No credit card required • Always free • Open source
             </p>
           </div>
         </div>
@@ -825,7 +799,7 @@ export default function Home() {
               </div>
               <p className="mb-6 max-w-sm text-muted-foreground">
                 Empowering students to achieve academic excellence through
-                organization and collaboration. Made in Nepal for the world.
+                organization and collaboration. Built by students, for students.
               </p>
               <div className="flex space-x-4">
                 <Link
@@ -982,8 +956,7 @@ export default function Home() {
           <div className="mt-12 border-t border-primary/10 pt-8">
             <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
               <p className="text-center text-muted-foreground md:text-left">
-                &copy; 2024 StudyCollab. All rights reserved. Made with ❤️ in
-                Nepal 🇳🇵
+                &copy; 2024 StudyCollab. All rights reserved. Made with ❤️ for students worldwide
               </p>
               <div className="flex items-center gap-6 text-sm text-muted-foreground">
                 <Link href="#" className="transition-colors hover:text-primary">
@@ -994,6 +967,9 @@ export default function Home() {
                 </Link>
                 <Link href="#" className="transition-colors hover:text-primary">
                   Cookies
+                </Link>
+                <Link href="/admin/branding" className="transition-colors hover:text-primary">
+                  🎨 Developer
                 </Link>
               </div>
             </div>

@@ -62,7 +62,7 @@ class StudyCollabApp {
         this.systemTrayManager.setWindowManager(this.windowManager);
         this.systemIntegrationManager.setWindowManager(this.windowManager);
         this.autoUpdaterManager.setWindowManager(this.windowManager);
-        this.ipcManager.setManagers(this.windowManager, this.offlineDataManager, this.autoUpdaterManager, this.systemIntegrationManager);
+        this.ipcManager.setManagers(this.windowManager, this.offlineDataManager, this.autoUpdaterManager, undefined, this.systemIntegrationManager);
     }
     async initialize() {
         // Handle app events

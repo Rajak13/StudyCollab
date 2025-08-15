@@ -1,0 +1,4 @@
+# This is a placeholder for the installer sidebar bitmap
+# In a real implementation, this would be a 164x314 pixel BMP file
+# For now, this serves as a placeholder to prevent build errors
+# Replace with actual installer sidebar image (164x314 pixels, BMP format)

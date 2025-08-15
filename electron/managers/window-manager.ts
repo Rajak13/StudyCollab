@@ -18,6 +18,18 @@ interface DesktopConfig {
   customTitleBar: boolean;
   systemTrayIntegration: boolean;
   multiWindowSupport: boolean;
+  branding: {
+    appName: string;
+    windowTitle: string;
+  };
+}
+
+interface SecondaryWindowConfig {
+  id: string;
+  type: 'study-group' | 'notes' | 'canvas' | 'settings';
+  title: string;
+  url: string;
+  options?: Partial<Electron.BrowserWindowConstructorOptions>;
 }
 
 interface StoreSchema {
@@ -46,6 +58,10 @@ export class WindowManager {
           customTitleBar: true,
           systemTrayIntegration: true,
           multiWindowSupport: true,
+          branding: {
+            appName: 'StudyCollab',
+            windowTitle: 'StudyCollab - Your Study Companion',
+          },
         },
       },
     });
@@ -157,16 +173,16 @@ export class WindowManager {
   }
 
   private getWindowState(): WindowState {
-    const savedState = (this.store as any)['windowState'];
+    const savedState = (this.store as any)['windowState'] || {};
     const primaryDisplay = screen.getPrimaryDisplay();
     const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
 
     // Ensure window fits on screen
     const state: WindowState = {
-      width: Math.min(savedState.width, screenWidth),
-      height: Math.min(savedState.height, screenHeight),
-      isMaximized: savedState.isMaximized,
-      isFullScreen: savedState.isFullScreen,
+      width: Math.min(savedState.width || 1200, screenWidth),
+      height: Math.min(savedState.height || 800, screenHeight),
+      isMaximized: savedState.isMaximized || false,
+      isFullScreen: savedState.isFullScreen || false,
     };
 
     // Center window if no position saved or if position is off-screen
@@ -227,28 +243,145 @@ export class WindowManager {
     }
   }
 
-  createSecondaryWindow(url: string, options: Partial<Electron.BrowserWindowConstructorOptions> = {}): BrowserWindow {
+  private getTitleBarStyle(config: DesktopConfig): 'default' | 'hidden' | 'hiddenInset' | 'customButtonsOnHover' {
+    if (process.platform === 'darwin') {
+      return config.customTitleBar ? 'hiddenInset' : 'default';
+    } else if (process.platform === 'win32') {
+      return config.customTitleBar ? 'hidden' : 'default';
+    }
+    return 'default';
+  }
+
+  // Enhanced window creation with better custom title bar support
+  private setupCustomTitleBar(config: DesktopConfig): Partial<Electron.BrowserWindowConstructorOptions> {
+    if (!config.customTitleBar) {
+      return { frame: true };
+    }
+
+    const baseOptions: Partial<Electron.BrowserWindowConstructorOptions> = {
+      frame: false,
+      titleBarStyle: this.getTitleBarStyle(config),
+    };
+
+    if (process.platform === 'win32') {
+      return {
+        ...baseOptions,
+        titleBarOverlay: {
+          color: '#1f2937',
+          symbolColor: '#ffffff',
+          height: 32,
+        },
+      };
+    } else if (process.platform === 'darwin') {
+      return {
+        ...baseOptions,
+        trafficLightPosition: { x: 20, y: 13 },
+      };
+    }
+
+    return baseOptions;
+  }
+
+  createSecondaryWindow(config: SecondaryWindowConfig): BrowserWindow {
+    const config_desktop = this.getDesktopConfig();
+    const customTitleBarOptions = this.setupCustomTitleBar(config_desktop);
+    
     const secondaryWindow = new BrowserWindow({
       width: 800,
       height: 600,
+      minWidth: 400,
+      minHeight: 300,
       parent: this.mainWindow || undefined,
       modal: false,
       show: false,
+      title: config.title,
+      icon: this.getAppIcon(),
+      ...customTitleBarOptions,
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
         preload: getPreloadPath(),
         webSecurity: !isDev(),
       },
-      ...options,
+      ...config.options,
     });
 
-    secondaryWindow.loadURL(url);
+    // Store reference to secondary window
+    this.secondaryWindows.set(config.id, secondaryWindow);
+
+    // Hide menu bar for secondary windows too
+    if (config_desktop.hideMenuBar) {
+      secondaryWindow.setMenuBarVisibility(false);
+      secondaryWindow.setAutoHideMenuBar(true);
+    }
+
+    // Setup window events for secondary windows
+    this.setupSecondaryWindowEvents(secondaryWindow, config.id);
+
+    // Load the URL
+    secondaryWindow.loadURL(config.url);
+    
     secondaryWindow.once('ready-to-show', () => {
       secondaryWindow.show();
     });
 
     return secondaryWindow;
+  }
+
+  private setupSecondaryWindowEvents(window: BrowserWindow, windowId: string) {
+    // Handle window close
+    window.on('closed', () => {
+      this.secondaryWindows.delete(windowId);
+    });
+
+    // Handle navigation for secondary windows
+    window.webContents.on('will-navigate', (event, url) => {
+      const appUrl = getAppUrl();
+      if (!url.startsWith(appUrl)) {
+        event.preventDefault();
+        require('electron').shell.openExternal(url);
+      }
+    });
+
+    // Handle new window requests
+    window.webContents.setWindowOpenHandler(({ url }) => {
+      require('electron').shell.openExternal(url);
+      return { action: 'deny' };
+    });
+  }
+
+  // Enhanced window management methods
+  getSecondaryWindow(windowId: string): BrowserWindow | undefined {
+    return this.secondaryWindows.get(windowId);
+  }
+
+  closeSecondaryWindow(windowId: string): void {
+    const window = this.secondaryWindows.get(windowId);
+    if (window && !window.isDestroyed()) {
+      window.close();
+    }
+  }
+
+  closeAllSecondaryWindows(): void {
+    this.secondaryWindows.forEach((window, id) => {
+      if (!window.isDestroyed()) {
+        window.close();
+      }
+    });
+    this.secondaryWindows.clear();
+  }
+
+  getAllWindows(): BrowserWindow[] {
+    const windows: BrowserWindow[] = [];
+    if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+      windows.push(this.mainWindow);
+    }
+    this.secondaryWindows.forEach(window => {
+      if (!window.isDestroyed()) {
+        windows.push(window);
+      }
+    });
+    return windows;
   }
 
   focusMainWindow() {
@@ -258,6 +391,89 @@ export class WindowManager {
       }
       this.mainWindow.show();
       this.mainWindow.focus();
+    }
+  }
+
+  // Configuration management methods
+  getDesktopConfig(): DesktopConfig {
+    return (this.store as any)['desktopConfig'] || {
+      hideMenuBar: true,
+      customTitleBar: true,
+      systemTrayIntegration: true,
+      multiWindowSupport: true,
+      branding: {
+        appName: 'StudyCollab',
+        windowTitle: 'StudyCollab - Your Study Companion',
+      },
+    };
+  }
+
+  updateDesktopConfig(updates: Partial<DesktopConfig>): void {
+    const currentConfig = this.getDesktopConfig();
+    const newConfig = { ...currentConfig, ...updates };
+    (this.store as any)['desktopConfig'] = newConfig;
+  }
+
+  updateCustomLogo(logoPath: string): void {
+    this.updateDesktopConfig({ customLogo: logoPath });
+  }
+
+  updateBranding(appName: string, windowTitle: string): void {
+    this.updateDesktopConfig({
+      branding: { appName, windowTitle }
+    });
+    
+    // Update main window title if it exists
+    if (this.mainWindow) {
+      this.mainWindow.setTitle(windowTitle);
+    }
+  }
+
+  // Enhanced window control methods
+  minimizeMainWindow(): void {
+    if (this.mainWindow) {
+      this.mainWindow.minimize();
+    }
+  }
+
+  maximizeMainWindow(): void {
+    if (this.mainWindow) {
+      if (this.mainWindow.isMaximized()) {
+        this.mainWindow.unmaximize();
+      } else {
+        this.mainWindow.maximize();
+      }
+    }
+  }
+
+  closeMainWindow(): void {
+    if (this.mainWindow) {
+      this.mainWindow.close();
+    }
+  }
+
+  isMainWindowMaximized(): boolean {
+    return this.mainWindow?.isMaximized() || false;
+  }
+
+  // Window state management
+  restoreWindowState(): void {
+    if (!this.mainWindow) return;
+
+    const windowState = this.getWindowState();
+    this.mainWindow.setBounds({
+      x: windowState.x || 0,
+      y: windowState.y || 0,
+      width: windowState.width,
+      height: windowState.height,
+    });
+
+    if (windowState.isMaximized) {
+      this.mainWindow.maximize();
+    }
+
+    if (windowState.isFullScreen) {
+      this.mainWindow.setFullScreen(true);
     }
   }
 }

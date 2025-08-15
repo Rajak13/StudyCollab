@@ -240,7 +240,7 @@ export function ResourceUploadForm({
         file_url: fileUrl,
         file_size: fileSize,
         tags,
-      })
+      } as any)
 
       // Reset form
       form.reset()

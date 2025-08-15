@@ -138,8 +138,8 @@ export class CanvasPerformanceMonitor {
     total: number
     limit: number
   } | null {
-    if (typeof performance !== 'undefined' && performance.memory) {
-      const memory = performance.memory
+    if (typeof performance !== 'undefined' && (performance as any).memory) {
+      const memory = (performance as any).memory
       return {
         used: memory.usedJSHeapSize,
         total: memory.totalJSHeapSize,

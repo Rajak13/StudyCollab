@@ -201,6 +201,8 @@ declare global {
       registerGlobalShortcut: (accelerator: string, action: string, description: string) => Promise<boolean>;
       unregisterGlobalShortcut: (accelerator: string) => void;
       getRegisteredShortcuts: () => Promise<any[]>;
+      triggerSync?: () => void;
+      getSyncStatus?: () => Promise<{ isOnline: boolean; lastSync: Date | null; pendingChanges: number; isSyncing?: boolean; syncError?: string }>;
     };
     isElectron?: boolean;
   }

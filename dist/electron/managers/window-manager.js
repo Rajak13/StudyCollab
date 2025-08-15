@@ -11,6 +11,7 @@ const environment_1 = require("../utils/environment");
 class WindowManager {
     constructor() {
         this.mainWindow = null;
+        this.secondaryWindows = new Map();
         this.store = new electron_store_1.default({
             defaults: {
                 windowState: {
@@ -21,25 +22,47 @@ class WindowManager {
                     isMaximized: false,
                     isFullScreen: false,
                 },
+                desktopConfig: {
+                    hideMenuBar: true,
+                    customTitleBar: true,
+                    systemTrayIntegration: true,
+                    multiWindowSupport: true,
+                    branding: {
+                        appName: 'StudyCollab',
+                        windowTitle: 'StudyCollab - Your Study Companion',
+                    },
+                },
             },
         });
     }
     async createMainWindow() {
         const windowState = this.getWindowState();
+        const config = this.getDesktopConfig();
         this.mainWindow = new electron_1.BrowserWindow({
             ...windowState,
             minWidth: 800,
             minHeight: 600,
             show: false,
             icon: this.getAppIcon(),
+            frame: !config.customTitleBar,
+            titleBarStyle: this.getTitleBarStyle(config),
+            titleBarOverlay: config.customTitleBar && process.platform === 'win32' ? {
+                color: '#1f2937',
+                symbolColor: '#ffffff',
+                height: 32
+            } : undefined,
             webPreferences: {
                 nodeIntegration: false,
                 contextIsolation: true,
                 preload: (0, environment_1.getPreloadPath)(),
                 webSecurity: !(0, environment_1.isDev)(),
             },
-            titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
         });
+        // Hide menu bar if configured
+        if (config.hideMenuBar) {
+            this.mainWindow.setMenuBarVisibility(false);
+            this.mainWindow.setAutoHideMenuBar(true);
+        }
         // Handle window events
         this.setupWindowEvents();
         // Load the app
@@ -106,15 +129,15 @@ class WindowManager {
         });
     }
     getWindowState() {
-        const savedState = this.store['windowState'];
+        const savedState = this.store['windowState'] || {};
         const primaryDisplay = electron_1.screen.getPrimaryDisplay();
         const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
         // Ensure window fits on screen
         const state = {
-            width: Math.min(savedState.width, screenWidth),
-            height: Math.min(savedState.height, screenHeight),
-            isMaximized: savedState.isMaximized,
-            isFullScreen: savedState.isFullScreen,
+            width: Math.min(savedState.width || 1200, screenWidth),
+            height: Math.min(savedState.height || 800, screenHeight),
+            isMaximized: savedState.isMaximized || false,
+            isFullScreen: savedState.isFullScreen || false,
         };
         // Center window if no position saved or if position is off-screen
         if (savedState.x !== undefined && savedState.y !== undefined) {
@@ -166,26 +189,128 @@ class WindowManager {
             return (0, path_1.join)(__dirname, '../../assets/icon.png');
         }
     }
-    createSecondaryWindow(url, options = {}) {
+    getTitleBarStyle(config) {
+        if (process.platform === 'darwin') {
+            return config.customTitleBar ? 'hiddenInset' : 'default';
+        }
+        else if (process.platform === 'win32') {
+            return config.customTitleBar ? 'hidden' : 'default';
+        }
+        return 'default';
+    }
+    // Enhanced window creation with better custom title bar support
+    setupCustomTitleBar(config) {
+        if (!config.customTitleBar) {
+            return { frame: true };
+        }
+        const baseOptions = {
+            frame: false,
+            titleBarStyle: this.getTitleBarStyle(config),
+        };
+        if (process.platform === 'win32') {
+            return {
+                ...baseOptions,
+                titleBarOverlay: {
+                    color: '#1f2937',
+                    symbolColor: '#ffffff',
+                    height: 32,
+                },
+            };
+        }
+        else if (process.platform === 'darwin') {
+            return {
+                ...baseOptions,
+                trafficLightPosition: { x: 20, y: 13 },
+            };
+        }
+        return baseOptions;
+    }
+    createSecondaryWindow(config) {
+        const config_desktop = this.getDesktopConfig();
+        const customTitleBarOptions = this.setupCustomTitleBar(config_desktop);
         const secondaryWindow = new electron_1.BrowserWindow({
             width: 800,
             height: 600,
+            minWidth: 400,
+            minHeight: 300,
             parent: this.mainWindow || undefined,
             modal: false,
             show: false,
+            title: config.title,
+            icon: this.getAppIcon(),
+            ...customTitleBarOptions,
             webPreferences: {
                 nodeIntegration: false,
                 contextIsolation: true,
                 preload: (0, environment_1.getPreloadPath)(),
                 webSecurity: !(0, environment_1.isDev)(),
             },
-            ...options,
+            ...config.options,
         });
-        secondaryWindow.loadURL(url);
+        // Store reference to secondary window
+        this.secondaryWindows.set(config.id, secondaryWindow);
+        // Hide menu bar for secondary windows too
+        if (config_desktop.hideMenuBar) {
+            secondaryWindow.setMenuBarVisibility(false);
+            secondaryWindow.setAutoHideMenuBar(true);
+        }
+        // Setup window events for secondary windows
+        this.setupSecondaryWindowEvents(secondaryWindow, config.id);
+        // Load the URL
+        secondaryWindow.loadURL(config.url);
         secondaryWindow.once('ready-to-show', () => {
             secondaryWindow.show();
         });
         return secondaryWindow;
+    }
+    setupSecondaryWindowEvents(window, windowId) {
+        // Handle window close
+        window.on('closed', () => {
+            this.secondaryWindows.delete(windowId);
+        });
+        // Handle navigation for secondary windows
+        window.webContents.on('will-navigate', (event, url) => {
+            const appUrl = (0, environment_1.getAppUrl)();
+            if (!url.startsWith(appUrl)) {
+                event.preventDefault();
+                require('electron').shell.openExternal(url);
+            }
+        });
+        // Handle new window requests
+        window.webContents.setWindowOpenHandler(({ url }) => {
+            require('electron').shell.openExternal(url);
+            return { action: 'deny' };
+        });
+    }
+    // Enhanced window management methods
+    getSecondaryWindow(windowId) {
+        return this.secondaryWindows.get(windowId);
+    }
+    closeSecondaryWindow(windowId) {
+        const window = this.secondaryWindows.get(windowId);
+        if (window && !window.isDestroyed()) {
+            window.close();
+        }
+    }
+    closeAllSecondaryWindows() {
+        this.secondaryWindows.forEach((window, id) => {
+            if (!window.isDestroyed()) {
+                window.close();
+            }
+        });
+        this.secondaryWindows.clear();
+    }
+    getAllWindows() {
+        const windows = [];
+        if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+            windows.push(this.mainWindow);
+        }
+        this.secondaryWindows.forEach(window => {
+            if (!window.isDestroyed()) {
+                windows.push(window);
+            }
+        });
+        return windows;
     }
     focusMainWindow() {
         if (this.mainWindow) {
@@ -194,6 +319,78 @@ class WindowManager {
             }
             this.mainWindow.show();
             this.mainWindow.focus();
+        }
+    }
+    // Configuration management methods
+    getDesktopConfig() {
+        return this.store['desktopConfig'] || {
+            hideMenuBar: true,
+            customTitleBar: true,
+            systemTrayIntegration: true,
+            multiWindowSupport: true,
+            branding: {
+                appName: 'StudyCollab',
+                windowTitle: 'StudyCollab - Your Study Companion',
+            },
+        };
+    }
+    updateDesktopConfig(updates) {
+        const currentConfig = this.getDesktopConfig();
+        const newConfig = { ...currentConfig, ...updates };
+        this.store['desktopConfig'] = newConfig;
+    }
+    updateCustomLogo(logoPath) {
+        this.updateDesktopConfig({ customLogo: logoPath });
+    }
+    updateBranding(appName, windowTitle) {
+        this.updateDesktopConfig({
+            branding: { appName, windowTitle }
+        });
+        // Update main window title if it exists
+        if (this.mainWindow) {
+            this.mainWindow.setTitle(windowTitle);
+        }
+    }
+    // Enhanced window control methods
+    minimizeMainWindow() {
+        if (this.mainWindow) {
+            this.mainWindow.minimize();
+        }
+    }
+    maximizeMainWindow() {
+        if (this.mainWindow) {
+            if (this.mainWindow.isMaximized()) {
+                this.mainWindow.unmaximize();
+            }
+            else {
+                this.mainWindow.maximize();
+            }
+        }
+    }
+    closeMainWindow() {
+        if (this.mainWindow) {
+            this.mainWindow.close();
+        }
+    }
+    isMainWindowMaximized() {
+        return this.mainWindow?.isMaximized() || false;
+    }
+    // Window state management
+    restoreWindowState() {
+        if (!this.mainWindow)
+            return;
+        const windowState = this.getWindowState();
+        this.mainWindow.setBounds({
+            x: windowState.x || 0,
+            y: windowState.y || 0,
+            width: windowState.width,
+            height: windowState.height,
+        });
+        if (windowState.isMaximized) {
+            this.mainWindow.maximize();
+        }
+        if (windowState.isFullScreen) {
+            this.mainWindow.setFullScreen(true);
         }
     }
 }

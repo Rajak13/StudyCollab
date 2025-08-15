@@ -1,5 +1,40 @@
 import { useCallback, useEffect, useState } from 'react';
 
+// Extend CSSProperties to include Electron-specific properties
+declare module 'react' {
+  interface CSSProperties {
+    WebkitAppRegion?: 'drag' | 'no-drag';
+  }
+}
+
+// Electron type definitions
+declare namespace Electron {
+  interface OpenDialogOptions {
+    title?: string;
+    defaultPath?: string;
+    buttonLabel?: string;
+    filters?: Array<{ name: string; extensions: string[] }>;
+    properties?: Array<'openFile' | 'openDirectory' | 'multiSelections' | 'showHiddenFiles'>;
+  }
+
+  interface OpenDialogReturnValue {
+    canceled: boolean;
+    filePaths: string[];
+  }
+
+  interface SaveDialogOptions {
+    title?: string;
+    defaultPath?: string;
+    buttonLabel?: string;
+    filters?: Array<{ name: string; extensions: string[] }>;
+  }
+
+  interface SaveDialogReturnValue {
+    canceled: boolean;
+    filePath?: string;
+  }
+}
+
 // Type definitions for the Electron API
 interface ElectronAPI {
   minimize: () => void;
@@ -15,12 +50,30 @@ interface ElectronAPI {
   getVersion: () => Promise<string>;
   getPlatform: () => Promise<string>;
   getOfflineData: (key: string) => Promise<any>;
-  setOfflineData: (key: string, value: any) => Promise<void>;
-  removeOfflineData: (key: string) => Promise<void>;
+  setOfflineData: (key: string, value: any, entityType?: string) => Promise<void>;
+  removeOfflineData: (key: string, entityType?: string) => Promise<void>;
   clearOfflineData: () => Promise<void>;
+  getDataByType: (entityType: string) => Promise<Record<string, any>>;
+  getConflictedEntities: () => Promise<any[]>;
+  resolveConflictManually: (entityId: string, resolvedData: any) => Promise<void>;
   triggerSync: () => void;
-  getSyncStatus: () => Promise<{ isOnline: boolean; lastSync: Date | null; pendingChanges: number }>;
+  getSyncStatus: () => Promise<{ isOnline: boolean; lastSync: Date | null; pendingChanges: number; isSyncing?: boolean; syncError?: string }>;
   showNotification: (title: string, body: string, options?: NotificationOptions) => void;
+  showSystemNotification: (options: any) => void;
+  showReminderNotification: (title: string, body: string, reminderData?: any) => void;
+  showGroupActivityNotification: (groupName: string, activity: string, userName?: string) => void;
+  registerGlobalShortcut: (accelerator: string, action: string, description: string) => Promise<boolean>;
+  unregisterGlobalShortcut: (accelerator: string) => void;
+  getRegisteredShortcuts: () => Promise<any[]>;
+  minimizeWindow: () => void;
+  maximizeWindow: () => void;
+  unmaximizeWindow: () => void;
+  closeWindow: () => void;
+  getWindowState: () => Promise<{ isMaximized: boolean }>;
+  onWindowStateChange: (callback: (state: { isMaximized: boolean }) => void) => void;
+  handleFileOpen: (filePath: string) => void;
+  handleProtocolUrl: (url: string) => void;
+  getDroppedFiles: (files: string[]) => Promise<any[]>;
   on: (channel: string, callback: (...args: any[]) => void) => void;
   off: (channel: string, callback: (...args: any[]) => void) => void;
   once: (channel: string, callback: (...args: any[]) => void) => void;
@@ -166,6 +219,8 @@ export const useElectronFile = () => {
 export const useElectronSync = () => {
   const { isElectron, electronAPI } = useElectron();
   const [syncStatus, setSyncStatus] = useState<{
+    syncError: any;
+    isSyncing: any;
     isOnline: boolean;
     lastSync: Date | null;
     pendingChanges: number;
@@ -313,5 +368,119 @@ export const useElectronUpdater = () => {
     updateStatus,
     checkForUpdates,
     installUpdate,
+  };
+};
+
+export const useElectronOfflineData = () => {
+  const { isElectron, electronAPI } = useElectron();
+
+  const getData = useCallback(async (key: string) => {
+    if (!electronAPI) return null;
+    return await electronAPI.getOfflineData(key);
+  }, [electronAPI]);
+
+  const setData = useCallback(async (key: string, value: any, entityType?: string) => {
+    if (!electronAPI) return;
+    await electronAPI.setOfflineData(key, value, entityType);
+  }, [electronAPI]);
+
+  const removeData = useCallback(async (key: string, entityType?: string) => {
+    if (!electronAPI) return;
+    await electronAPI.removeOfflineData(key, entityType);
+  }, [electronAPI]);
+
+  const clearData = useCallback(async () => {
+    if (!electronAPI) return;
+    await electronAPI.clearOfflineData();
+  }, [electronAPI]);
+
+  const getDataByType = useCallback(async (entityType: string) => {
+    if (!electronAPI) return {};
+    return await electronAPI.getDataByType(entityType);
+  }, [electronAPI]);
+
+  const getConflictedEntities = useCallback(async () => {
+    if (!electronAPI) return [];
+    return await electronAPI.getConflictedEntities();
+  }, [electronAPI]);
+
+  const resolveConflictManually = useCallback(async (entityId: string, resolvedData: any) => {
+    if (!electronAPI) return;
+    await electronAPI.resolveConflictManually(entityId, resolvedData);
+  }, [electronAPI]);
+
+  return {
+    isElectron,
+    getData,
+    setData,
+    removeData,
+    clearData,
+    getDataByType,
+    getConflictedEntities,
+    resolveConflictManually,
+  };
+};
+
+export const useElectronNotifications = () => {
+  const { isElectron, electronAPI } = useElectron();
+
+  const showSystemNotification = useCallback((options: {
+    title: string;
+    body: string;
+    icon?: string;
+    silent?: boolean;
+    urgency?: 'normal' | 'critical' | 'low';
+    actions?: Array<{ type: string; text: string }>;
+    tag?: string;
+  }) => {
+    if (electronAPI?.showSystemNotification) {
+      electronAPI.showSystemNotification(options);
+    }
+  }, [electronAPI]);
+
+  const showReminderNotification = useCallback((title: string, body: string, reminderData?: any) => {
+    if (electronAPI?.showReminderNotification) {
+      electronAPI.showReminderNotification(title, body, reminderData);
+    }
+  }, [electronAPI]);
+
+  const showGroupActivityNotification = useCallback((groupName: string, activity: string, userName?: string) => {
+    if (electronAPI?.showGroupActivityNotification) {
+      electronAPI.showGroupActivityNotification(groupName, activity, userName);
+    }
+  }, [electronAPI]);
+
+  return {
+    isElectron,
+    showSystemNotification,
+    showReminderNotification,
+    showGroupActivityNotification,
+  };
+};
+
+export const useElectronGlobalShortcuts = () => {
+  const { isElectron, electronAPI } = useElectron();
+
+  const registerShortcut = useCallback(async (accelerator: string, action: string, description: string) => {
+    if (!electronAPI?.registerGlobalShortcut) return false;
+    return await electronAPI.registerGlobalShortcut(accelerator, action, description);
+  }, [electronAPI]);
+
+  const unregisterShortcut = useCallback((accelerator: string) => {
+    if (electronAPI?.unregisterGlobalShortcut) {
+      electronAPI.unregisterGlobalShortcut(accelerator);
+    }
+  }, [electronAPI]);
+
+  const getRegisteredShortcuts = useCallback(async () => {
+    if (!electronAPI?.getRegisteredShortcuts) return [];
+    return await electronAPI.getRegisteredShortcuts();
+  }, [electronAPI]);
+
+  return {
+    isElectron,
+    registerShortcut,
+    unregisterShortcut,
+    getRegisteredShortcuts,
   };
 };

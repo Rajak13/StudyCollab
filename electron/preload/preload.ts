@@ -66,6 +66,15 @@ export interface ElectronAPI {
   // File associations
   handleFileOpen: (filePath: string) => void;
   handleProtocolUrl: (url: string) => void;
+  
+  // Branding operations
+  setWindowTitle: (title: string) => Promise<void>;
+  setWindowIcon: (iconPath: string) => Promise<void>;
+  setTrayIcon: (iconPath: string) => Promise<void>;
+  setTrayTooltip: (tooltip: string) => Promise<void>;
+  setAppName: (name: string) => Promise<void>;
+  readConfigFile: (fileName: string) => Promise<string | null>;
+  writeConfigFile: (fileName: string, content: string) => Promise<void>;
 }
 
 // Expose the API to the renderer process
@@ -152,6 +161,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // File associations
   handleFileOpen: (filePath: string) => ipcRenderer.send('handle-file-open', filePath),
   handleProtocolUrl: (url: string) => ipcRenderer.send('handle-protocol-url', url),
+  
+  // Branding operations
+  setWindowTitle: (title: string) => ipcRenderer.invoke('branding-set-window-title', title),
+  setWindowIcon: (iconPath: string) => ipcRenderer.invoke('branding-set-window-icon', iconPath),
+  setTrayIcon: (iconPath: string) => ipcRenderer.invoke('branding-set-tray-icon', iconPath),
+  setTrayTooltip: (tooltip: string) => ipcRenderer.invoke('branding-set-tray-tooltip', tooltip),
+  setAppName: (name: string) => ipcRenderer.invoke('branding-set-app-name', name),
+  readConfigFile: (fileName: string) => ipcRenderer.invoke('config-file-read', fileName),
+  writeConfigFile: (fileName: string, content: string) => ipcRenderer.invoke('config-file-write', fileName, content),
 } as ElectronAPI);
 
 // Also expose a flag to indicate we're in Electron

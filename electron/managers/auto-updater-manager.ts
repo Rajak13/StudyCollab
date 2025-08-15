@@ -24,12 +24,23 @@ export class AutoUpdaterManager {
     }
 
     // Configure auto-updater
-    autoUpdater.checkForUpdatesAndNotify();
     autoUpdater.autoDownload = false; // We'll handle download manually
     autoUpdater.autoInstallOnAppQuit = true;
+    autoUpdater.allowPrerelease = false;
+    autoUpdater.allowDowngrade = false;
+    
+    // Set update check interval (check every 4 hours)
+    setInterval(() => {
+      this.checkForUpdates();
+    }, 4 * 60 * 60 * 1000);
 
     // Set up event handlers
     this.setupEventHandlers();
+    
+    // Initial check for updates (delayed by 10 seconds after app start)
+    setTimeout(() => {
+      this.checkForUpdates();
+    }, 10000);
   }
 
   private setupEventHandlers() {

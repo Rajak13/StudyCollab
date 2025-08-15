@@ -39,7 +39,13 @@ class OfflineDataManager extends events_1.EventEmitter {
     }
     async initialize() {
         // Initialize SQLite database
-        await this.initializeDatabase();
+        try {
+            await this.initializeDatabase();
+        }
+        catch (error) {
+            console.warn('SQLite database initialization failed, running without offline support:', error);
+            // Continue without SQLite - app will work in online-only mode
+        }
         // Check initial online status
         this.isOnline = electron_1.net.isOnline();
         // Set up online/offline detection

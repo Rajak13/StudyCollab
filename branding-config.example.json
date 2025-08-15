@@ -1,0 +1,22 @@
+{
+  "version": "1.0.0",
+  "branding": {
+    "appName": "StudyCollab",
+    "windowTitle": "StudyCollab - Collaborative Study Platform",
+    "description": "A comprehensive study platform for students",
+    "assets": {
+      "navbar": "/logo.png",
+      "window": "/icon.png",
+      "tray": "/tray-icon.png",
+      "splash": "/splash.png",
+      "favicon": "/favicon.ico",
+      "hero": "/hero-image.jpg"
+    },
+    "theme": {
+      "primaryColor": "#3b82f6",
+      "accentColor": "#3b82f6",
+      "backgroundColor": "#ffffff"
+    }
+  },
+  "lastUpdated": "2024-01-01T00:00:00.000Z"
+}

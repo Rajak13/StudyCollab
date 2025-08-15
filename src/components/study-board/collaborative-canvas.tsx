@@ -536,9 +536,9 @@ export function CollaborativeCanvas({
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onTouchStart={handleMouseDown}
-        onTouchMove={handleMouseMove}
-        onTouchEnd={handleMouseUp}
+        onTouchStart={handleMouseDown as any}
+        onTouchMove={handleMouseMove as any}
+        onTouchEnd={handleMouseUp as any}
         style={{
           cursor: selectedTool === 'select' ? 'default' : 'crosshair',
           display: 'block'

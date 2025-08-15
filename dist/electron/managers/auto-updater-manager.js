@@ -21,11 +21,20 @@ class AutoUpdaterManager {
             return;
         }
         // Configure auto-updater
-        electron_updater_1.autoUpdater.checkForUpdatesAndNotify();
         electron_updater_1.autoUpdater.autoDownload = false; // We'll handle download manually
         electron_updater_1.autoUpdater.autoInstallOnAppQuit = true;
+        electron_updater_1.autoUpdater.allowPrerelease = false;
+        electron_updater_1.autoUpdater.allowDowngrade = false;
+        // Set update check interval (check every 4 hours)
+        setInterval(() => {
+            this.checkForUpdates();
+        }, 4 * 60 * 60 * 1000);
         // Set up event handlers
         this.setupEventHandlers();
+        // Initial check for updates (delayed by 10 seconds after app start)
+        setTimeout(() => {
+            this.checkForUpdates();
+        }, 10000);
     }
     setupEventHandlers() {
         electron_updater_1.autoUpdater.on('checking-for-update', () => {

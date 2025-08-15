@@ -4,6 +4,7 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { useState } from 'react'
+import { LogoDisplay } from '../branding/logo-display'
 
 export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -20,12 +21,19 @@ export function Navigation() {
     <nav className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex items-center justify-between px-4 py-4">
         <div className="flex items-center space-x-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <span className="text-sm font-bold text-primary-foreground">
-              SC
-            </span>
-          </div>
-          <span className="text-xl font-bold">StudyCollab</span>
+          <LogoDisplay
+            type="navbar"
+            width={32}
+            height={32}
+            className="rounded-lg"
+            fallback={
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+                <span className="text-sm font-bold text-primary-foreground">
+                  SC
+                </span>
+              </div>
+            }
+          />
         </div>
 
         {/* Desktop Navigation */}

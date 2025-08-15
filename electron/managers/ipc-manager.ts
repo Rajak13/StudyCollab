@@ -2,6 +2,7 @@ import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron';
 import Store from 'electron-store';
 import { promises as fs } from 'fs';
 import { AutoUpdaterManager } from './auto-updater-manager';
+import { BrandingManager } from './branding-manager';
 import { OfflineDataManager } from './offline-data-manager';
 import { WindowManager } from './window-manager';
 
@@ -21,6 +22,7 @@ export class IPCManager {
   private windowManager: WindowManager;
   private offlineDataManager: OfflineDataManager;
   private autoUpdaterManager: AutoUpdaterManager;
+  private brandingManager: BrandingManager;
   private systemIntegrationManager: SystemIntegrationManager;
   private settingsStore: Store;
 
@@ -28,6 +30,7 @@ export class IPCManager {
     this.windowManager = new WindowManager();
     this.offlineDataManager = new OfflineDataManager();
     this.autoUpdaterManager = new AutoUpdaterManager();
+    this.brandingManager = new BrandingManager();
     this.systemIntegrationManager = {} as SystemIntegrationManager; // Will be set later
     this.settingsStore = new Store({ name: 'settings' });
   }
@@ -36,11 +39,15 @@ export class IPCManager {
     windowManager: WindowManager,
     offlineDataManager: OfflineDataManager,
     autoUpdaterManager: AutoUpdaterManager,
+    brandingManager?: BrandingManager,
     systemIntegrationManager?: SystemIntegrationManager
   ) {
     this.windowManager = windowManager;
     this.offlineDataManager = offlineDataManager;
     this.autoUpdaterManager = autoUpdaterManager;
+    if (brandingManager) {
+      this.brandingManager = brandingManager;
+    }
     if (systemIntegrationManager) {
       this.systemIntegrationManager = systemIntegrationManager;
     }
@@ -56,6 +63,7 @@ export class IPCManager {
     this.setupNotificationHandlers();
     this.setupAutoUpdaterHandlers();
     this.setupSettingsHandlers();
+    this.setupBrandingHandlers();
     this.setupSystemIntegrationHandlers();
   }
 
@@ -218,6 +226,36 @@ export class IPCManager {
 
     ipcMain.handle('settings-set', (event, key: string, value: any) => {
       (this.settingsStore as any).set(key, value);
+    });
+  }
+
+  private setupBrandingHandlers() {
+    ipcMain.handle('branding-set-window-title', async (event, title: string) => {
+      await this.brandingManager.setWindowTitle(title);
+    });
+
+    ipcMain.handle('branding-set-window-icon', async (event, iconPath: string) => {
+      await this.brandingManager.setWindowIcon(iconPath);
+    });
+
+    ipcMain.handle('branding-set-tray-icon', async (event, iconPath: string) => {
+      await this.brandingManager.setTrayIcon(iconPath);
+    });
+
+    ipcMain.handle('branding-set-tray-tooltip', async (event, tooltip: string) => {
+      await this.brandingManager.setTrayTooltip(tooltip);
+    });
+
+    ipcMain.handle('branding-set-app-name', async (event, name: string) => {
+      await this.brandingManager.setAppName(name);
+    });
+
+    ipcMain.handle('config-file-read', async (event, fileName: string) => {
+      return await this.brandingManager.readConfigFile(fileName);
+    });
+
+    ipcMain.handle('config-file-write', async (event, fileName: string, content: string) => {
+      await this.brandingManager.writeConfigFile(fileName, content);
     });
   }
 

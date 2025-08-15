@@ -137,10 +137,10 @@ export async function POST(
       .eq('user_id', user.id)
       .single()
 
+    const isGroupAdmin = board.group.group_members.some(m => m.user_id === user.id && (m.role === 'OWNER' || m.role === 'ADMIN'))
     const hasAdminPermission = 
       board.created_by === user.id ||
-      board.group.group_members.role === 'OWNER' ||
-      board.group.group_members.role === 'ADMIN' ||
+      isGroupAdmin ||
       permission?.permission_level === 'ADMIN'
 
     if (!hasAdminPermission) {

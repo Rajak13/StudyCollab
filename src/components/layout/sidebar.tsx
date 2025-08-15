@@ -5,7 +5,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import * as React from 'react'
+import { LogoDisplay } from '../branding/logo-display'
 import { Button } from '../ui/button'
+import { useBranding } from '@/hooks/use-branding'
 
 interface SidebarProps {
   className?: string
@@ -259,6 +261,7 @@ export function Sidebar({
   user,
 }: SidebarProps) {
   const pathname = usePathname()
+  const { config } = useBranding()
 
   // Get user display info
   const displayName = user?.name || 'User'
@@ -277,12 +280,20 @@ export function Sidebar({
       <div className="flex h-16 items-center justify-between border-b px-4">
         {isOpen && (
           <Link href="/dashboard" className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
-            </div>
-            <span className="font-bold">StudyCollab</span>
+            <LogoDisplay
+              type="navbar"
+              width={32}
+              height={32}
+              className="rounded-lg"
+              fallback={
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                  </svg>
+                </div>
+              }
+            />
+            <span className="font-bold">{config.appName}</span>
           </Link>
         )}
         <Button

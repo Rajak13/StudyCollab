@@ -1,6 +1,8 @@
 'use client'
 
+import { DesktopBranding } from '@/components/desktop/desktop-branding'
 import { DesktopHomeScreen } from '@/components/desktop/desktop-home-screen'
+import { DesktopAppLayout, DesktopHomeLayout } from '@/components/desktop/desktop-layout'
 import { useAuth } from '@/hooks/use-auth'
 import { PlatformDetection } from '@/lib/platform-detection'
 import { PlatformRouting } from '@/lib/platform-routing'
@@ -72,7 +74,11 @@ export function PlatformLayout({ children }: PlatformLayoutProps) {
   // Handle desktop home screen
   const platformInfo = PlatformDetection.detect()
   if (platformInfo.isElectron && pathname === '/desktop-home') {
-    return <DesktopHomeScreen />
+    return (
+      <DesktopHomeLayout>
+        <DesktopHomeScreen />
+      </DesktopHomeLayout>
+    )
   }
 
   // Handle landing page logic
@@ -81,8 +87,29 @@ export function PlatformLayout({ children }: PlatformLayoutProps) {
     return children // Show the landing page
   }
 
-  // For all other routes, show the children
-  return children
+  // For desktop routes, use desktop layout
+  if (platformInfo.isElectron) {
+    // Routes that should use desktop app layout (with sidebar)
+    const appRoutes = ['/dashboard', '/tasks', '/notes', '/study-groups', '/files', '/profile', '/settings']
+    const isAppRoute = appRoutes.some(route => pathname.startsWith(route))
+    
+    if (isAppRoute) {
+      return (
+        <DesktopAppLayout user={user}>
+          <DesktopBranding />
+          {children}
+        </DesktopAppLayout>
+      )
+    }
+  }
+
+  // For all other routes, show the children with desktop branding
+  return (
+    <>
+      <DesktopBranding />
+      {children}
+    </>
+  )
 }
 
 /**

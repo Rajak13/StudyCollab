@@ -20,6 +20,17 @@ export type NotificationType =
   | 'GROUP_MESSAGE'
   | 'GROUP_RESOURCE_SHARED'
   | 'GROUP_ARCHIVED'
+  | 'TASK_DUE_SOON'
+  | 'TASK_CREATED'
+  | 'TASK_COMPLETED'
+  | 'NOTE_SHARED'
+  | 'NOTE_COMMENTED'
+  | 'NOTE_COLLABORATION_INVITE'
+  | 'SYSTEM_ERROR'
+  | 'SYSTEM_WARNING'
+  | 'SYSTEM_SUCCESS'
+  | 'SYNC_CONFLICT'
+  | 'BACKUP_CREATED'
 
 export interface NotificationData {
   groupId?: string

@@ -1,4 +1,4 @@
-import { Menu, Tray, app, nativeImage } from 'electron';
+import { app, Menu, nativeImage, Notification, Tray } from 'electron';
 import { join } from 'path';
 import { WindowManager } from './window-manager';
 
@@ -7,7 +7,6 @@ export class SystemTrayManager {
   private windowManager: WindowManager;
 
   constructor() {
-    // We'll get the window manager instance from the main app
     this.windowManager = new WindowManager();
   }
 
@@ -16,18 +15,24 @@ export class SystemTrayManager {
   }
 
   setup() {
+    if (this.tray) {
+      return; // Already set up
+    }
+
+    this.createTray();
+    this.setupTrayMenu();
+    this.setupTrayEvents();
+  }
+
+  private createTray() {
     const iconPath = this.getTrayIconPath();
-    const icon = nativeImage.createFromPath(iconPath);
     
-    // Resize icon for tray
+    // Create native image and resize for tray
+    const icon = nativeImage.createFromPath(iconPath);
     const trayIcon = icon.resize({ width: 16, height: 16 });
     
     this.tray = new Tray(trayIcon);
-    
-    this.setupTrayMenu();
-    this.setupTrayEvents();
-    
-    this.tray.setToolTip('StudyCollab - Your Study Companion');
+    this.tray.setToolTip('StudyCollab - Your Academic Companion');
   }
 
   private setupTrayMenu() {
@@ -44,38 +49,55 @@ export class SystemTrayManager {
         type: 'separator',
       },
       {
-        label: 'New Note',
-        accelerator: 'CommandOrControl+Shift+N',
+        label: 'Dashboard',
         click: () => {
-          const mainWindow = this.windowManager.getMainWindow();
-          if (mainWindow) {
-            this.windowManager.focusMainWindow();
-            mainWindow.webContents.send('global-shortcut', 'new-note');
-          }
+          this.windowManager.focusMainWindow();
+          // Navigate to dashboard - this would be handled by the renderer process
         },
       },
       {
-        label: 'Quick Capture',
-        accelerator: 'CommandOrControl+Shift+C',
-        click: () => {
-          const mainWindow = this.windowManager.getMainWindow();
-          if (mainWindow) {
-            this.windowManager.focusMainWindow();
-            mainWindow.webContents.send('global-shortcut', 'quick-capture');
-          }
-        },
+        label: 'Quick Actions',
+        submenu: [
+          {
+            label: 'New Note',
+            accelerator: 'CmdOrCtrl+N',
+            click: () => {
+              this.windowManager.focusMainWindow();
+              // Send IPC message to create new note
+            },
+          },
+          {
+            label: 'New Task',
+            accelerator: 'CmdOrCtrl+T',
+            click: () => {
+              this.windowManager.focusMainWindow();
+              // Send IPC message to create new task
+            },
+          },
+          {
+            label: 'Open Study Board',
+            accelerator: 'CmdOrCtrl+B',
+            click: () => {
+              this.windowManager.focusMainWindow();
+              // Send IPC message to open study board
+            },
+          },
+        ],
       },
       {
         type: 'separator',
       },
       {
-        label: 'Preferences',
+        label: 'Settings',
         click: () => {
-          const mainWindow = this.windowManager.getMainWindow();
-          if (mainWindow) {
-            this.windowManager.focusMainWindow();
-            mainWindow.webContents.send('navigate-to', '/settings');
-          }
+          this.windowManager.focusMainWindow();
+          // Navigate to settings
+        },
+      },
+      {
+        label: 'About StudyCollab',
+        click: () => {
+          this.showAboutDialog();
         },
       },
       {
@@ -108,19 +130,17 @@ export class SystemTrayManager {
       }
     });
 
-    // Single click behavior (platform specific)
-    if (process.platform === 'win32') {
+    // Single click behavior (Windows/Linux)
+    if (process.platform !== 'darwin') {
       this.tray.on('click', () => {
-        const mainWindow = this.windowManager.getMainWindow();
-        if (mainWindow) {
-          if (mainWindow.isVisible()) {
-            mainWindow.hide();
-          } else {
-            this.windowManager.focusMainWindow();
-          }
-        }
+        this.windowManager.focusMainWindow();
       });
     }
+
+    // Handle tray icon updates
+    this.tray.on('right-click', () => {
+      // Context menu is automatically shown
+    });
   }
 
   private getTrayIconPath(): string {
@@ -145,50 +165,50 @@ export class SystemTrayManager {
         type: 'separator',
       },
       {
-        label: 'New Note',
-        accelerator: 'CommandOrControl+Shift+N',
+        label: 'Dashboard',
         click: () => {
-          const mainWindow = this.windowManager.getMainWindow();
-          if (mainWindow) {
-            this.windowManager.focusMainWindow();
-            mainWindow.webContents.send('global-shortcut', 'new-note');
-          }
+          this.windowManager.focusMainWindow();
         },
       },
       {
-        label: 'Quick Capture',
-        accelerator: 'CommandOrControl+Shift+C',
-        click: () => {
-          const mainWindow = this.windowManager.getMainWindow();
-          if (mainWindow) {
-            this.windowManager.focusMainWindow();
-            mainWindow.webContents.send('global-shortcut', 'quick-capture');
-          }
-        },
+        label: 'Quick Actions',
+        submenu: [
+          {
+            label: 'New Note',
+            accelerator: 'CmdOrCtrl+N',
+            click: () => {
+              this.windowManager.focusMainWindow();
+            },
+          },
+          {
+            label: 'New Task',
+            accelerator: 'CmdOrCtrl+T',
+            click: () => {
+              this.windowManager.focusMainWindow();
+            },
+          },
+          {
+            label: 'Open Study Board',
+            accelerator: 'CmdOrCtrl+B',
+            click: () => {
+              this.windowManager.focusMainWindow();
+            },
+          },
+        ],
       },
       {
         type: 'separator',
       },
       {
-        label: 'Sync Now',
+        label: 'Settings',
         click: () => {
-          const mainWindow = this.windowManager.getMainWindow();
-          if (mainWindow) {
-            mainWindow.webContents.send('trigger-sync');
-          }
+          this.windowManager.focusMainWindow();
         },
       },
       {
-        type: 'separator',
-      },
-      {
-        label: 'Preferences',
+        label: 'About StudyCollab',
         click: () => {
-          const mainWindow = this.windowManager.getMainWindow();
-          if (mainWindow) {
-            this.windowManager.focusMainWindow();
-            mainWindow.webContents.send('navigate-to', '/settings');
-          }
+          this.showAboutDialog();
         },
       },
       {
@@ -204,15 +224,24 @@ export class SystemTrayManager {
     ]);
 
     this.tray.setContextMenu(contextMenu);
+
+    // Update tooltip with unread count
+    const tooltip = unreadCount > 0 ? 
+      `StudyCollab - ${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}` :
+      'StudyCollab - Your Academic Companion';
+    
+    this.tray.setToolTip(tooltip);
   }
 
   showNotification(title: string, body: string) {
-    if (this.tray) {
-      this.tray.displayBalloon({
+    if (Notification.isSupported()) {
+      const notification = new Notification({
         title,
-        content: body,
-        icon: nativeImage.createFromPath(this.getTrayIconPath()),
+        body,
+        icon: this.getTrayIconPath(),
       });
+
+      notification.show();
     }
   }
 
@@ -220,6 +249,21 @@ export class SystemTrayManager {
     if (this.tray) {
       this.tray.destroy();
       this.tray = null;
+    }
+  }
+
+  private showAboutDialog() {
+    const { dialog } = require('electron');
+    const mainWindow = this.windowManager.getMainWindow();
+    
+    if (mainWindow) {
+      dialog.showMessageBox(mainWindow, {
+        type: 'info',
+        title: 'About StudyCollab',
+        message: 'StudyCollab Desktop',
+        detail: `Version: ${app.getVersion()}\nYour Academic Companion\n\nBuilt with Electron and Next.js`,
+        buttons: ['OK'],
+      });
     }
   }
 }

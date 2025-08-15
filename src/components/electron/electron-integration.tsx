@@ -4,6 +4,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useElectronDragDrop } from '@/hooks/use-electron-drag-drop';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect } from 'react';
+import { DesktopNotifications } from '../desktop/desktop-notifications';
 
 interface DroppedFile {
   path: string;
@@ -295,5 +296,10 @@ export function ElectronIntegration() {
     };
   }, []);
 
-  return null; // This component doesn't render anything visible
+  return (
+    <>
+      {/* Desktop notifications component */}
+      <DesktopNotifications />
+    </>
+  );
 }

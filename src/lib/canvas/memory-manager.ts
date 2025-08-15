@@ -1,231 +1,229 @@
+/**
+ * Canvas Memory Manager
+ * Handles memory cleanup and resource management for canvas components
+ */
+
 import Konva from 'konva'
 
-/**
- * Manages memory usage and cleanup for canvas resources
- * Prevents memory leaks and optimizes performance
- */
-export class CanvasMemoryManager {
-  private static instance: CanvasMemoryManager
-  private trackedStages = new Set<Konva.Stage>()
-  private trackedLayers = new Set<Konva.Layer>()
-  private trackedNodes = new Set<Konva.Node>()
-  private cleanupCallbacks = new Set<() => void>()
-  private isCleaningUp = false
+export interface CanvasResources {
+  stage?: Konva.Stage
+  layers: Konva.Layer[]
+  shapes: Konva.Shape[]
+  groups: Konva.Group[]
+  animations: Konva.Animation[]
+  resizeObserver?: ResizeObserver
+  eventListeners: Array<{
+    element: EventTarget
+    event: string
+    handler: EventListener
+  }>
+}
 
-  static getInstance(): CanvasMemoryManager {
-    if (!CanvasMemoryManager.instance) {
-      CanvasMemoryManager.instance = new CanvasMemoryManager()
+export class MemoryManager {
+  private resources: CanvasResources = {
+    layers: [],
+    shapes: [],
+    groups: [],
+    animations: [],
+    eventListeners: []
+  }
+
+  /**
+   * Register a stage for cleanup
+   */
+  registerStage(stage: Konva.Stage): void {
+    this.resources.stage = stage
+  }
+
+  /**
+   * Register a layer for cleanup
+   */
+  registerLayer(layer: Konva.Layer): void {
+    if (!this.resources.layers.includes(layer)) {
+      this.resources.layers.push(layer)
     }
-    return CanvasMemoryManager.instance
   }
 
   /**
-   * Track a Konva stage for cleanup
+   * Register a shape for cleanup
    */
-  trackStage(stage: Konva.Stage): void {
-    this.trackedStages.add(stage)
+  registerShape(shape: Konva.Shape): void {
+    if (!this.resources.shapes.includes(shape)) {
+      this.resources.shapes.push(shape)
+    }
   }
 
   /**
-   * Track a Konva layer for cleanup
+   * Register a group for cleanup
    */
-  trackLayer(layer: Konva.Layer): void {
-    this.trackedLayers.add(layer)
+  registerGroup(group: Konva.Group): void {
+    if (!this.resources.groups.includes(group)) {
+      this.resources.groups.push(group)
+    }
   }
 
   /**
-   * Track a Konva node for cleanup
+   * Register an animation for cleanup
    */
-  trackNode(node: Konva.Node): void {
-    this.trackedNodes.add(node)
+  registerAnimation(animation: Konva.Animation): void {
+    if (!this.resources.animations.includes(animation)) {
+      this.resources.animations.push(animation)
+    }
   }
 
   /**
-   * Add a cleanup callback
+   * Register a ResizeObserver for cleanup
    */
-  addCleanupCallback(callback: () => void): void {
-    this.cleanupCallbacks.add(callback)
+  registerResizeObserver(observer: ResizeObserver): void {
+    this.resources.resizeObserver = observer
   }
 
   /**
-   * Remove a cleanup callback
+   * Register an event listener for cleanup
    */
-  removeCleanupCallback(callback: () => void): void {
-    this.cleanupCallbacks.delete(callback)
+  registerEventListener(element: EventTarget, event: string, handler: EventListener): void {
+    this.resources.eventListeners.push({ element, event, handler })
+    element.addEventListener(event, handler)
   }
 
   /**
-   * Clean up a specific stage and its resources
+   * Unregister and cleanup a specific shape
    */
-  cleanupStage(stage: Konva.Stage): void {
+  unregisterShape(shape: Konva.Shape): void {
+    const index = this.resources.shapes.indexOf(shape)
+    if (index > -1) {
+      this.resources.shapes.splice(index, 1)
+      this.cleanupShape(shape)
+    }
+  }
+
+  /**
+   * Unregister and cleanup a specific group
+   */
+  unregisterGroup(group: Konva.Group): void {
+    const index = this.resources.groups.indexOf(group)
+    if (index > -1) {
+      this.resources.groups.splice(index, 1)
+      this.cleanupGroup(group)
+    }
+  }
+
+  /**
+   * Clean up a specific shape
+   */
+  private cleanupShape(shape: Konva.Shape): void {
     try {
-      this.cleanupStageDirect(stage)
-      this.trackedStages.delete(stage)
-    } catch (error) {
-      console.warn('Error cleaning up stage:', error)
-    }
-  }
-
-  /**
-   * Direct stage cleanup without tracking management
-   */
-  private cleanupStageDirect(stage: Konva.Stage): void {
-    // Check if stage is already destroyed
-    if (!stage || stage.isDestroyed?.()) {
-      return
-    }
-
-    try {
-      // Remove all layers and their children
-      const layers = stage.getLayers()
-      layers.forEach(layer => {
-        this.cleanupLayerDirect(layer)
-      })
-
-      // Destroy the stage
-      stage.destroy()
-    } catch (error) {
-      // Silently ignore errors during cleanup
-      console.debug('Stage cleanup error (ignored):', error)
-    }
-  }
-
-  /**
-   * Clean up a specific layer and its children
-   */
-  cleanupLayer(layer: Konva.Layer): void {
-    try {
-      this.cleanupLayerDirect(layer)
-      this.trackedLayers.delete(layer)
-    } catch (error) {
-      console.warn('Error cleaning up layer:', error)
-    }
-  }
-
-  /**
-   * Direct layer cleanup without tracking management
-   */
-  private cleanupLayerDirect(layer: Konva.Layer): void {
-    // Check if layer is already destroyed
-    if (!layer || layer.isDestroyed?.()) {
-      return
-    }
-
-    try {
-      // Destroy all children
-      const children = layer.getChildren()
-      children.forEach(child => {
-        this.cleanupNodeDirect(child)
-      })
-
-      // Destroy the layer
-      layer.destroy()
-    } catch (error) {
-      // Silently ignore errors during cleanup
-      console.debug('Layer cleanup error (ignored):', error)
-    }
-  }
-
-  /**
-   * Clean up a specific node
-   */
-  cleanupNode(node: Konva.Node): void {
-    try {
-      this.cleanupNodeDirect(node)
-      this.trackedNodes.delete(node)
-    } catch (error) {
-      console.warn('Error cleaning up node:', error)
-    }
-  }
-
-  /**
-   * Direct node cleanup without tracking management
-   */
-  private cleanupNodeDirect(node: Konva.Node): void {
-    // Check if node is already destroyed
-    if (!node || node.isDestroyed?.()) {
-      return
-    }
-
-    try {
-      // If it's a group, clean up children first
-      if (node instanceof Konva.Group) {
-        const children = node.getChildren()
-        children.forEach(child => {
-          this.cleanupNodeDirect(child)
-        })
-      }
-
       // Remove event listeners
-      node.off()
-
-      // Destroy the node
-      node.destroy()
+      shape.off()
+      
+      // Remove from parent
+      shape.remove()
+      
+      // Destroy the shape
+      shape.destroy()
     } catch (error) {
-      // Silently ignore errors during cleanup
-      console.debug('Node cleanup error (ignored):', error)
+      console.warn('Error cleaning up shape:', error)
     }
   }
 
   /**
-   * Clean up all tracked resources
+   * Clean up a specific group
    */
-  cleanupAll(): void {
-    // Prevent recursive cleanup calls
-    if (this.isCleaningUp) {
-      return
-    }
-    
-    this.isCleaningUp = true
-    
+  private cleanupGroup(group: Konva.Group): void {
     try {
-      // Execute cleanup callbacks first
-      const callbacks = Array.from(this.cleanupCallbacks)
-      this.cleanupCallbacks.clear() // Clear immediately to prevent recursion
+      // Clean up all children first
+      const children = group.getChildren()
+      children.forEach(child => {
+        if (child instanceof Konva.Shape) {
+          this.cleanupShape(child)
+        } else if (child instanceof Konva.Group) {
+          this.cleanupGroup(child)
+        }
+      })
       
-      callbacks.forEach(callback => {
-        try {
-          callback()
-        } catch (error) {
-          console.warn('Error executing cleanup callback:', error)
-        }
-      })
-
-      // Clean up all tracked nodes
-      const nodes = Array.from(this.trackedNodes)
-      this.trackedNodes.clear()
-      nodes.forEach(node => {
-        try {
-          this.cleanupNodeDirect(node)
-        } catch (error) {
-          console.warn('Error cleaning up node:', error)
-        }
-      })
-
-      // Clean up all tracked layers
-      const layers = Array.from(this.trackedLayers)
-      this.trackedLayers.clear()
-      layers.forEach(layer => {
-        try {
-          this.cleanupLayerDirect(layer)
-        } catch (error) {
-          console.warn('Error cleaning up layer:', error)
-        }
-      })
-
-      // Clean up all tracked stages
-      const stages = Array.from(this.trackedStages)
-      this.trackedStages.clear()
-      stages.forEach(stage => {
-        try {
-          this.cleanupStageDirect(stage)
-        } catch (error) {
-          console.warn('Error cleaning up stage:', error)
-        }
-      })
-    } finally {
-      this.isCleaningUp = false
+      // Remove event listeners
+      group.off()
+      
+      // Remove from parent
+      group.remove()
+      
+      // Destroy the group
+      group.destroy()
+    } catch (error) {
+      console.warn('Error cleaning up group:', error)
     }
+  }
+
+  /**
+   * Clean up all registered resources
+   */
+  cleanup(): void {
+    console.log('Starting canvas memory cleanup...')
+
+    // Stop and cleanup animations
+    this.resources.animations.forEach(animation => {
+      try {
+        animation.stop()
+      } catch (error) {
+        console.warn('Error cleaning up animation:', error)
+      }
+    })
+    this.resources.animations = []
+
+    // Cleanup shapes
+    this.resources.shapes.forEach(shape => this.cleanupShape(shape))
+    this.resources.shapes = []
+
+    // Cleanup groups
+    this.resources.groups.forEach(group => this.cleanupGroup(group))
+    this.resources.groups = []
+
+    // Cleanup layers
+    this.resources.layers.forEach(layer => {
+      try {
+        layer.destroyChildren()
+        layer.off()
+        layer.remove()
+        layer.destroy()
+      } catch (error) {
+        console.warn('Error cleaning up layer:', error)
+      }
+    })
+    this.resources.layers = []
+
+    // Cleanup stage
+    if (this.resources.stage) {
+      try {
+        this.resources.stage.destroyChildren()
+        this.resources.stage.off()
+        this.resources.stage.destroy()
+      } catch (error) {
+        console.warn('Error cleaning up stage:', error)
+      }
+      this.resources.stage = undefined
+    }
+
+    // Cleanup ResizeObserver
+    if (this.resources.resizeObserver) {
+      try {
+        this.resources.resizeObserver.disconnect()
+      } catch (error) {
+        console.warn('Error cleaning up ResizeObserver:', error)
+      }
+      this.resources.resizeObserver = undefined
+    }
+
+    // Cleanup event listeners
+    this.resources.eventListeners.forEach(({ element, event, handler }) => {
+      try {
+        element.removeEventListener(event, handler)
+      } catch (error) {
+        console.warn('Error removing event listener:', error)
+      }
+    })
+    this.resources.eventListeners = []
+
+    console.log('Canvas memory cleanup completed')
   }
 
   /**
@@ -234,105 +232,32 @@ export class CanvasMemoryManager {
   getMemoryStats(): {
     stages: number
     layers: number
-    nodes: number
-    callbacks: number
+    shapes: number
+    groups: number
+    animations: number
+    eventListeners: number
   } {
     return {
-      stages: this.trackedStages.size,
-      layers: this.trackedLayers.size,
-      nodes: this.trackedNodes.size,
-      callbacks: this.cleanupCallbacks.size
+      stages: this.resources.stage ? 1 : 0,
+      layers: this.resources.layers.length,
+      shapes: this.resources.shapes.length,
+      groups: this.resources.groups.length,
+      animations: this.resources.animations.length,
+      eventListeners: this.resources.eventListeners.length
     }
   }
 
   /**
-   * Force garbage collection if available (for development/testing)
+   * Force garbage collection if available (development only)
    */
   forceGarbageCollection(): void {
-    if (typeof window !== 'undefined' && 'gc' in window) {
+    if (typeof window !== 'undefined' && 'gc' in window && typeof (window as any).gc === 'function') {
       try {
-        ;(window as any).gc()
+        (window as any).gc()
+        console.log('Forced garbage collection')
       } catch (error) {
-        console.warn('Garbage collection not available:', error)
+        console.warn('Could not force garbage collection:', error)
       }
     }
-  }
-
-  /**
-   * Optimize canvas performance by limiting the number of nodes
-   */
-  optimizePerformance(layer: Konva.Layer, maxNodes: number = 1000): void {
-    const children = layer.getChildren()
-    
-    if (children.length > maxNodes) {
-      // Remove oldest nodes (assuming they were added in chronological order)
-      const nodesToRemove = children.slice(0, children.length - maxNodes)
-      nodesToRemove.forEach(node => {
-        this.cleanupNode(node)
-      })
-      
-      console.log(`Removed ${nodesToRemove.length} nodes to optimize performance`)
-    }
-  }
-
-  /**
-   * Monitor memory usage and warn if it gets too high
-   */
-  monitorMemoryUsage(): void {
-    if (typeof performance !== 'undefined' && performance.memory) {
-      const memory = performance.memory
-      const usedMB = memory.usedJSHeapSize / 1024 / 1024
-      const limitMB = memory.jsHeapSizeLimit / 1024 / 1024
-      
-      const usagePercent = (usedMB / limitMB) * 100
-      
-      if (usagePercent > 80) {
-        console.warn(`High memory usage detected: ${usedMB.toFixed(2)}MB (${usagePercent.toFixed(1)}%)`)
-        
-        // Suggest cleanup
-        if (usagePercent > 90) {
-          console.warn('Consider cleaning up canvas resources to prevent memory issues')
-        }
-      }
-    }
-  }
-
-  /**
-   * Reset the memory manager to initial state
-   */
-  reset(): void {
-    this.isCleaningUp = false
-    this.trackedStages.clear()
-    this.trackedLayers.clear()
-    this.trackedNodes.clear()
-    this.cleanupCallbacks.clear()
-  }
-}
-
-/**
- * Hook for React components to use canvas memory management
- */
-export function useCanvasMemoryManager() {
-  const memoryManager = CanvasMemoryManager.getInstance()
-
-  const trackStage = (stage: Konva.Stage) => memoryManager.trackStage(stage)
-  const trackLayer = (layer: Konva.Layer) => memoryManager.trackLayer(layer)
-  const trackNode = (node: Konva.Node) => memoryManager.trackNode(node)
-  const addCleanupCallback = (callback: () => void) => memoryManager.addCleanupCallback(callback)
-  const removeCleanupCallback = (callback: () => void) => memoryManager.removeCleanupCallback(callback)
-  const cleanupAll = () => memoryManager.cleanupAll()
-  const getMemoryStats = () => memoryManager.getMemoryStats()
-  const reset = () => memoryManager.reset()
-
-  return {
-    trackStage,
-    trackLayer,
-    trackNode,
-    addCleanupCallback,
-    removeCleanupCallback,
-    cleanupAll,
-    getMemoryStats,
-    reset,
-    memoryManager
   }
 }
