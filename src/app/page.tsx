@@ -1,4 +1,7 @@
+/* eslint-disable react/no-unescaped-entities */
 'use client'
+
+import { useState } from 'react'
 
 import { FeedbackSystem } from '@/components/landing/feedback-system'
 import { HeroImage } from '@/components/landing/hero-image'
@@ -15,6 +18,62 @@ import {
 import Link from 'next/link'
 
 export default function Home() {
+  // State for loading and error handling
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
+  // Function to get latest release download URLs
+  const getLatestReleaseDownloadUrl = async (platform: 'windows' | 'macos') => {
+    try {
+      const response = await fetch('https://api.github.com/repos/Rajak13/StudyCollab/releases/latest');
+      const release = await response.json();
+      
+      if (platform === 'windows') {
+        const exeAsset = release.assets.find((asset: { name: string; browser_download_url: string }) => asset.name.includes('.exe'));
+        return exeAsset?.browser_download_url || '#';
+      } else {
+        const dmgAsset = release.assets.find((asset: { name: string; browser_download_url: string }) => asset.name.includes('.dmg'));
+        return dmgAsset?.browser_download_url || '#';
+      }
+    } catch (error) {
+      console.error('Failed to fetch release info:', error);
+      return 'https://github.com/Rajak13/StudyCollab/releases';
+    }
+  };
+
+  // Function to handle platform-specific downloads
+  const handleDownload = async (platform: 'windows' | 'macos') => {
+    try {
+      setIsDownloading(true);
+      setDownloadError(null);
+      
+      const downloadUrl = await getLatestReleaseDownloadUrl(platform);
+      if (downloadUrl && downloadUrl !== '#') {
+        // Show success message briefly before opening download
+        setDownloadError('Download starting... 🚀');
+        setTimeout(() => {
+          window.open(downloadUrl, '_blank');
+          setDownloadError(null);
+        }, 1000);
+      } else {
+        // Fallback to releases page if download URL not found
+        setDownloadError('Download not found. Redirecting to releases page...');
+        setTimeout(() => {
+          window.open('https://github.com/Rajak13/StudyCollab/releases', '_blank');
+          setDownloadError(null);
+        }, 2000);
+      }
+    } catch (error) {
+      setDownloadError('Failed to get download link. Redirecting to releases page...');
+      setTimeout(() => {
+        window.open('https://github.com/Rajak13/StudyCollab/releases', '_blank');
+        setDownloadError(null);
+      }, 2000);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -508,24 +567,25 @@ export default function Home() {
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Button
                 size="lg"
-                className="group bg-white px-8 py-6 text-lg text-slate-900 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-gray-100 hover:shadow-xl"
-                onClick={() => {
+                className="group bg-white px-8 py-6 text-lg text-slate-900 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-gray-100 hover:shadow-xl disabled:opacity-50"
+                onClick={async () => {
                   // Detect platform and download appropriate version
                   const platform = navigator.platform.toLowerCase();
                   if (platform.includes('win')) {
-                    window.open('https://github.com/Rajak13/StudyCollab/releases/latest/download/StudyCollab-Setup-0.1.0.exe', '_blank');
+                    await handleDownload('windows');
                   } else if (platform.includes('mac')) {
-                    window.open('https://github.com/Rajak13/StudyCollab/releases/latest/download/StudyCollab-0.1.0.dmg', '_blank');
+                    await handleDownload('macos');
                   } else {
                     // Fallback to releases page for other platforms
                     window.open('https://github.com/Rajak13/StudyCollab/releases', '_blank');
                   }
                 }}
+                disabled={isDownloading}
               >
                 <span className="mr-2 transition-transform group-hover:scale-110">
-                  ⬇️
+                  {isDownloading ? '⏳' : '⬇️'}
                 </span>
-                Download Desktop App
+                {isDownloading ? 'Getting Download...' : 'Download Desktop App'}
               </Button>
               
               <Button
@@ -545,28 +605,46 @@ export default function Home() {
             <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 max-w-2xl mx-auto">
               <Button
                 size="lg"
-                className="group bg-blue-600 hover:bg-blue-700 px-6 py-4 text-white shadow-lg transition-all duration-300 hover:scale-105"
-                onClick={() => window.open('https://github.com/Rajak13/StudyCollab/releases/latest/download/StudyCollab-Setup-0.1.0.exe', '_blank')}
+                className="group bg-blue-600 hover:bg-blue-700 px-6 py-4 text-white shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50"
+                onClick={() => handleDownload('windows')}
+                disabled={isDownloading}
               >
                 <span className="mr-2 transition-transform group-hover:scale-110">
-                  🪟
+                  {isDownloading ? '⏳' : '🪟'}
                 </span>
-                Download for Windows
+                {isDownloading ? 'Getting Download...' : 'Download for Windows'}
                 <span className="ml-2 text-sm opacity-80">(.exe)</span>
               </Button>
               
               <Button
                 size="lg"
-                className="group bg-gray-800 hover:bg-gray-900 px-6 py-4 text-white shadow-lg transition-all duration-300 hover:scale-105"
-                onClick={() => window.open('https://github.com/Rajak13/StudyCollab/releases/latest/download/StudyCollab-0.1.0.dmg', '_blank')}
+                className="group bg-gray-800 hover:bg-gray-900 px-6 py-4 text-white shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50"
+                onClick={() => handleDownload('macos')}
+                disabled={isDownloading}
               >
                 <span className="mr-2 transition-transform group-hover:scale-110">
-                  🍎
+                  {isDownloading ? '⏳' : '🍎'}
                 </span>
-                Download for macOS
+                {isDownloading ? 'Getting Download...' : 'Download for macOS'}
                 <span className="ml-2 text-sm opacity-80">(.dmg)</span>
               </Button>
             </div>
+
+            {/* Status message display */}
+            {downloadError && (
+              <div className="mt-4 text-center">
+                <div className={`inline-flex items-center rounded-lg px-4 py-2 text-sm border ${
+                  downloadError.includes('starting') || downloadError.includes('🚀')
+                    ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                    : 'bg-red-500/10 text-red-400 border-red-500/20'
+                }`}>
+                  <span className="mr-2">
+                    {downloadError.includes('starting') || downloadError.includes('🚀') ? '✅' : '⚠️'}
+                  </span>
+                  {downloadError}
+                </div>
+              </div>
+            )}
 
             <div className="mt-8 flex items-center justify-center gap-8 text-sm text-gray-400">
               <div className="flex items-center gap-2">
