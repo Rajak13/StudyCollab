@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 import type { Session, User } from '@supabase/supabase-js'
 import { create } from 'zustand'
 
@@ -46,6 +46,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({ loading: true })
 
     try {
+      const supabase = createClient()
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -73,6 +74,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({ loading: true })
 
     try {
+      const supabase = createClient()
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -111,6 +113,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({ loading: true })
 
     try {
+      const supabase = createClient()
       await supabase.auth.signOut()
       set({
         user: null,
@@ -137,6 +140,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({ loading: true })
 
     try {
+      const supabase = createClient()
       // Update auth user metadata (for name and avatar)
       const authUpdates: { name?: string; avatar_url?: string } = {}
       if (updates.name) authUpdates.name = updates.name
@@ -209,6 +213,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     set({ loading: true })
 
     try {
+      const supabase = createClient()
       // Create unique filename
       const fileExt = file.name.split('.').pop()
       const fileName = `${user.id}-${Date.now()}.${fileExt}`
@@ -253,6 +258,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   initialize: async () => {
     try {
+      const supabase = createClient()
       // Get initial session
       const {
         data: { session },

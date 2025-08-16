@@ -1,4 +1,37 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -38,6 +71,8 @@ class WindowManager {
     async createMainWindow() {
         const windowState = this.getWindowState();
         const config = this.getDesktopConfig();
+        console.log('🔧 Creating main window with state:', windowState);
+        console.log('🔧 Desktop config:', config);
         this.mainWindow = new electron_1.BrowserWindow({
             ...windowState,
             minWidth: 800,
@@ -58,6 +93,7 @@ class WindowManager {
                 webSecurity: !(0, environment_1.isDev)(),
             },
         });
+        console.log('🔧 Main window created:', this.mainWindow.id);
         // Hide menu bar if configured
         if (config.hideMenuBar) {
             this.mainWindow.setMenuBarVisibility(false);
@@ -66,25 +102,47 @@ class WindowManager {
         // Handle window events
         this.setupWindowEvents();
         // Load the app
+        const appUrl = (0, environment_1.getAppUrl)();
+        console.log('🔧 Loading app URL:', appUrl);
+        console.log('🔧 Is dev mode:', (0, environment_1.isDev)());
         if ((0, environment_1.isDev)()) {
-            await this.mainWindow.loadURL((0, environment_1.getAppUrl)());
+            console.log('🔧 Loading in dev mode, opening DevTools');
+            await this.mainWindow.loadURL(appUrl);
             this.mainWindow.webContents.openDevTools();
         }
         else {
-            await this.mainWindow.loadURL((0, environment_1.getAppUrl)());
+            console.log('🔧 Loading in production mode');
+            await this.mainWindow.loadURL(appUrl);
         }
+        console.log('🔧 App loaded, setting up ready-to-show event');
         // Show window when ready
         this.mainWindow.once('ready-to-show', () => {
+            console.log('🔧 Window ready to show!');
             if (this.mainWindow) {
+                console.log('🔧 Showing main window');
                 this.mainWindow.show();
+                // Force focus and bring to front
+                this.mainWindow.focus();
+                this.mainWindow.moveTop();
                 if (windowState.isMaximized) {
+                    console.log('🔧 Maximizing window');
                     this.mainWindow.maximize();
                 }
                 if (windowState.isFullScreen) {
+                    console.log('🔧 Setting fullscreen');
                     this.mainWindow.setFullScreen(true);
                 }
+                console.log('🔧 Window should now be visible');
             }
         });
+        // Also show window after a short delay as a fallback
+        setTimeout(() => {
+            if (this.mainWindow && !this.mainWindow.isVisible()) {
+                console.log('🔧 Fallback: forcing window to show');
+                this.mainWindow.show();
+                this.mainWindow.focus();
+            }
+        }, 1000);
         return this.mainWindow;
     }
     setupWindowEvents() {
@@ -119,12 +177,12 @@ class WindowManager {
             const appUrl = (0, environment_1.getAppUrl)();
             if (!url.startsWith(appUrl)) {
                 event.preventDefault();
-                require('electron').shell.openExternal(url);
+                Promise.resolve().then(() => __importStar(require('electron'))).then(({ shell }) => shell.openExternal(url));
             }
         });
         // Handle new window requests
         this.mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-            require('electron').shell.openExternal(url);
+            Promise.resolve().then(() => __importStar(require('electron'))).then(({ shell }) => shell.openExternal(url));
             return { action: 'deny' };
         });
     }
@@ -273,12 +331,12 @@ class WindowManager {
             const appUrl = (0, environment_1.getAppUrl)();
             if (!url.startsWith(appUrl)) {
                 event.preventDefault();
-                require('electron').shell.openExternal(url);
+                Promise.resolve().then(() => __importStar(require('electron'))).then(({ shell }) => shell.openExternal(url));
             }
         });
         // Handle new window requests
         window.webContents.setWindowOpenHandler(({ url }) => {
-            require('electron').shell.openExternal(url);
+            Promise.resolve().then(() => __importStar(require('electron'))).then(({ shell }) => shell.openExternal(url));
             return { action: 'deny' };
         });
     }

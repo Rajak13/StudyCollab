@@ -48,6 +48,15 @@ const system_integration_manager_1 = require("./managers/system-integration-mana
 const system_tray_manager_1 = require("./managers/system-tray-manager");
 const window_manager_1 = require("./managers/window-manager");
 const environment_1 = require("./utils/environment");
+// Load environment variables from .env.local
+try {
+    const dotenv = require('dotenv');
+    dotenv.config({ path: '.env.local' });
+    console.log('🔧 Environment variables loaded from .env.local');
+}
+catch (error) {
+    console.error('❌ Failed to load .env.local:', error);
+}
 class StudyCollabApp {
     constructor() {
         this.serverProcess = null;
@@ -103,19 +112,36 @@ class StudyCollabApp {
         });
     }
     async onReady() {
+        console.log('🚀 App is ready, starting initialization...');
+        console.log('🔧 Is dev mode:', (0, environment_1.isDev)());
+        // Debug environment variables
+        console.log('🔧 Environment variables:');
+        console.log('  - NODE_ENV:', process.env.NODE_ENV);
+        console.log('  - NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+        console.log('  - NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'NOT SET');
+        console.log('  - SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'NOT SET');
         // In production, start the bundled Next.js server first
         if (!(0, environment_1.isDev)()) {
+            console.log('🔧 Starting embedded server for production...');
             await this.startEmbeddedServer();
             await this.waitForServerReady('http://localhost:3000', 30000);
         }
+        else {
+            console.log('🔧 Running in dev mode, using existing server');
+        }
         // Create main window
+        console.log('🔧 Creating main window...');
         await this.windowManager.createMainWindow();
+        console.log('🔧 Main window creation completed');
         // Setup system tray
+        console.log('🔧 Setting up system tray...');
         this.systemTrayManager.setup();
         // Check for updates
         if (!(0, environment_1.isDev)()) {
+            console.log('🔧 Checking for updates...');
             this.autoUpdaterManager.checkForUpdates();
         }
+        console.log('🔧 App initialization completed successfully');
         // Offline data is initialized in initializeManagers
     }
     async initializeManagers() {

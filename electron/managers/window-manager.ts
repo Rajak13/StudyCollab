@@ -71,6 +71,9 @@ export class WindowManager {
     const windowState = this.getWindowState();
     const config = this.getDesktopConfig();
 
+    console.log('🔧 Creating main window with state:', windowState);
+    console.log('🔧 Desktop config:', config);
+
     this.mainWindow = new BrowserWindow({
       ...windowState,
       minWidth: 800,
@@ -92,6 +95,8 @@ export class WindowManager {
       },
     });
 
+    console.log('🔧 Main window created:', this.mainWindow.id);
+
     // Hide menu bar if configured
     if (config.hideMenuBar) {
       this.mainWindow.setMenuBarVisibility(false);
@@ -102,27 +107,54 @@ export class WindowManager {
     this.setupWindowEvents();
 
     // Load the app
+    const appUrl = getAppUrl();
+    console.log('🔧 Loading app URL:', appUrl);
+    console.log('🔧 Is dev mode:', isDev());
+    
     if (isDev()) {
-      await this.mainWindow.loadURL(getAppUrl());
+      console.log('🔧 Loading in dev mode, opening DevTools');
+      await this.mainWindow.loadURL(appUrl);
       this.mainWindow.webContents.openDevTools();
     } else {
-      await this.mainWindow.loadURL(getAppUrl());
+      console.log('🔧 Loading in production mode');
+      await this.mainWindow.loadURL(appUrl);
     }
+
+    console.log('🔧 App loaded, setting up ready-to-show event');
 
     // Show window when ready
     this.mainWindow.once('ready-to-show', () => {
+      console.log('🔧 Window ready to show!');
       if (this.mainWindow) {
+        console.log('🔧 Showing main window');
         this.mainWindow.show();
+        
+        // Force focus and bring to front
+        this.mainWindow.focus();
+        this.mainWindow.moveTop();
 
         if (windowState.isMaximized) {
+          console.log('🔧 Maximizing window');
           this.mainWindow.maximize();
         }
 
         if (windowState.isFullScreen) {
+          console.log('🔧 Setting fullscreen');
           this.mainWindow.setFullScreen(true);
         }
+        
+        console.log('🔧 Window should now be visible');
       }
     });
+    
+    // Also show window after a short delay as a fallback
+    setTimeout(() => {
+      if (this.mainWindow && !this.mainWindow.isVisible()) {
+        console.log('🔧 Fallback: forcing window to show');
+        this.mainWindow.show();
+        this.mainWindow.focus();
+      }
+    }, 1000);
 
     return this.mainWindow;
   }
@@ -159,15 +191,23 @@ export class WindowManager {
     this.mainWindow.webContents.on('will-navigate', (event, url) => {
       // Allow navigation within the app
       const appUrl = getAppUrl();
-      if (!url.startsWith(appUrl)) {
-        event.preventDefault();
-        require('electron').shell.openExternal(url);
+      const baseUrl = 'http://localhost:3000';
+      
+      // Allow navigation to any localhost:3000 URL (internal app navigation)
+      if (url.startsWith(baseUrl)) {
+        console.log('🔧 Allowing internal navigation to:', url);
+        return; // Allow the navigation
       }
+      
+      // Block external navigation
+      console.log('🔧 Blocking external navigation to:', url);
+      event.preventDefault();
+      import('electron').then(({ shell }) => shell.openExternal(url));
     });
 
     // Handle new window requests
     this.mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-      require('electron').shell.openExternal(url);
+      import('electron').then(({ shell }) => shell.openExternal(url));
       return { action: 'deny' };
     });
   }
@@ -339,13 +379,13 @@ export class WindowManager {
       const appUrl = getAppUrl();
       if (!url.startsWith(appUrl)) {
         event.preventDefault();
-        require('electron').shell.openExternal(url);
+        import('electron').then(({ shell }) => shell.openExternal(url));
       }
     });
 
     // Handle new window requests
     window.webContents.setWindowOpenHandler(({ url }) => {
-      require('electron').shell.openExternal(url);
+      import('electron').then(({ shell }) => shell.openExternal(url));
       return { action: 'deny' };
     });
   }

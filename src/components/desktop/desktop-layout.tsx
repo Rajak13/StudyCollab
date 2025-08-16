@@ -76,7 +76,7 @@ export function DesktopAppLayout({
   }
 
   return (
-    <DesktopLayout showSidebar={true} showNavigation={true}>
+    <DesktopLayout showSidebar={false} showNavigation={true}>
       <div className="p-6">
         {children}
       </div>
