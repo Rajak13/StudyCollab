@@ -1,6 +1,6 @@
 import { getCurrentUser } from '@/lib/auth'
-import { CreateFileData } from '@/types/database'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { CreateFileData } from '@/types/database'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {

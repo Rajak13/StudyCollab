@@ -1,11 +1,6 @@
-import { createClient } from '@supabase/supabase-js'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
 import bcrypt from 'bcryptjs'
 import { NextRequest, NextResponse } from 'next/server'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 export async function GET(
   request: NextRequest,
@@ -13,6 +8,7 @@ export async function GET(
 ) {
   const { token } = await params
   try {
+    const supabase = createSupabaseServerClient()
     const { data: share, error } = await supabase
       .from('file_shares')
       .select(
@@ -82,6 +78,7 @@ export async function POST(
 ) {
   const { token } = await params
   try {
+    const supabase = createSupabaseServerClient()
     const { password } = await request.json()
 
     const { data: share, error } = await supabase
@@ -140,6 +137,7 @@ export async function DELETE(
 ) {
   const { token } = await params
   try {
+    const supabase = createSupabaseServerClient()
     const { data: share, error: fetchError } = await supabase
       .from('file_shares')
       .select('created_by')

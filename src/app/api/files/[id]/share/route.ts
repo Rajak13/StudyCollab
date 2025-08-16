@@ -1,14 +1,9 @@
 import { getCurrentUser } from '@/lib/auth'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { CreateFileShareData } from '@/types/database'
-import { createClient } from '@supabase/supabase-js'
 import bcrypt from 'bcryptjs'
 import { randomBytes } from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 function generateShareToken(): string {
   return randomBytes(32).toString('hex')
@@ -24,6 +19,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const supabase = createSupabaseServerClient()
     const { id } = await params
 
     // Verify user owns the file
@@ -75,6 +71,7 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const supabase = createSupabaseServerClient()
     const { id } = await params
     const body: CreateFileShareData = await request.json()
 

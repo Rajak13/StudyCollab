@@ -94,5 +94,5 @@ export const createServiceSupabaseClient = () => {
   )
 }
 
-// Remove legacy export to avoid build-time execution
-// export const supabase = hasValidSupabaseConfig() ? createClient() : null
+// Backward compatibility export - returns a function that creates the client
+export const supabase = () => createClient()

@@ -1,7 +1,7 @@
 import { getCurrentUser } from '@/lib/auth'
 import { deleteFile } from '@/lib/file-upload'
-import { UpdateFileData } from '@/types/database'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { UpdateFileData } from '@/types/database'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(
