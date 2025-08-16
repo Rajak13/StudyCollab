@@ -29,8 +29,7 @@ const buildCommands = {
 // Cross-platform builds (when building from any platform)
 const crossPlatformCommands = {
   windows: 'npm run electron:build -- --win --x64 --ia32',
-  mac: 'npm run electron:build -- --mac --x64 --arm64', 
-  linux: 'npm run electron:build -- --linux AppImage deb rpm'
+  mac: 'npm run electron:build -- --mac --x64 --arm64'
 };
 
 function runCommand(command, description) {
@@ -84,16 +83,14 @@ if (buildTarget === 'all') {
   
   if (!runCommand(crossPlatformCommands.windows, 'Windows build')) success = false;
   if (!runCommand(crossPlatformCommands.mac, 'macOS build')) success = false;
-  if (!runCommand(crossPlatformCommands.linux, 'Linux build')) success = false;
   
 } else if (buildTarget === 'windows') {
   success = runCommand(crossPlatformCommands.windows, 'Windows build');
 } else if (buildTarget === 'mac') {
   success = runCommand(crossPlatformCommands.mac, 'macOS build');
-} else if (buildTarget === 'linux') {
-  success = runCommand(crossPlatformCommands.linux, 'Linux build');
 } else {
   console.error(`❌ Unknown build target: ${buildTarget}`);
+  console.log('Available targets: windows, mac, all');
   process.exit(1);
 }
 

@@ -33,11 +33,11 @@
     "electron:dist": "npm run electron:build && electron-builder",
     "electron:dist:win": "npm run electron:build && electron-builder --win",
     "electron:dist:mac": "npm run electron:build && electron-builder --mac",
-    "electron:dist:linux": "npm run electron:build && electron-builder --linux",
+
     "electron:publish": "npm run electron:build && electron-builder --publish=always",
     "electron:publish:win": "npm run electron:build && electron-builder --win --publish=always",
     "electron:publish:mac": "npm run electron:build && electron-builder --mac --publish=always",
-    "electron:publish:linux": "npm run electron:build && electron-builder --linux --publish=always",
+
     "build-electron": "node scripts/build-electron.js",
     "build-electron:skip-native": "node scripts/build-electron.js --skip-native",
     "validate:build": "node scripts/validate-build-config.js",
@@ -263,38 +263,7 @@
         }
       ]
     },
-    "linux": {
-      "icon": "assets/icon.png",
-      "category": "Office",
-      "synopsis": "StudyCollab - Your Academic Companion",
-      "description": "A comprehensive platform for students to manage tasks, take notes, share resources, and collaborate in study groups.",
-      "target": [
-        {
-          "target": "AppImage",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
-          "target": "deb",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
-          "target": "rpm",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
-          "target": "snap",
-          "arch": [
-            "x64"
-          ]
-        }
-      ]
-    },
+
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
