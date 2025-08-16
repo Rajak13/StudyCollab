@@ -17,7 +17,7 @@ jobs:
     
     strategy:
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        os: [windows-latest, macos-latest]
         
     steps:
       - name: Checkout code
@@ -60,12 +60,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: false
           
-      - name: Build Electron app (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: npm run electron:dist:linux
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -74,9 +68,6 @@ jobs:
             release/*.exe
             release/*.dmg
             release/*.zip
-            release/*.AppImage
-            release/*.deb
-            release/*.rpm
             release/latest*.yml
           retention-days: 5
           
@@ -116,12 +107,10 @@ jobs:
             ### Download Instructions
             - **Windows**: Download the `.exe` installer
             - **macOS**: Download the `.dmg` file
-            - **Linux**: Download the `.AppImage` for universal compatibility, or `.deb`/`.rpm` for your distribution
             
             ### System Requirements
             - **Windows**: Windows 10 or later
             - **macOS**: macOS 10.14 (Mojave) or later
-            - **Linux**: Ubuntu 18.04 or equivalent
             
             ### Installation
             1. Download the appropriate file for your operating system
@@ -151,17 +140,6 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./artifacts/release-macos-latest/StudyCollab-*.dmg
           asset_name: StudyCollab-macOS.dmg
-          asset_content_type: application/octet-stream
-        continue-on-error: true
-        
-      - name: Upload Linux AppImage
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/release-ubuntu-latest/StudyCollab-*.AppImage
-          asset_name: StudyCollab-Linux.AppImage
           asset_content_type: application/octet-stream
         continue-on-error: true
         
