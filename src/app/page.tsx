@@ -510,8 +510,16 @@ export default function Home() {
                 size="lg"
                 className="group bg-white px-8 py-6 text-lg text-slate-900 shadow-lg transition-all duration-300 hover:scale-105 hover:bg-gray-100 hover:shadow-xl"
                 onClick={() => {
-                  // Check if releases exist first
-                  window.open('https://github.com/Rajak13/StudyCollab/releases', '_blank');
+                  // Detect platform and download appropriate version
+                  const platform = navigator.platform.toLowerCase();
+                  if (platform.includes('win')) {
+                    window.open('https://github.com/Rajak13/StudyCollab/releases/latest/download/StudyCollab-Setup-0.1.0.exe', '_blank');
+                  } else if (platform.includes('mac')) {
+                    window.open('https://github.com/Rajak13/StudyCollab/releases/latest/download/StudyCollab-0.1.0.dmg', '_blank');
+                  } else {
+                    // Fallback to releases page for other platforms
+                    window.open('https://github.com/Rajak13/StudyCollab/releases', '_blank');
+                  }
                 }}
               >
                 <span className="mr-2 transition-transform group-hover:scale-110">
@@ -524,12 +532,39 @@ export default function Home() {
                 variant="outline"
                 size="lg"
                 className="group border-white/20 px-8 py-6 text-lg text-white transition-all duration-300 hover:scale-105 hover:border-white/40 hover:bg-white/10"
-                onClick={() => window.open('https://github.com/studycollab/studycollab-desktop/releases', '_blank')}
+                onClick={() => window.open('https://github.com/Rajak13/StudyCollab/releases', '_blank')}
               >
                 <span className="mr-2 transition-transform group-hover:scale-110">
                   📋
                 </span>
                 View All Releases
+              </Button>
+            </div>
+
+            {/* Platform-specific download buttons */}
+            <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 max-w-2xl mx-auto">
+              <Button
+                size="lg"
+                className="group bg-blue-600 hover:bg-blue-700 px-6 py-4 text-white shadow-lg transition-all duration-300 hover:scale-105"
+                onClick={() => window.open('https://github.com/Rajak13/StudyCollab/releases/latest/download/StudyCollab-Setup-0.1.0.exe', '_blank')}
+              >
+                <span className="mr-2 transition-transform group-hover:scale-110">
+                  🪟
+                </span>
+                Download for Windows
+                <span className="ml-2 text-sm opacity-80">(.exe)</span>
+              </Button>
+              
+              <Button
+                size="lg"
+                className="group bg-gray-800 hover:bg-gray-900 px-6 py-4 text-white shadow-lg transition-all duration-300 hover:scale-105"
+                onClick={() => window.open('https://github.com/Rajak13/StudyCollab/releases/latest/download/StudyCollab-0.1.0.dmg', '_blank')}
+              >
+                <span className="mr-2 transition-transform group-hover:scale-110">
+                  🍎
+                </span>
+                Download for macOS
+                <span className="ml-2 text-sm opacity-80">(.dmg)</span>
               </Button>
             </div>
 
