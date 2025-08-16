@@ -12,6 +12,7 @@ console.log('🏗️  Building StudyCollab with environment fallbacks...\n');
 
 // Load .env.local if it exists
 const fs = require('fs');
+const path = require('path');
 const envLocalPath = '.env.local';
 
 if (fs.existsSync(envLocalPath)) {
@@ -20,14 +21,18 @@ if (fs.existsSync(envLocalPath)) {
   
   envContent.split('\n').forEach(line => {
     const trimmedLine = line.trim();
-    if (trimmedLine && !trimmedLine.startsWith('#')) {
-      const [key, ...valueParts] = trimmedLine.split('=');
-      if (key && valueParts.length > 0) {
-        const value = valueParts.join('=');
+    if (trimmedLine && !trimmedLine.startsWith('#') && trimmedLine.includes('=')) {
+      const equalIndex = trimmedLine.indexOf('=');
+      const key = trimmedLine.substring(0, equalIndex).trim();
+      const value = trimmedLine.substring(equalIndex + 1).trim();
+      if (key && value) {
         process.env[key] = value;
+        console.log(`✅ Loaded ${key}`);
       }
     }
   });
+} else {
+  console.log('⚠️  No .env.local file found');
 }
 
 // Set fallback environment variables if not present

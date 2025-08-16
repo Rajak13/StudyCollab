@@ -9,6 +9,7 @@ const currentVersion = process.version;
 const requiredVersion = '20.0.0';
 
 console.log(`Current Node.js version: ${currentVersion}`);
+console.log(`Required Node.js version: ${requiredVersion}+`);
 
 if (semver.lt(currentVersion, requiredVersion)) {
   console.log(`\n⚠️  Node.js ${requiredVersion} or higher is recommended for this project`);

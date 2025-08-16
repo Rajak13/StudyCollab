@@ -5,13 +5,14 @@
   "author": {
     "name": "StudyCollab Team",
     "email": "support@studycollab.app",
-    "url": "https://studycollab.app"
+    "url": "https://study-collab-pi.vercel.app/"
   },
   "private": true,
   "scripts": {
     "dev": "npx ts-node --project tsconfig.server.json server.ts",
     "build": "next build",
     "build:with-fallbacks": "node scripts/build-with-fallbacks.js",
+    "build:desktop": "node scripts/build-desktop-complete.js",
     "start": "npx ts-node --project tsconfig.server.json server.ts",
     "start:next": "next start",
     "dev:next": "next dev",
@@ -39,6 +40,8 @@
     "electron:publish:linux": "npm run electron:build && electron-builder --linux --publish=always",
     "build-electron": "node scripts/build-electron.js",
     "build-electron:skip-native": "node scripts/build-electron.js --skip-native",
+    "validate:build": "node scripts/validate-build-config.js",
+    "build:all-platforms": "node scripts/build-all-platforms.js all",
     "create-release": "node scripts/create-first-release.js",
     "check-node": "node scripts/check-node-version.js",
     "prebuild": "node scripts/check-node-version.js",
@@ -190,6 +193,7 @@
       "gatekeeperAssess": false,
       "entitlements": "assets/entitlements.mac.plist",
       "entitlementsInherit": "assets/entitlements.mac.plist",
+      "notarize": false,
       "target": [
         {
           "target": "dmg",
@@ -262,6 +266,8 @@
     "linux": {
       "icon": "assets/icon.png",
       "category": "Office",
+      "synopsis": "StudyCollab - Your Academic Companion",
+      "description": "A comprehensive platform for students to manage tasks, take notes, share resources, and collaborate in study groups.",
       "target": [
         {
           "target": "AppImage",
@@ -280,6 +286,12 @@
           "arch": [
             "x64"
           ]
+        },
+        {
+          "target": "snap",
+          "arch": [
+            "x64"
+          ]
         }
       ]
     },
@@ -290,24 +302,21 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "StudyCollab",
-      "runAfterFinish": true,
+      "runAfterFinish": false,
       "deleteAppDataOnUninstall": false,
       "installerIcon": "assets/icon.ico",
       "uninstallerIcon": "assets/icon.ico",
       "artifactName": "${productName}-Setup-${version}.${ext}",
       "include": "build/installer.nsh",
-      "guid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+      "guid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "installerHeaderIcon": "assets/icon.ico"
     },
     "publish": [
       {
         "provider": "github",
-        "owner": "studycollab",
-        "repo": "studycollab-desktop",
+        "owner": "Rajak13",
+        "repo": "StudyCollab",
         "releaseType": "release"
-      },
-      {
-        "provider": "generic",
-        "url": "https://studycollab.app/api/releases/"
       }
     ]
   }
