@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "npx ts-node --project tsconfig.server.json server.ts",
     "build": "next build",
+    "build:with-fallbacks": "node scripts/build-with-fallbacks.js",
     "start": "npx ts-node --project tsconfig.server.json server.ts",
     "start:next": "next start",
     "dev:next": "next dev",
@@ -39,6 +40,8 @@
     "build-electron": "node scripts/build-electron.js",
     "build-electron:skip-native": "node scripts/build-electron.js --skip-native",
     "create-release": "node scripts/create-first-release.js",
+    "check-node": "node scripts/check-node-version.js",
+    "prebuild": "node scripts/check-node-version.js",
     "build-electron:pack": "node scripts/build-electron.js --pack-only"
   },
   "lint-staged": {

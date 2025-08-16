@@ -1,15 +1,30 @@
 import { createBrowserClient, createServerClient } from '@supabase/ssr'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
+
+// Check if we have valid Supabase configuration
+const hasValidSupabaseConfig = () => {
+  return supabaseUrl !== 'https://placeholder.supabase.co' && 
+         supabaseAnonKey !== 'placeholder-key' &&
+         supabaseUrl && 
+         supabaseAnonKey
+}
 
 // Client-side Supabase client
 export const createClient = () => {
+  if (!hasValidSupabaseConfig()) {
+    throw new Error('Supabase configuration is missing. Please check your environment variables.')
+  }
   return createBrowserClient(supabaseUrl, supabaseAnonKey)
 }
 
 // Server-side Supabase client for Server Components
 export const createServerSupabaseClient = async () => {
+  if (!hasValidSupabaseConfig()) {
+    throw new Error('Supabase configuration is missing. Please check your environment variables.')
+  }
+  
   const { cookies } = await import('next/headers')
   const cookieStore = await cookies()
 
@@ -24,6 +39,10 @@ export const createServerSupabaseClient = async () => {
 
 // Server-side Supabase client for API routes
 export const createApiSupabaseClient = (request: Request) => {
+  if (!hasValidSupabaseConfig()) {
+    throw new Error('Supabase configuration is missing. Please check your environment variables.')
+  }
+  
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       get(name: string) {
@@ -50,9 +69,15 @@ export const createApiSupabaseClient = (request: Request) => {
 
 // Server-side Supabase client with service role for admin operations
 export const createServiceSupabaseClient = () => {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  
+  if (!hasValidSupabaseConfig() || !serviceRoleKey) {
+    throw new Error('Supabase configuration or service role key is missing. Please check your environment variables.')
+  }
+  
   return createServerClient(
     supabaseUrl,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    serviceRoleKey,
     {
       cookies: {
         get() {
@@ -69,5 +94,5 @@ export const createServiceSupabaseClient = () => {
   )
 }
 
-// Legacy export for backward compatibility
-export const supabase = createClient()
+// Legacy export for backward compatibility - only create if config is valid
+export const supabase = hasValidSupabaseConfig() ? createClient() : null

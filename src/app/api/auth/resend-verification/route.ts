@@ -1,46 +1,45 @@
-import { getCurrentUser } from '@/lib/auth'
-import { createApiSupabaseClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await getCurrentUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const { email } = await request.json()
 
-    // Check if email is already verified
-    if (user.email_confirmed_at) {
+    if (!email) {
       return NextResponse.json(
-        { message: 'Email is already verified' },
-        { status: 200 }
+        { error: 'Email is required' },
+        { status: 400 }
       )
     }
 
-    const supabase = createApiSupabaseClient(request)
+    // Check if Supabase is configured
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      return NextResponse.json(
+        { error: 'Authentication service is not configured' },
+        { status: 503 }
+      )
+    }
 
-    // Resend verification email
+    const supabase = createClient()
+    
     const { error } = await supabase.auth.resend({
       type: 'signup',
-      email: user.email!,
-      options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
-      },
+      email: email,
     })
 
     if (error) {
-      console.error('Error resending verification email:', error)
       return NextResponse.json(
-        { error: 'Failed to resend verification email' },
-        { status: 500 }
+        { error: error.message },
+        { status: 400 }
       )
     }
 
-    return NextResponse.json({
-      message: 'Verification email sent successfully',
-    })
+    return NextResponse.json(
+      { message: 'Verification email sent successfully' },
+      { status: 200 }
+    )
   } catch (error) {
-    console.error('Error in resend verification:', error)
+    console.error('Resend verification error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
