@@ -1,12 +1,7 @@
 import { getCurrentUser } from '@/lib/auth'
 import { CreateFileData } from '@/types/database'
-import { createClient } from '@supabase/supabase-js'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,6 +10,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const supabase = createSupabaseServerClient()
     const { searchParams } = new URL(request.url)
     const folder_id = searchParams.get('folder_id')
     const file_type = searchParams.get('file_type')

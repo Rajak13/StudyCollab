@@ -1,12 +1,7 @@
 import { getCurrentUser } from '@/lib/auth'
 import { CreateFileFolderData } from '@/types/database'
-import { createClient } from '@supabase/supabase-js'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,6 +10,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const supabase = createSupabaseServerClient()
     const { searchParams } = new URL(request.url)
     const parent_id = searchParams.get('parent_id')
     const include_files = searchParams.get('include_files') === 'true'
@@ -67,6 +63,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const supabase = createSupabaseServerClient()
     const body: CreateFileFolderData = await request.json()
 
     // Validate required fields

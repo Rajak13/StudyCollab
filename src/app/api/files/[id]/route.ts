@@ -1,13 +1,8 @@
 import { getCurrentUser } from '@/lib/auth'
 import { deleteFile } from '@/lib/file-upload'
 import { UpdateFileData } from '@/types/database'
-import { createClient } from '@supabase/supabase-js'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 export async function GET(
   request: NextRequest,
@@ -19,6 +14,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const supabase = createSupabaseServerClient()
     const { id } = await params
 
     const { data: file, error } = await supabase
@@ -73,6 +69,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const supabase = createSupabaseServerClient()
     const { id } = await params
     const body: UpdateFileData = await request.json()
 
@@ -118,6 +115,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const supabase = createSupabaseServerClient()
     const { id } = await params
 
     // Get file info before deletion

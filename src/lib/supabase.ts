@@ -1,27 +1,23 @@
 import { createBrowserClient, createServerClient } from '@supabase/ssr'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
-
-// Check if we have valid Supabase configuration
-const hasValidSupabaseConfig = () => {
-  return supabaseUrl !== 'https://placeholder.supabase.co' && 
-         supabaseAnonKey !== 'placeholder-key' &&
-         supabaseUrl && 
-         supabaseAnonKey
-}
-
 // Client-side Supabase client
 export const createClient = () => {
-  if (!hasValidSupabaseConfig()) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Supabase configuration is missing. Please check your environment variables.')
   }
+  
   return createBrowserClient(supabaseUrl, supabaseAnonKey)
 }
 
 // Server-side Supabase client for Server Components
 export const createServerSupabaseClient = async () => {
-  if (!hasValidSupabaseConfig()) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Supabase configuration is missing. Please check your environment variables.')
   }
   
@@ -39,7 +35,10 @@ export const createServerSupabaseClient = async () => {
 
 // Server-side Supabase client for API routes
 export const createApiSupabaseClient = (request: Request) => {
-  if (!hasValidSupabaseConfig()) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error('Supabase configuration is missing. Please check your environment variables.')
   }
   
@@ -69,9 +68,10 @@ export const createApiSupabaseClient = (request: Request) => {
 
 // Server-side Supabase client with service role for admin operations
 export const createServiceSupabaseClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   
-  if (!hasValidSupabaseConfig() || !serviceRoleKey) {
+  if (!supabaseUrl || !serviceRoleKey) {
     throw new Error('Supabase configuration or service role key is missing. Please check your environment variables.')
   }
   
@@ -94,5 +94,5 @@ export const createServiceSupabaseClient = () => {
   )
 }
 
-// Legacy export for backward compatibility - only create if config is valid
-export const supabase = hasValidSupabaseConfig() ? createClient() : null
+// Remove legacy export to avoid build-time execution
+// export const supabase = hasValidSupabaseConfig() ? createClient() : null
