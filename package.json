@@ -213,53 +213,10 @@
     },
     "win": {
       "icon": "assets/icon.ico",
-      "verifyUpdateCodeSignature": false,
-      "requestedExecutionLevel": "asInvoker",
-      "fileAssociations": [
-        {
-          "ext": "scnote",
-          "name": "StudyCollab Note",
-          "description": "StudyCollab Note File",
-          "icon": "assets/note-icon.ico",
-          "role": "Editor"
-        },
-        {
-          "ext": "sctask",
-          "name": "StudyCollab Task",
-          "description": "StudyCollab Task File",
-          "icon": "assets/task-icon.ico",
-          "role": "Editor"
-        },
-        {
-          "ext": "scboard",
-          "name": "StudyCollab Board",
-          "description": "StudyCollab Study Board File",
-          "icon": "assets/board-icon.ico",
-          "role": "Editor"
-        }
-      ],
-      "protocols": [
-        {
-          "name": "StudyCollab Protocol",
-          "schemes": [
-            "studycollab"
-          ]
-        }
-      ],
       "target": [
         {
           "target": "nsis",
-          "arch": [
-            "x64",
-            "ia32"
-          ]
-        },
-        {
-          "target": "portable",
-          "arch": [
-            "x64",
-            "ia32"
-          ]
+          "arch": ["x64"]
         }
       ]
     },
@@ -276,9 +233,7 @@
       "installerIcon": "assets/icon.ico",
       "uninstallerIcon": "assets/icon.ico",
       "artifactName": "${productName}-Setup-${version}.${ext}",
-      "include": "build/installer.nsh",
-      "guid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-      "installerHeaderIcon": "assets/icon.ico"
+      "guid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
     },
     "publish": [
       {
