@@ -1,12 +1,7 @@
 import { getCurrentUser } from '@/lib/auth'
 import { UpdateFileFolderData } from '@/types/database'
-import { createClient } from '@supabase/supabase-js'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 export async function GET(
   request: NextRequest,
@@ -18,6 +13,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const supabase = createSupabaseServerClient()
     const { id } = await params
 
     const { data: folder, error } = await supabase
@@ -59,6 +55,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const supabase = createSupabaseServerClient()
     const { id } = await params
     const body: UpdateFileFolderData = await request.json()
 
@@ -84,7 +81,7 @@ export async function PUT(
       if (existingFolder) {
         return NextResponse.json(
           { error: 'Folder with this name already exists' },
-          { status: 409 }
+          { status: 400 }
         )
       }
     }
@@ -130,6 +127,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const supabase = createSupabaseServerClient()
     const { id } = await params
 
     // Check if folder has children or files
