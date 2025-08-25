@@ -1,6 +1,5 @@
 'use client'
 
-import { DesktopConfig, DesktopConfigManager } from '@/lib/desktop-config'
 import { EnvironmentConfig, EnvironmentConfigLoader } from '@/lib/environment-config'
 import { PlatformConfig, PlatformDetection, PlatformInfo } from '@/lib/platform-detection'
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
@@ -14,10 +13,6 @@ interface PlatformContextValue {
   environmentConfig: EnvironmentConfig | null
   environmentLoading: boolean
   
-  // Desktop configuration (only available on desktop)
-  desktopConfig: DesktopConfig | null
-  desktopLoading: boolean
-  
   // Feature availability
   features: ReturnType<typeof PlatformDetection.getFeatureAvailability>
   
@@ -27,12 +22,9 @@ interface PlatformContextValue {
   // Update functions
   updatePlatformConfig: (updates: Partial<PlatformConfig>) => void
   updateEnvironmentConfig: (updates: Partial<EnvironmentConfig>) => Promise<void>
-  updateDesktopConfig: (updates: Partial<DesktopConfig>) => Promise<void>
   
   // Utility functions
-  isElectron: boolean
   isWeb: boolean
-  isDesktop: boolean
   shouldShowLanding: boolean
 }
 
@@ -43,8 +35,6 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
   const [platformConfig, setPlatformConfig] = useState(() => PlatformDetection.getConfig())
   const [environmentConfig, setEnvironmentConfig] = useState<EnvironmentConfig | null>(null)
   const [environmentLoading, setEnvironmentLoading] = useState(true)
-  const [desktopConfig, setDesktopConfig] = useState<DesktopConfig | null>(null)
-  const [desktopLoading, setDesktopLoading] = useState(true)
 
   // Load environment configuration
   useEffect(() => {
@@ -53,18 +43,6 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
       .catch(console.error)
       .finally(() => setEnvironmentLoading(false))
   }, [])
-
-  // Load desktop configuration (only on desktop)
-  useEffect(() => {
-    if (platformInfo.isElectron) {
-      DesktopConfigManager.loadConfig()
-        .then(setDesktopConfig)
-        .catch(console.error)
-        .finally(() => setDesktopLoading(false))
-    } else {
-      setDesktopLoading(false)
-    }
-  }, [platformInfo.isElectron])
 
   // Update functions
   const updatePlatformConfig = (updates: Partial<PlatformConfig>) => {
@@ -78,14 +56,6 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
     setEnvironmentConfig(newConfig)
   }
 
-  const updateDesktopConfig = async (updates: Partial<DesktopConfig>) => {
-    if (platformInfo.isElectron) {
-      await DesktopConfigManager.saveConfig(updates)
-      const newConfig = await DesktopConfigManager.loadConfig()
-      setDesktopConfig(newConfig)
-    }
-  }
-
   // Derived values
   const features = PlatformDetection.getFeatureAvailability()
   const routing = PlatformDetection.getRoutingConfig()
@@ -95,16 +65,11 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
     platformConfig,
     environmentConfig,
     environmentLoading,
-    desktopConfig,
-    desktopLoading,
     features,
     routing,
     updatePlatformConfig,
     updateEnvironmentConfig,
-    updateDesktopConfig,
-    isElectron: platformInfo.isElectron,
     isWeb: platformInfo.isWeb,
-    isDesktop: platformInfo.platform === 'desktop',
     shouldShowLanding: PlatformDetection.shouldShowLanding(),
   }
 
@@ -140,23 +105,6 @@ export function usePlatformRouting() {
 }
 
 /**
- * Hook for desktop configuration (only works on desktop)
- */
-export function useDesktopConfig() {
-  const { desktopConfig, desktopLoading, updateDesktopConfig, isElectron } = usePlatform()
-  
-  if (!isElectron) {
-    throw new Error('useDesktopConfig can only be used on desktop platform')
-  }
-  
-  return {
-    config: desktopConfig,
-    loading: desktopLoading,
-    updateConfig: updateDesktopConfig,
-  }
-}
-
-/**
  * Hook for environment configuration
  */
 export function useEnvironmentConfig() {
@@ -173,18 +121,14 @@ export function useEnvironmentConfig() {
  * Hook for conditional platform rendering
  */
 export function usePlatformConditional() {
-  const { isElectron, isWeb, isDesktop } = usePlatform()
+  const { isWeb } = usePlatform()
   
   return {
-    isElectron,
     isWeb,
-    isDesktop,
-    renderIf: (platform: 'web' | 'desktop', component: ReactNode) => {
-      if (platform === 'desktop' && isDesktop) return component
+    renderIf: (platform: 'web', component: ReactNode) => {
       if (platform === 'web' && isWeb) return component
       return null
     },
-    renderElectron: (component: ReactNode) => isElectron ? component : null,
     renderWeb: (component: ReactNode) => isWeb ? component : null,
   }
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { toast } from '@/components/ui/use-toast'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo } from 'react'
 
@@ -98,6 +98,7 @@ export function useGroupMessages(
   useEffect(() => {
     if (!groupId) return
 
+    const supabase = createClient()
     const channel = supabase
       .channel(`group-messages-${groupId}`)
       .on(

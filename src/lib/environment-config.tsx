@@ -1,10 +1,6 @@
-/**
- * Environment-Specific Configuration Loader
- * Handles loading of platform and environment-specific settings
- */
+'use client';
 
 import React from 'react'
-import { PlatformDetection } from './platform-detection'
 
 export interface EnvironmentConfig {
   apiUrl: string
@@ -29,25 +25,6 @@ export interface EnvironmentConfig {
     supabaseAnonKey: string
     enableRealtime: boolean
   }
-  desktop?: {
-    autoUpdater: {
-      enabled: boolean
-      checkInterval: number
-      updateUrl?: string
-    }
-    window: {
-      width: number
-      height: number
-      minWidth: number
-      minHeight: number
-    }
-    features: {
-      systemTray: boolean
-      globalShortcuts: boolean
-      fileAssociations: boolean
-      nativeNotifications: boolean
-    }
-  }
 }
 
 export class EnvironmentConfigLoader {
@@ -62,7 +39,6 @@ export class EnvironmentConfigLoader {
       return this._config
     }
 
-    const platformInfo = PlatformDetection.detect()
     const environment = this.getEnvironment()
 
     // Base configuration
@@ -88,29 +64,6 @@ export class EnvironmentConfigLoader {
         supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
         supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
         enableRealtime: process.env.NEXT_PUBLIC_ENABLE_REALTIME !== 'false'
-      }
-    }
-
-    // Add desktop-specific configuration
-    if (platformInfo.isElectron) {
-      baseConfig.desktop = {
-        autoUpdater: {
-          enabled: environment === 'production',
-          checkInterval: 60 * 60 * 1000, // 1 hour
-          updateUrl: process.env.NEXT_PUBLIC_UPDATE_URL
-        },
-        window: {
-          width: parseInt(process.env.NEXT_PUBLIC_WINDOW_WIDTH || '1200'),
-          height: parseInt(process.env.NEXT_PUBLIC_WINDOW_HEIGHT || '800'),
-          minWidth: parseInt(process.env.NEXT_PUBLIC_MIN_WIDTH || '800'),
-          minHeight: parseInt(process.env.NEXT_PUBLIC_MIN_HEIGHT || '600')
-        },
-        features: {
-          systemTray: process.env.NEXT_PUBLIC_SYSTEM_TRAY !== 'false',
-          globalShortcuts: process.env.NEXT_PUBLIC_GLOBAL_SHORTCUTS !== 'false',
-          fileAssociations: process.env.NEXT_PUBLIC_FILE_ASSOCIATIONS !== 'false',
-          nativeNotifications: process.env.NEXT_PUBLIC_NATIVE_NOTIFICATIONS !== 'false'
-        }
       }
     }
 
@@ -185,19 +138,6 @@ export class EnvironmentConfigLoader {
    * Load custom configuration from storage or file
    */
   private static async loadCustomConfig(): Promise<Partial<EnvironmentConfig> | null> {
-    const platformInfo = PlatformDetection.detect()
-
-    // Try to load from Electron settings first
-    if (platformInfo.isElectron && typeof window !== 'undefined' && (window as any).electronAPI) {
-      try {
-        const config = await (window as any).electronAPI.getSetting('environment-config')
-        return config || null
-      } catch (error) {
-        console.warn('Failed to load config from Electron:', error)
-      }
-    }
-
-    // Try to load from localStorage
     if (typeof window !== 'undefined' && window.localStorage) {
       try {
         const config = localStorage.getItem(this.CONFIG_CACHE_KEY)
@@ -214,18 +154,6 @@ export class EnvironmentConfigLoader {
    * Save custom configuration
    */
   static async saveCustomConfig(config: Partial<EnvironmentConfig>): Promise<void> {
-    const platformInfo = PlatformDetection.detect()
-
-    // Save to Electron settings if available
-    if (platformInfo.isElectron && typeof window !== 'undefined' && (window as any).electronAPI) {
-      try {
-        await (window as any).electronAPI.setSetting('environment-config', config)
-      } catch (error) {
-        console.warn('Failed to save config to Electron:', error)
-      }
-    }
-
-    // Also save to localStorage as backup
     if (typeof window !== 'undefined' && window.localStorage) {
       try {
         localStorage.setItem(this.CONFIG_CACHE_KEY, JSON.stringify(config))
@@ -253,13 +181,6 @@ export class EnvironmentConfigLoader {
       features: { ...base.features, ...override.features },
       branding: { ...base.branding, ...override.branding },
       integrations: { ...base.integrations, ...override.integrations },
-      desktop: base.desktop ? {
-        ...base.desktop,
-        ...override.desktop,
-        autoUpdater: { ...base.desktop.autoUpdater, ...override.desktop?.autoUpdater },
-        window: { ...base.desktop.window, ...override.desktop?.window },
-        features: { ...base.desktop.features, ...override.desktop?.features }
-      } : override.desktop
     }
   }
 
@@ -275,21 +196,6 @@ export class EnvironmentConfigLoader {
    */
   static reset(): void {
     this._config = null
-  }
-
-  /**
-   * Get platform-specific configuration
-   */
-  static async getPlatformConfig() {
-    const config = await this.loadConfig()
-    const platformInfo = PlatformDetection.detect()
-
-    return {
-      ...config,
-      platform: platformInfo.platform,
-      isElectron: platformInfo.isElectron,
-      desktop: platformInfo.isElectron ? config.desktop : undefined
-    }
   }
 
   /**
@@ -357,4 +263,3 @@ export function useEnvironmentConfig() {
     saveCustomConfig: EnvironmentConfigLoader.saveCustomConfig,
   }
 }
-

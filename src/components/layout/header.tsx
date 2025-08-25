@@ -7,7 +7,6 @@ import * as React from 'react'
 import { LogoutButton } from '../auth/logout-button'
 import { LogoDisplay } from '../branding/logo-display'
 import { NotificationCenter } from '../notifications/notification-center'
-import { SyncStatusIndicator } from '../offline/sync-status-indicator'
 import { ThemeToggle } from '../theme-toggle'
 import { Button } from '../ui/button'
 import {
@@ -107,7 +106,6 @@ export function Header({
 
         {/* Right side actions */}
         <div className="flex items-center space-x-2">
-          <SyncStatusIndicator />
           <ThemeToggle />
 
           {user ? (

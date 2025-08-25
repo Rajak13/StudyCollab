@@ -5,8 +5,6 @@ import * as React from 'react'
 import { BottomNavigation } from './bottom-navigation'
 import { Header } from './header'
 import { Sidebar } from './sidebar'
-import { OfflineModeBanner } from '../offline/offline-mode-banner'
-import { ConflictResolutionDialog } from '../offline/conflict-resolution-dialog'
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -63,18 +61,12 @@ export function AppLayout({
             className
           )}
         >
-          <div className="p-4">
-            <OfflineModeBanner />
-          </div>
           {children}
         </main>
       </div>
 
       {/* Bottom Navigation - Visible on all devices */}
       {showSidebar && <BottomNavigation />}
-      
-      {/* Offline Components */}
-      <ConflictResolutionDialog />
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase';
 import { NextRequest, NextResponse } from 'next/server';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
     const since = searchParams.get('since'); // ISO timestamp
     const entities = searchParams.get('entities')?.split(',') || ['notes', 'tasks', 'files', 'studyGroups'];
 
-    const result: Record<string, any> = {};
+    const result: Record<string, unknown> = {};
 
     // Fetch latest data for each entity type
     for (const entity of entities) {
@@ -41,7 +42,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function fetchEntityData(supabase: any, entity: string, userId: string, since?: string | null) {
+async function fetchEntityData(supabase: SupabaseClient, entity: string, userId: string, since?: string | null) {
   let query = supabase.from(getTableName(entity)).select('*').eq('user_id', userId);
   
   // Add timestamp filter if provided
@@ -63,7 +64,7 @@ async function fetchEntityData(supabase: any, entity: string, userId: string, si
   }
   
   // Transform data into the expected format
-  const result: Record<string, any> = {};
+  const result: Record<string, unknown> = {};
   
   for (const item of data) {
     const entityId = item.id;
@@ -90,44 +91,4 @@ function getTableName(entity: string): string {
     default:
       throw new Error(`Unknown entity type: ${entity}`);
   }
-}
-
-// Handle study groups separately since they have different access patterns
-async function fetchStudyGroupData(supabase: any, userId: string, since?: string | null) {
-  // Get study groups where user is owner or member
-  let query = supabase
-    .from('study_groups')
-    .select(`
-      *,
-      study_group_members!inner(user_id)
-    `)
-    .or(`owner_id.eq.${userId},study_group_members.user_id.eq.${userId}`);
-  
-  if (since) {
-    query = query.gte('updated_at', since);
-  }
-  
-  query = query.limit(100).order('updated_at', { ascending: false });
-  
-  const { data, error } = await query;
-  
-  if (error) {
-    throw error;
-  }
-  
-  if (!data || data.length === 0) {
-    return {};
-  }
-  
-  const result: Record<string, any> = {};
-  
-  for (const group of data) {
-    result[group.id] = {
-      id: group.id,
-      data: group,
-      updatedAt: new Date(group.updated_at).getTime(),
-    };
-  }
-  
-  return result;
 }

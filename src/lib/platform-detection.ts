@@ -1,12 +1,11 @@
 /**
  * Platform Detection and Configuration System
- * Identifies web vs desktop environment and provides platform-specific configuration
+ * Identifies web environment and provides platform-specific configuration
  */
 
 export interface PlatformInfo {
-  isElectron: boolean
   isWeb: boolean
-  platform: 'web' | 'desktop'
+  platform: 'web'
   os?: 'windows' | 'macos' | 'linux'
   userAgent?: string
 }
@@ -33,10 +32,6 @@ export class PlatformDetection {
       return this._platformInfo
     }
 
-    // Check if we're in Electron environment
-    const isElectron = this.isElectron()
-    const isWeb = !isElectron
-
     let os: 'windows' | 'macos' | 'linux' | undefined
 
     if (typeof window !== 'undefined') {
@@ -52,16 +47,14 @@ export class PlatformDetection {
       }
 
       this._platformInfo = {
-        isElectron,
-        isWeb,
-        platform: isElectron ? 'desktop' : 'web',
+        isWeb: true,
+        platform: 'web',
         os,
         userAgent: window.navigator.userAgent
       }
     } else {
       // Server-side environment
       this._platformInfo = {
-        isElectron: false,
         isWeb: true,
         platform: 'web',
         os: undefined
@@ -69,21 +62,6 @@ export class PlatformDetection {
     }
 
     return this._platformInfo
-  }
-
-  /**
-   * Check if running in Electron environment
-   */
-  static isElectron(): boolean {
-    if (typeof window !== 'undefined') {
-      // Check for Electron-specific globals
-      return !!(
-        (window as any).electronAPI ||
-        (window as any).isElectron ||
-        (window as any).process?.versions?.electron
-      )
-    }
-    return false
   }
 
   /**
@@ -96,25 +74,10 @@ export class PlatformDetection {
 
   /**
    * Check if the landing page should be shown
-   * Desktop users skip the landing page and go directly to the app
    */
   static shouldShowLanding(): boolean {
-    const platformInfo = this.detect()
     const config = this.getConfig()
-    
-    // Desktop users skip landing page by default
-    if (platformInfo.isElectron) {
-      return false
-    }
-    
     return config.showLanding
-  }
-
-  /**
-   * Check if running on desktop platform
-   */
-  static isDesktop(): boolean {
-    return this.detect().platform === 'desktop'
   }
 
   /**
@@ -132,17 +95,15 @@ export class PlatformDetection {
       return this._config
     }
 
-    const platformInfo = this.detect()
-
-    // Default configuration based on platform
+    // Default configuration for web platform
     this._config = {
-      showLanding: platformInfo.isWeb, // Web shows landing, desktop skips it
-      enableOfflineSync: platformInfo.isElectron, // Only desktop has offline sync
-      useNativeNotifications: platformInfo.isElectron, // Desktop uses native notifications
-      enableSystemTray: platformInfo.isElectron, // Only desktop has system tray
-      customWindowControls: platformInfo.isElectron, // Desktop has custom window controls
-      enableGlobalShortcuts: platformInfo.isElectron, // Desktop supports global shortcuts
-      enableFileAssociations: platformInfo.isElectron, // Desktop supports file associations
+      showLanding: true, // Web shows landing page
+      enableOfflineSync: false, // Web doesn't have offline sync
+      useNativeNotifications: false, // Web uses web notifications
+      enableSystemTray: false, // Web doesn't have system tray
+      customWindowControls: false, // Web doesn't have custom window controls
+      enableGlobalShortcuts: false, // Web doesn't support global shortcuts
+      enableFileAssociations: false, // Web doesn't support file associations
     }
 
     return this._config
@@ -172,7 +133,7 @@ export class PlatformDetection {
     const platformInfo = this.detect()
 
     return {
-      // Core features available on both platforms
+      // Core features available on web platform
       taskManagement: true,
       notesTaking: true,
       studyGroups: true,
@@ -190,10 +151,10 @@ export class PlatformDetection {
       pwaInstall: platformInfo.isWeb,
       webNotifications: platformInfo.isWeb,
       
-      // Desktop-specific features
-      autoUpdater: platformInfo.isElectron,
-      fileSystemAccess: platformInfo.isElectron,
-      deepSystemIntegration: platformInfo.isElectron,
+      // Desktop-specific features (disabled for web)
+      autoUpdater: false,
+      fileSystemAccess: false,
+      deepSystemIntegration: false,
     }
   }
 
@@ -201,23 +162,18 @@ export class PlatformDetection {
    * Get platform-specific routing configuration
    */
   static getRoutingConfig() {
-    const platformInfo = this.detect()
-    
     return {
-      // Desktop users skip landing page
-      skipLanding: platformInfo.isElectron,
+      // Web shows landing page
+      skipLanding: false,
       
-      // Default route for each platform
-      defaultRoute: platformInfo.isElectron ? '/dashboard' : '/',
+      // Default route for web
+      defaultRoute: '/',
       
-      // Routes that should be disabled on certain platforms
-      disabledRoutes: platformInfo.isElectron ? ['/download'] : [],
+      // Routes that should be disabled on web
+      disabledRoutes: [],
       
       // Platform-specific redirects
-      redirects: platformInfo.isElectron ? {
-        '/': '/dashboard',
-        '/download': '/dashboard'
-      } : {}
+      redirects: {}
     }
   }
 }
@@ -236,29 +192,8 @@ export function usePlatformDetection() {
     config,
     features,
     routing,
-    isElectron: platformInfo.isElectron,
     isWeb: platformInfo.isWeb,
-    isDesktop: platformInfo.platform === 'desktop',
     shouldShowLanding: PlatformDetection.shouldShowLanding(),
     updateConfig: PlatformDetection.updateConfig,
   }
-}
-
-/**
- * Utility function to conditionally execute code based on platform
- */
-export function withPlatform<T>(
-  webCallback: () => T,
-  desktopCallback: () => T
-): T {
-  const platformInfo = PlatformDetection.detect()
-  return platformInfo.isElectron ? desktopCallback() : webCallback()
-}
-
-/**
- * Utility function to get platform-specific values
- */
-export function platformValue<T>(webValue: T, desktopValue: T): T {
-  const platformInfo = PlatformDetection.detect()
-  return platformInfo.isElectron ? desktopValue : webValue
 }

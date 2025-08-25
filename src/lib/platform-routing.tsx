@@ -1,7 +1,4 @@
-/**
- * Platform-Specific Routing Logic
- * Handles routing differences between web and desktop platforms
- */
+'use client';
 
 import React from 'react'
 import { PlatformDetection } from './platform-detection'
@@ -9,18 +6,15 @@ import { PlatformDetection } from './platform-detection'
 export interface RouteConfig {
   path: string
   component: string
-  platformRestriction?: 'web' | 'desktop' | 'both'
   requiresAuth?: boolean
   redirectTo?: string
 }
 
 export interface PlatformRoutingConfig {
-  skipLanding: boolean
   defaultRoute: string
   disabledRoutes: string[]
   redirects: Record<string, string>
   authRedirect: string
-  desktopHomeRoute: string
 }
 
 export class PlatformRouting {
@@ -34,30 +28,11 @@ export class PlatformRouting {
       return this._config
     }
 
-    const platformInfo = PlatformDetection.detect()
-    
     this._config = {
-      // Desktop users skip landing page
-      skipLanding: platformInfo.isElectron,
-      
-      // Default route based on platform
-      defaultRoute: platformInfo.isElectron ? '/dashboard' : '/',
-      
-      // Routes disabled on specific platforms
-      disabledRoutes: platformInfo.isElectron ? ['/download', '/pricing'] : [],
-      
-      // Platform-specific redirects
-      redirects: platformInfo.isElectron ? {
-        '/': '/dashboard',
-        '/download': '/dashboard',
-        '/pricing': '/dashboard'
-      } : {},
-      
-      // Where to redirect after authentication
-      authRedirect: platformInfo.isElectron ? '/dashboard' : '/dashboard',
-      
-      // Desktop-specific home route
-      desktopHomeRoute: '/desktop-home'
+      defaultRoute: '/',
+      disabledRoutes: [],
+      redirects: {},
+      authRedirect: '/dashboard',
     }
 
     return this._config
@@ -80,27 +55,6 @@ export class PlatformRouting {
   }
 
   /**
-   * Get the appropriate landing route based on platform and auth status
-   */
-  static getLandingRoute(isAuthenticated: boolean): string {
-    const config = this.getConfig()
-    const platformInfo = PlatformDetection.detect()
-
-    // Desktop users always go to dashboard or desktop home
-    if (platformInfo.isElectron) {
-      return isAuthenticated ? '/dashboard' : '/desktop-home'
-    }
-
-    // Web users go to landing page if not authenticated
-    if (!isAuthenticated) {
-      return '/'
-    }
-
-    // Authenticated web users go to dashboard
-    return '/dashboard'
-  }
-
-  /**
    * Get the route to redirect to after authentication
    */
   static getPostAuthRoute(): string {
@@ -112,24 +66,7 @@ export class PlatformRouting {
    * Check if the current route should show the landing page
    */
   static shouldShowLanding(path: string, isAuthenticated: boolean): boolean {
-    const config = this.getConfig()
-    const platformInfo = PlatformDetection.detect()
-
-    // Desktop never shows landing page
-    if (platformInfo.isElectron) {
-      return false
-    }
-
-    // Web shows landing page only on root path and when not authenticated
     return path === '/' && !isAuthenticated
-  }
-
-  /**
-   * Get desktop-specific home route
-   */
-  static getDesktopHomeRoute(): string {
-    const config = this.getConfig()
-    return config.desktopHomeRoute
   }
 
   /**
@@ -171,8 +108,6 @@ export class PlatformRouting {
       '/reset-password',
       '/privacy',
       '/terms',
-      '/download',
-      '/desktop-home'
     ]
 
     return !publicRoutes.includes(path) && !path.startsWith('/auth/')
@@ -182,9 +117,6 @@ export class PlatformRouting {
    * Get platform-specific navigation items
    */
   static getNavigationItems() {
-    const platformInfo = PlatformDetection.detect()
-    const features = PlatformDetection.getFeatureAvailability()
-
     const baseItems = [
       { path: '/dashboard', label: 'Dashboard', icon: 'home' },
       { path: '/tasks', label: 'Tasks', icon: 'check-square' },
@@ -193,15 +125,6 @@ export class PlatformRouting {
       { path: '/files', label: 'Files', icon: 'folder' },
     ]
 
-    // Add platform-specific items
-    if (platformInfo.isWeb) {
-      baseItems.push({ path: '/download', label: 'Download App', icon: 'download' })
-    }
-
-    if (features.offlineSync) {
-      baseItems.push({ path: '/sync', label: 'Sync Status', icon: 'refresh-cw' })
-    }
-
     return baseItems
   }
 
@@ -209,18 +132,6 @@ export class PlatformRouting {
    * Get breadcrumb configuration for platform
    */
   static getBreadcrumbConfig(path: string) {
-    const platformInfo = PlatformDetection.detect()
-    
-    // Desktop shows different breadcrumb structure
-    if (platformInfo.isElectron) {
-      return {
-        showHome: false, // Desktop doesn't need "Home" breadcrumb
-        homeLabel: 'Dashboard',
-        separator: '/',
-        maxItems: 4
-      }
-    }
-
     return {
       showHome: true,
       homeLabel: 'Home',
@@ -249,55 +160,11 @@ export function usePlatformRouting() {
     platformInfo,
     isRouteAllowed: PlatformRouting.isRouteAllowed,
     getRedirectTarget: PlatformRouting.getRedirectTarget,
-    getLandingRoute: PlatformRouting.getLandingRoute,
     getPostAuthRoute: PlatformRouting.getPostAuthRoute,
     shouldShowLanding: PlatformRouting.shouldShowLanding,
-    getDesktopHomeRoute: PlatformRouting.getDesktopHomeRoute,
     handleNavigation: PlatformRouting.handleNavigation,
     requiresAuth: PlatformRouting.requiresAuth,
     getNavigationItems: PlatformRouting.getNavigationItems,
     getBreadcrumbConfig: PlatformRouting.getBreadcrumbConfig,
   }
 }
-
-/**
- * Higher-order component for platform-specific routing
- */
-export function withPlatformRouting<T extends object>(
-  Component: React.ComponentType<T>
-): React.ComponentType<T> {
-  return function PlatformRoutingWrapper(props: T) {
-    const routing = usePlatformRouting()
-    
-    return React.createElement(Component, {
-      ...props,
-      platformRouting: routing
-    } as T & { platformRouting: ReturnType<typeof usePlatformRouting> })
-  }
-}
-
-/**
- * Route guard component for platform-specific access
- */
-export function PlatformRouteGuard({
-  children,
-  allowedPlatforms = ['web', 'desktop'],
-  fallbackRoute = '/dashboard'
-}: {
-  children: React.ReactNode
-  allowedPlatforms?: ('web' | 'desktop')[]
-  fallbackRoute?: string
-}) {
-  const platformInfo = PlatformDetection.detect()
-  
-  const isAllowed = allowedPlatforms.includes(platformInfo.platform)
-  
-  if (!isAllowed) {
-    // In a real app, this would trigger a navigation
-    console.warn(`Route not allowed on ${platformInfo.platform} platform, should redirect to ${fallbackRoute}`)
-    return null
-  }
-  
-  return <>{children}</>
-}
-

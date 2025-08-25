@@ -8,7 +8,7 @@ import { useState } from 'react'
 
 function DebugStudyGroupsFixContent() {
     const { user } = useAuth()
-    const [debugData, setDebugData] = useState<any>(null)
+    const [debugData, setDebugData] = useState<unknown>(null)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 

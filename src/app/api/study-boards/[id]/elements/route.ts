@@ -252,7 +252,7 @@ export async function PUT(
         } else {
           updatedElements.push(updatedElement)
         }
-      } catch (error) {
+      } catch {
         errors.push({ element_id: elementUpdate.id, error: 'Update failed' })
       }
     }

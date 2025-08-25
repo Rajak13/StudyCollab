@@ -1,12 +1,13 @@
 import { createClient } from '@/lib/supabase';
 import { NextRequest, NextResponse } from 'next/server';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 interface OfflineChange {
   id: string;
   type: 'create' | 'update' | 'delete';
   entity: string;
   entityId: string;
-  data: any;
+  data: unknown;
   timestamp: number;
   userId?: string;
   retryCount?: number;
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handleNotesSync(supabase: any, change: OfflineChange, userId: string) {
+async function handleNotesSync(supabase: SupabaseClient, change: OfflineChange, userId: string) {
   const table = 'notes';
   
   switch (change.type) {
@@ -55,7 +56,7 @@ async function handleNotesSync(supabase: any, change: OfflineChange, userId: str
         .from(table)
         .upsert({
           id: change.entityId,
-          ...change.data,
+          ...(change.data as Record<string, unknown>),
           user_id: userId,
           updated_at: new Date(change.timestamp).toISOString(),
         });
@@ -81,7 +82,7 @@ async function handleNotesSync(supabase: any, change: OfflineChange, userId: str
   return NextResponse.json({ success: true });
 }
 
-async function handleTasksSync(supabase: any, change: OfflineChange, userId: string) {
+async function handleTasksSync(supabase: SupabaseClient, change: OfflineChange, userId: string) {
   const table = 'tasks';
   
   switch (change.type) {
@@ -91,7 +92,7 @@ async function handleTasksSync(supabase: any, change: OfflineChange, userId: str
         .from(table)
         .upsert({
           id: change.entityId,
-          ...change.data,
+          ...(change.data as Record<string, unknown>),
           user_id: userId,
           updated_at: new Date(change.timestamp).toISOString(),
         });
@@ -117,7 +118,7 @@ async function handleTasksSync(supabase: any, change: OfflineChange, userId: str
   return NextResponse.json({ success: true });
 }
 
-async function handleFilesSync(supabase: any, change: OfflineChange, userId: string) {
+async function handleFilesSync(supabase: SupabaseClient, change: OfflineChange, userId: string) {
   const table = 'files';
   
   switch (change.type) {
@@ -127,7 +128,7 @@ async function handleFilesSync(supabase: any, change: OfflineChange, userId: str
         .from(table)
         .upsert({
           id: change.entityId,
-          ...change.data,
+          ...(change.data as Record<string, unknown>),
           user_id: userId,
           updated_at: new Date(change.timestamp).toISOString(),
         });
@@ -153,7 +154,7 @@ async function handleFilesSync(supabase: any, change: OfflineChange, userId: str
   return NextResponse.json({ success: true });
 }
 
-async function handleStudyGroupsSync(supabase: any, change: OfflineChange, userId: string) {
+async function handleStudyGroupsSync(supabase: SupabaseClient, change: OfflineChange, userId: string) {
   const table = 'study_groups';
   
   switch (change.type) {
@@ -174,7 +175,7 @@ async function handleStudyGroupsSync(supabase: any, change: OfflineChange, userI
         .from(table)
         .upsert({
           id: change.entityId,
-          ...change.data,
+          ...(change.data as Record<string, unknown>),
           owner_id: userId,
           updated_at: new Date(change.timestamp).toISOString(),
         });
