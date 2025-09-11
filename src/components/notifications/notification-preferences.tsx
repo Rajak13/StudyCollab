@@ -64,7 +64,7 @@ const defaultPreferences: NotificationPreferences = {
   quietHoursEnd: '08:00'
 }
 
-export function NotificationPreferences() {
+export function NotificationPreferencesComponent() {
   const [preferences, setPreferences] = useState<NotificationPreferences>(defaultPreferences)
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
@@ -344,3 +344,4 @@ export function NotificationPreferences() {
 // Export the preferences type and default values for use in other components
 export { defaultPreferences }
 export type { NotificationPreferences }
+

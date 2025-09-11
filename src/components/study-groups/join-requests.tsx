@@ -71,12 +71,13 @@ export function JoinRequests({ groupId, userRole, className = '' }: JoinRequests
     setProcessingRequests(prev => new Set(prev).add(requestId))
 
     try {
+      const status = action === 'approve' ? 'APPROVED' : 'REJECTED'
       const response = await fetch(`/api/study-groups/${groupId}/requests/${requestId}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ status }),
       })
 
       if (!response.ok) {

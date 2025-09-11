@@ -115,3 +115,29 @@ export function useBranding() {
     fixPaths
   }
 }
+
+/**
+ * Hook to get the app name from branding config
+ */
+export function useAppName() {
+  const { config, loading, error } = useBranding()
+  
+  return {
+    appName: config.appName,
+    loading,
+    error
+  }
+}
+
+/**
+ * Hook to get logo paths from branding config
+ */
+export function useLogo(type: keyof BrandingConfig['assets'] = 'navbar') {
+  const { config, loading, error } = useBranding()
+  
+  return {
+    logoPath: config.assets[type],
+    loading,
+    error
+  }
+}

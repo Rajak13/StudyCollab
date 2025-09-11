@@ -10,11 +10,11 @@ import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -67,7 +67,8 @@ function ResetPasswordForm() {
     }
 
     // Set the session with the tokens
-    supabase.auth
+    const supabaseClient = supabase()
+    supabaseClient.auth
       .setSession({
         access_token: accessToken,
         refresh_token: refreshToken,
@@ -90,7 +91,8 @@ function ResetPasswordForm() {
     setLoading(true)
 
     try {
-      const { error } = await supabase.auth.updateUser({
+      const supabaseClient = supabase()
+      const { error } = await supabaseClient.auth.updateUser({
         password: data.password,
       })
 

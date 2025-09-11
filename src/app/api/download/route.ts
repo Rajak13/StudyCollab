@@ -1,151 +1,127 @@
-import { detectPlatform } from '@/lib/downloads';
-import { NextRequest } from 'next/server';
+import { detectPlatform, getLatestReleaseRedirectUrl, isPlatformSupported } from '@/lib/downloads'
+import { NextRequest, NextResponse } from 'next/server'
 
-interface GitHubAsset {
-  name: string;
-  browser_download_url: string;
-  size: number;
-  download_count: number;
-  created_at: string;
-}
+// GitHub release configuration
+const GITHUB_OWNER = process.env.NEXT_PUBLIC_RELEASE_OWNER || 'studycollab'
+const GITHUB_REPO = process.env.NEXT_PUBLIC_RELEASE_REPO || 'studycollab-desktop'
 
-interface GitHubRelease {
-  tag_name: string;
-  name: string;
-  body: string;
-  assets: GitHubAsset[];
-  html_url: string;
-  published_at: string;
-}
+// Download analytics storage (in production, use a proper database)
+const downloadAnalytics: Array<{
+  timestamp: string
+  platform: string
+  userAgent: string
+  ip?: string
+  country?: string
+}> = []
 
 export async function GET(request: NextRequest) {
-  const userAgent = request.headers.get('user-agent') || '';
-  const platform = detectPlatform(userAgent);
-  const owner = process.env.NEXT_PUBLIC_RELEASE_OWNER || 'studycollab';
-  const repo = process.env.NEXT_PUBLIC_RELEASE_REPO || 'studycollab-desktop';
-  
-  // Get specific platform from query params if provided
-  const { searchParams } = new URL(request.url);
-  const requestedPlatform = searchParams.get('platform') as 'windows' | 'mac' | 'linux' | null;
-  const finalPlatform = requestedPlatform || platform;
-
   try {
-    // Add GitHub token if available for higher rate limits
-    const headers: Record<string, string> = {
-      'Accept': 'application/vnd.github+json',
-      'User-Agent': 'StudyCollab-Desktop-Downloader'
-    };
+    const { searchParams } = new URL(request.url)
+    const requestedPlatform = searchParams.get('platform')
+    const userAgent = request.headers.get('user-agent') || ''
     
-    if (process.env.GITHUB_TOKEN) {
-      headers['Authorization'] = `Bearer ${process.env.GITHUB_TOKEN}`;
-    }
-
-    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/releases/latest`, {
-      headers,
-      cache: 'no-store',
-      next: { revalidate: 0 },
-    });
+    // Detect platform if not specified
+    const detectedPlatform = detectPlatform(userAgent)
+    const targetPlatform = requestedPlatform || detectedPlatform
     
-    if (!res.ok) {
-      throw new Error(`GitHub API error: ${res.status} ${res.statusText}`);
-    }
-    
-    const data = await res.json() as GitHubRelease;
-    const assets = data.assets || [];
-
-    const selectAsset = (platform: string): GitHubAsset | undefined => {
-      switch (platform) {
-        case 'windows':
-          // Prefer NSIS installer over portable
-          return assets.find(a => 
-            a.name.toLowerCase().includes('setup') && a.name.toLowerCase().endsWith('.exe')
-          ) || assets.find(a => a.name.toLowerCase().endsWith('.exe'));
-          
-        case 'mac':
-          // Prefer DMG over ZIP
-          return assets.find(a => a.name.toLowerCase().endsWith('.dmg'))
-            || assets.find(a => a.name.toLowerCase().endsWith('.zip') && a.name.toLowerCase().includes('mac'));
-            
-        case 'linux':
-          // Prefer AppImage for universal compatibility
-          return assets.find(a => a.name.toLowerCase().includes('appimage'))
-            || assets.find(a => a.name.toLowerCase().endsWith('.deb'))
-            || assets.find(a => a.name.toLowerCase().endsWith('.rpm'));
-            
-        default:
-          return undefined;
-      }
-    };
-
-    const asset = selectAsset(finalPlatform);
-    
-    if (!asset) {
-      // If no specific asset found, redirect to releases page
-      return new Response(null, {
-        status: 302,
-        headers: { 
-          Location: data.html_url || `https://github.com/${owner}/${repo}/releases/latest`,
-          'Cache-Control': 'no-store, no-cache, must-revalidate'
-        },
-      });
+    // Validate platform
+    if (!isPlatformSupported(targetPlatform)) {
+      return NextResponse.json(
+        { error: 'Unsupported platform', platform: targetPlatform },
+        { status: 400 }
+      )
     }
 
     // Log download attempt for analytics
-    console.log(`Download requested: ${asset.name} for ${finalPlatform} platform`);
+    const analyticsEntry = {
+      timestamp: new Date().toISOString(),
+      platform: targetPlatform,
+      userAgent,
+      ip: request.ip || 'unknown',
+      country: request.geo?.country || 'unknown'
+    }
+    downloadAnalytics.push(analyticsEntry)
 
-    // Redirect to the asset download URL
-    return new Response(null, {
-      status: 302,
-      headers: { 
-        Location: asset.browser_download_url,
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
-        'X-Download-Platform': finalPlatform,
-        'X-Download-Asset': asset.name,
-        'X-Download-Size': asset.size.toString()
-      },
-    });
+    // Get the latest release URL from GitHub
+    const releaseUrl = getLatestReleaseRedirectUrl(targetPlatform as 'windows' | 'mac' | 'linux')
+    
+    // Redirect to GitHub releases page
+    return NextResponse.redirect(releaseUrl, 302)
     
   } catch (error) {
-    console.error('Download API error:', error);
+    console.error('Download API error:', error)
     
     // Fallback to GitHub releases page
-    const fallbackUrl = `https://github.com/${owner}/${repo}/releases/latest`;
-    
-    return new Response(null, {
-      status: 302,
-      headers: { 
-        Location: fallbackUrl,
-        'Cache-Control': 'no-store, no-cache, must-revalidate'
-      },
-    });
+    const fallbackUrl = `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`
+    return NextResponse.redirect(fallbackUrl, 302)
   }
 }
 
-// Handle POST requests for download analytics
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { platform, version, userAgent } = body;
+    const body = await request.json()
+    const { platform, userAgent, platformInfo, timestamp } = body
     
-    // Log download completion for analytics
-    console.log('Download completed:', {
+    // Store analytics data
+    const analyticsEntry = {
+      timestamp: timestamp || new Date().toISOString(),
       platform,
-      version,
       userAgent,
-      timestamp: new Date().toISOString()
-    });
+      platformInfo,
+      ip: request.ip || 'unknown',
+      country: request.geo?.country || 'unknown'
+    }
     
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    downloadAnalytics.push(analyticsEntry)
+    
+    // In production, you would store this in a database
+    console.log('Download analytics:', analyticsEntry)
+    
+    return NextResponse.json({ success: true })
+    
   } catch (error) {
-    console.error('Download analytics error:', error);
-    return new Response(JSON.stringify({ error: 'Failed to log download' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    console.error('Analytics logging error:', error)
+    return NextResponse.json(
+      { error: 'Failed to log analytics' },
+      { status: 500 }
+    )
   }
 }
 
+// Analytics endpoint for admin dashboard
+export async function OPTIONS(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const action = searchParams.get('action')
+  
+  if (action === 'analytics') {
+    // Return download analytics (in production, implement proper authentication)
+    const stats = {
+      totalDownloads: downloadAnalytics.length,
+      platformBreakdown: downloadAnalytics.reduce((acc, entry) => {
+        acc[entry.platform] = (acc[entry.platform] || 0) + 1
+        return acc
+      }, {} as Record<string, number>),
+      recentDownloads: downloadAnalytics.slice(-10),
+      dailyStats: getDailyStats()
+    }
+    
+    return NextResponse.json(stats)
+  }
+  
+  return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
+}
 
+function getDailyStats() {
+  const today = new Date().toISOString().split('T')[0]
+  const todayDownloads = downloadAnalytics.filter(entry => 
+    entry.timestamp.startsWith(today)
+  )
+  
+  return {
+    today: todayDownloads.length,
+    platforms: todayDownloads.reduce((acc, entry) => {
+      acc[entry.platform] = (acc[entry.platform] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+  }
+}

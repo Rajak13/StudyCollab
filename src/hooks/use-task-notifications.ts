@@ -41,17 +41,16 @@ export function useTaskNotifications() {
     showReminderNotification(
       'Task Due Soon',
       `${taskTitle} - ${message}`,
-      { taskTitle, dueDate: dueDate.toISOString(), priority }
+      { urgency }
     )
   }, [addNotification, showReminderNotification])
 
   const notifyTaskCompleted = useCallback((taskTitle: string) => {
-    showSystemNotification({
-      title: '✅ Task Completed',
-      body: `Great job! You completed "${taskTitle}"`,
-      urgency: 'low',
-      tag: 'task-completed'
-    })
+    showSystemNotification(
+      '✅ Task Completed',
+      `Great job! You completed "${taskTitle}"`,
+      { urgency: 'low' }
+    )
   }, [showSystemNotification])
 
   const notifyTaskCreated = useCallback((taskTitle: string, dueDate?: Date) => {

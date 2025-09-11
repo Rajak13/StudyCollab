@@ -160,7 +160,8 @@ export async function uploadFile(
         : file
 
     // Upload to Supabase Storage
-    const { error } = await supabase.storage
+    const supabaseClient = supabase()
+    const { error } = await supabaseClient.storage
       .from('files')
       .upload(filePath, fileToUpload, {
         cacheControl: '3600',
@@ -173,7 +174,7 @@ export async function uploadFile(
     }
 
     // Get public URL
-    const { data: urlData } = supabase.storage
+    const { data: urlData } = supabaseClient.storage
       .from('files')
       .getPublicUrl(filePath)
 
@@ -196,7 +197,8 @@ export async function deleteFile(
   filePath: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const { error } = await supabase.storage.from('files').remove([filePath])
+    const supabaseClient = supabase()
+    const { error } = await supabaseClient.storage.from('files').remove([filePath])
 
     if (error) {
       console.error('Delete error:', error)

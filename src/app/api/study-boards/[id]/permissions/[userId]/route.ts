@@ -116,7 +116,7 @@ export async function PUT(
       .eq('user_id', user.id)
       .single()
 
-    const isGroupAdmin = board.group.group_members.some(m => m.user_id === user.id && (m.role === 'OWNER' || m.role === 'ADMIN'))
+    const isGroupAdmin = (board.group as any).group_members?.some((m: any) => m.user_id === user.id && (m.role === 'OWNER' || m.role === 'ADMIN')) || false
     const hasAdminPermission = 
       board.created_by === user.id ||
       isGroupAdmin ||
@@ -208,8 +208,8 @@ export async function DELETE(
 
     const hasAdminPermission = 
       board.created_by === user.id ||
-      board.group.group_members.role === 'OWNER' ||
-      board.group.group_members.role === 'ADMIN' ||
+      (board.group as any).group_members?.role === 'OWNER' ||
+      (board.group as any).group_members?.role === 'ADMIN' ||
       permission?.permission_level === 'ADMIN'
 
     if (!hasAdminPermission) {

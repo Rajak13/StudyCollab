@@ -17,21 +17,19 @@ export function useSystemNotifications() {
       expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // Expire after 24 hours
     })
 
-    showSystemNotification({
-      title: `❌ ${title}`,
-      body: message,
-      urgency: 'critical',
-      tag: 'system-error'
-    })
+    showSystemNotification(
+      `❌ ${title}`,
+      message,
+      { urgency: 'critical' }
+    )
   }, [addNotification, showSystemNotification])
 
   const notifySuccess = useCallback((title: string, message: string) => {
-    showSystemNotification({
-      title: `✅ ${title}`,
-      body: message,
-      urgency: 'low',
-      tag: 'system-success'
-    })
+    showSystemNotification(
+      `✅ ${title}`,
+      message,
+      { urgency: 'low' }
+    )
   }, [showSystemNotification])
 
   const notifyWarning = useCallback((title: string, message: string) => {
@@ -44,12 +42,11 @@ export function useSystemNotifications() {
       expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
     })
 
-    showSystemNotification({
-      title: `⚠️ ${title}`,
-      body: message,
-      urgency: 'normal',
-      tag: 'system-warning'
-    })
+    showSystemNotification(
+      `⚠️ ${title}`,
+      message,
+      { urgency: 'normal' }
+    )
   }, [addNotification, showSystemNotification])
 
   const notifyOfflineMode = useCallback((isOffline: boolean) => {
@@ -76,12 +73,11 @@ export function useSystemNotifications() {
       created_at: new Date().toISOString()
     })
 
-    showSystemNotification({
-      title: '🔄 Sync Conflict',
-      body: `Conflict detected in ${itemType}: "${itemName}"`,
-      urgency: 'normal',
-      tag: 'sync-conflict'
-    })
+    showSystemNotification(
+      '🔄 Sync Conflict',
+      `Conflict detected in ${itemType}: "${itemName}"`,
+      { urgency: 'normal' }
+    )
   }, [addNotification, showSystemNotification])
 
   const notifyDataExported = useCallback((exportType: string, fileName: string) => {

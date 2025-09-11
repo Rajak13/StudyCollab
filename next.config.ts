@@ -1,20 +1,11 @@
 import type { NextConfig } from 'next'
 
-// Check if building for Electron
-const isElectronBuild = process.env.NEXT_PUBLIC_ELECTRON === 'true'
-
 const nextConfig: NextConfig = {
-  // Disable static export for Electron integration - enables server-side features
-  // output: 'export', // Commented out for Electron integration
   trailingSlash: true,
   
-  // Asset handling configuration for Electron
-  assetPrefix: isElectronBuild ? './' : (process.env.NODE_ENV === 'production' ? '' : ''),
-  basePath: '',
-  
-  // Image optimization disabled for Electron compatibility
+  // Image optimization configuration
   images: {
-    unoptimized: true, // Required for Electron integration
+    unoptimized: false,
     remotePatterns: [
       {
         protocol: 'https',
@@ -38,24 +29,24 @@ const nextConfig: NextConfig = {
   experimental: {
     // Enable optimized package imports for better tree shaking
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    // Enable performance optimizations
+    optimizeCss: true,
+    // Enable modern bundling
+    esmExternals: true,
+    // Enable server components optimization
+    serverComponentsExternalPackages: ['@tanstack/react-query'],
   },
   
-  // Enhanced webpack configuration for Electron integration
+  // Enhanced webpack configuration
   webpack: (config, { isServer, dev }) => {
     // Server-side externals
     if (isServer) {
       config.externals = [...(config.externals || []), 'socket.io']
     }
     
-    // Electron-specific webpack optimizations
+    // Client-side optimizations
     if (!isServer) {
-      // Configure public path for Electron renderer process
-      config.output = {
-        ...config.output,
-        publicPath: isElectronBuild ? './' : (dev ? 'http://localhost:3000/' : '/'),
-      }
-      
-      // Resolve electron modules properly
+      // Resolve modules properly
       config.resolve = {
         ...config.resolve,
         fallback: {
@@ -68,70 +59,106 @@ const nextConfig: NextConfig = {
           buffer: false,
         },
       }
-      
-      // Exclude electron from client bundle
-      if (isElectronBuild) {
-        config.externals = {
-          ...config.externals,
-          electron: 'commonjs electron',
-        }
-      }
     }
     
     // Production optimizations
     if (!dev) {
       config.optimization = {
         ...config.optimization,
+        // Enable module concatenation for better performance
+        concatenateModules: true,
+        // Enable side effects optimization
+        sideEffects: false,
+        // Optimize chunk splitting
         splitChunks: {
           ...config.optimization?.splitChunks,
+          chunks: 'all',
+          minSize: 20000,
+          maxSize: 244000,
           cacheGroups: {
             ...config.optimization?.splitChunks?.cacheGroups,
+            // Framework chunk
+            framework: {
+              test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+              name: 'framework',
+              chunks: 'all',
+              priority: 40,
+              enforce: true,
+            },
+            // UI library chunk
+            ui: {
+              test: /[\\/]node_modules[\\/](@radix-ui|lucide-react)[\\/]/,
+              name: 'ui',
+              chunks: 'all',
+              priority: 30,
+            },
+            // Query library chunk
+            query: {
+              test: /[\\/]node_modules[\\/](@tanstack)[\\/]/,
+              name: 'query',
+              chunks: 'all',
+              priority: 25,
+            },
+            // Vendor chunk for other libraries
             vendor: {
               test: /[\\/]node_modules[\\/]/,
               name: 'vendors',
               chunks: 'all',
+              priority: 20,
             },
-            // Separate chunk for Electron-specific code
-            ...(isElectronBuild && {
-              electron: {
-                test: /[\\/]electron[\\/]/,
-                name: 'electron',
-                chunks: 'all',
-                priority: 10,
-              },
-            }),
+            // Performance components chunk
+            performance: {
+              test: /[\\/]src[\\/]components[\\/]performance[\\/]/,
+              name: 'performance',
+              chunks: 'all',
+              priority: 15,
+            },
+
+            // Common chunk for shared components
+            common: {
+              name: 'common',
+              minChunks: 2,
+              chunks: 'all',
+              priority: 10,
+              enforce: true,
+            },
           },
         },
+        // Enable runtime chunk optimization
+        runtimeChunk: {
+          name: 'runtime',
+        },
+      }
+      
+
+    }
+    
+    // Performance plugins
+    if (!dev && !isServer) {
+      // Add performance monitoring
+      config.plugins = config.plugins || []
+      
+      // Bundle analyzer for performance monitoring (only in analysis mode)
+      if (process.env.ANALYZE === 'true') {
+        const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
+        config.plugins.push(
+          new BundleAnalyzerPlugin({
+            analyzerMode: 'static',
+            openAnalyzer: false,
+            reportFilename: 'web-bundle-report.html',
+          })
+        )
       }
     }
     
     return config
   },
   
-  // Bundle optimization for Electron
+  // Bundle optimization
   bundlePagesRouterDependencies: true,
   
-  // Disable server-side generation features that don't work well in Electron
+  // Disable powered by header
   poweredByHeader: false,
-  
-  // Configure headers for Electron security
-  async headers() {
-    if (!isElectronBuild) {
-      return []
-    }
-    
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'Content-Security-Policy',
-            value: "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: https:; img-src 'self' data: https:; connect-src 'self' https: wss: ws:;",
-          },
-        ],
-      },
-    ]
-  },
 }
 
 export default nextConfig

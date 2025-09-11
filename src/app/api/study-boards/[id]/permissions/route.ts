@@ -110,7 +110,7 @@ export async function POST(
     const { data: targetMembership, error: membershipError } = await supabase
       .from('group_members')
       .select('user_id')
-      .eq('group_id', board.group.id)
+      .eq('group_id', (board.group as any).id)
       .eq('user_id', validatedData.user_id)
       .single()
 
@@ -126,7 +126,7 @@ export async function POST(
       .eq('user_id', user.id)
       .single()
 
-    const isGroupAdmin = board.group.group_members.some(m => m.user_id === user.id && (m.role === 'OWNER' || m.role === 'ADMIN'))
+    const isGroupAdmin = (board.group as any).group_members?.some((m: any) => m.user_id === user.id && (m.role === 'OWNER' || m.role === 'ADMIN')) || false
     const hasAdminPermission = 
       board.created_by === user.id ||
       isGroupAdmin ||

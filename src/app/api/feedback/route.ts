@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     console.log('Feedback received:', {
       ...validatedData,
       timestamp: new Date().toISOString(),
-      ip: request.ip || 'unknown'
+      ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
     })
 
     // You could integrate with services like:

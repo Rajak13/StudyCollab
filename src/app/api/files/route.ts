@@ -1,4 +1,5 @@
 import { getCurrentUser } from '@/lib/auth'
+import { supabase } from '@/lib/supabase'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { CreateFileData } from '@/types/database'
 import { NextRequest, NextResponse } from 'next/server'
@@ -143,7 +144,8 @@ export async function POST(request: NextRequest) {
       is_public: body.is_public || false,
     }
 
-    const { data: file, error } = await supabase
+    const supabaseClient = supabase()
+    const { data: file, error } = await supabaseClient
       .from('files')
       .insert([fileData])
       .select(
@@ -164,7 +166,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Log the upload action
-    await supabase.from('file_access_logs').insert([
+    await supabaseClient.from('file_access_logs').insert([
       {
         file_id: file.id,
         user_id: user.id,

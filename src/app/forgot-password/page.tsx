@@ -9,11 +9,11 @@ import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -44,7 +44,8 @@ export default function ForgotPasswordPage() {
     setLoading(true)
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
+      const supabaseClient = supabase()
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(data.email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       })
 

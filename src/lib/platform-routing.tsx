@@ -1,7 +1,6 @@
 'use client';
 
-import React from 'react'
-import { PlatformDetection } from './platform-detection'
+import { PlatformDetection } from './platform-detection';
 
 export interface RouteConfig {
   path: string

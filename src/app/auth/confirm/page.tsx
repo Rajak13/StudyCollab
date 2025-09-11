@@ -7,11 +7,11 @@ import { Suspense, useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from '@/components/ui/card'
 import { supabase } from '@/lib/supabase'
 
@@ -45,7 +45,8 @@ function ConfirmContent() {
             return
           }
 
-          const { error } = await supabase.auth.verifyOtp({
+          const supabaseClient = supabase()
+          const { error } = await supabaseClient.auth.verifyOtp({
             email,
             token_hash,
             type: 'email',
@@ -67,7 +68,8 @@ function ConfirmContent() {
             return
           }
 
-          const { error } = await supabase.auth.verifyOtp({
+          const supabaseClient = supabase()
+          const { error } = await supabaseClient.auth.verifyOtp({
             phone,
             token,
             type: 'sms',

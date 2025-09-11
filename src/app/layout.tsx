@@ -38,12 +38,12 @@ export default function RootLayout({
             <QueryProvider>
               <PlatformProvider>
                 <AuthProvider>
-                  <NotificationProvider>
-                    <PlatformLayout>
-                      {children}
-                    </PlatformLayout>
-                    <Toaster />
-                  </NotificationProvider>
+                    <NotificationProvider>
+                      <PlatformLayout>
+                        {children}
+                      </PlatformLayout>
+                      <Toaster />
+                    </NotificationProvider>
                 </AuthProvider>
               </PlatformProvider>
             </QueryProvider>

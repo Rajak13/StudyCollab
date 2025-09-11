@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 'use client'
 
+
 import { FeedbackSystem } from '@/components/landing/feedback-system'
 import { HeroImage } from '@/components/landing/hero-image'
 import { InteractiveFAQ } from '@/components/landing/interactive-faq'
@@ -14,8 +15,11 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 export default function Home() {
+  const router = useRouter()
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -38,16 +42,16 @@ export default function Home() {
                   <span className="mr-2 animate-bounce">🎓</span>
                   The Future of Student Productivity
                 </div>
-                
+
                 <h1 className="text-5xl font-bold tracking-tight text-foreground md:text-6xl lg:text-7xl">
                   Study Smarter,{' '}
                   <span className="bg-gradient-to-r from-primary via-purple-600 to-indigo-600 bg-clip-text text-transparent">
                     Together
                   </span>
                 </h1>
-                
+
                 <p className="text-xl leading-relaxed text-muted-foreground md:text-2xl max-w-2xl">
-                  Transform your academic journey with StudyCollab's all-in-one platform. 
+                  Transform your academic journey with StudyCollab's all-in-one platform.
                   Organize tasks, collaborate with peers, and achieve your goals with powerful tools designed for modern students.
                 </p>
               </div>
@@ -138,7 +142,7 @@ export default function Home() {
                       <div className="h-2 w-2 rounded-full bg-green-400"></div>
                     </div>
                   </div>
-                  
+
                   {/* Dashboard content */}
                   <div className="p-6 space-y-4">
                     {/* Stats cards */}
@@ -156,7 +160,7 @@ export default function Home() {
                         <div className="text-xs text-green-600/70 dark:text-green-400/70">Groups</div>
                       </div>
                     </div>
-                    
+
                     {/* Task list mockup */}
                     <div className="space-y-2">
                       <div className="flex items-center gap-3 rounded-lg bg-muted p-3">

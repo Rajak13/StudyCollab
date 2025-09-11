@@ -1,0 +1,299 @@
+/* Desktop-specific styles for Electron app */
+
+/* Window controls and draggable regions */
+.drag-region {
+  -webkit-app-region: drag;
+  app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
+/* Desktop app container */
+.desktop-app-container {
+  margin: 0;
+  padding: 0;
+  user-select: none; /* Prevent text selection for native feel */
+}
+
+/* Hide web-specific elements in desktop mode */
+.desktop-hide-web-nav .web-only {
+  display: none !important;
+}
+
+/* Desktop-optimized scrollbars */
+.desktop-app-container ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.desktop-app-container ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.desktop-app-container ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.desktop-app-container ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.desktop-app-container.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.desktop-app-container.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Desktop-specific responsive adjustments */
+@media (min-width: 1024px) {
+  .desktop-optimized {
+    /* Larger click targets for desktop */
+    min-height: 44px;
+  }
+
+  .desktop-spacing {
+    /* Increased spacing for desktop */
+    padding: 1rem;
+  }
+
+  .desktop-main-content {
+    /* Better content spacing */
+    padding: 1.5rem;
+  }
+}
+
+/* Desktop header styling */
+.desktop-header {
+  /* Compact header for desktop */
+  height: 48px;
+  border-bottom: 1px solid hsl(var(--border));
+  background: hsl(var(--background) / 0.95);
+  backdrop-filter: blur(8px);
+}
+
+/* Desktop sidebar styling */
+.desktop-sidebar {
+  /* Enhanced sidebar for desktop */
+  background: hsl(var(--background));
+  border-right: 1px solid hsl(var(--border));
+}
+
+.desktop-sidebar .desktop-optimized {
+  /* Better hover states for desktop */
+  transition: all 0.15s ease-in-out;
+}
+
+.desktop-sidebar .desktop-optimized:hover {
+  transform: translateX(2px);
+}
+
+/* Desktop window controls */
+.desktop-window-controls {
+  height: 32px;
+  background: hsl(var(--background) / 0.95);
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+/* Desktop landing page specific styles */
+.desktop-landing-layout {
+  background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%);
+}
+
+/* Desktop notification styles */
+.desktop-notification {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(8px);
+}
+
+/* Desktop modal and dialog adjustments */
+.desktop-app-container .modal,
+.desktop-app-container .dialog {
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* Desktop button enhancements */
+.desktop-app-container button {
+  transition: all 0.15s ease-in-out;
+}
+
+.desktop-app-container button:hover {
+  transform: translateY(-1px);
+}
+
+.desktop-app-container button:active {
+  transform: translateY(0);
+}
+
+/* Desktop form styling */
+.desktop-app-container input,
+.desktop-app-container textarea,
+.desktop-app-container select {
+  border-radius: 8px;
+  transition: all 0.15s ease-in-out;
+}
+
+.desktop-app-container input:focus,
+.desktop-app-container textarea:focus,
+.desktop-app-container select:focus {
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1);
+}
+
+/* Desktop card styling */
+.desktop-app-container .card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease-in-out;
+}
+
+.desktop-app-container .card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Desktop typography adjustments */
+.desktop-app-container {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.desktop-app-container h1 {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.desktop-app-container h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.desktop-app-container h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+/* Desktop animation preferences */
+@media (prefers-reduced-motion: no-preference) {
+  .desktop-app-container * {
+    transition-duration: 0.15s;
+    transition-timing-function: ease-in-out;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desktop-app-container * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Desktop focus styles */
+.desktop-app-container *:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Desktop selection styles */
+.desktop-app-container ::selection {
+  background: hsl(var(--primary) / 0.2);
+  color: hsl(var(--primary-foreground));
+}
+
+/* Desktop context menu styling */
+.desktop-app-container .context-menu {
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(8px);
+  border: 1px solid hsl(var(--border));
+}
+
+/* Desktop tooltip styling */
+.desktop-app-container .tooltip {
+  border-radius: 6px;
+  font-size: 12px;
+  padding: 4px 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Desktop loading states */
+.desktop-app-container .loading {
+  border-radius: 8px;
+  background: linear-gradient(90deg, 
+    hsl(var(--muted)) 25%, 
+    hsl(var(--muted) / 0.5) 50%, 
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  animation: desktop-loading 1.5s infinite;
+}
+
+@keyframes desktop-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Desktop error states */
+.desktop-app-container .error {
+  border-color: hsl(var(--destructive));
+  background: hsl(var(--destructive) / 0.05);
+}
+
+/* Desktop success states */
+.desktop-app-container .success {
+  border-color: hsl(var(--success));
+  background: hsl(var(--success) / 0.05);
+}
+
+/* Desktop warning states */
+.desktop-app-container .warning {
+  border-color: hsl(var(--warning));
+  background: hsl(var(--warning) / 0.05);
+}
+
+/* Desktop drag and drop styling */
+.desktop-app-container .drag-over {
+  border: 2px dashed hsl(var(--primary));
+  background: hsl(var(--primary) / 0.05);
+}
+
+.desktop-app-container .drag-active {
+  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Desktop performance optimizations */
+.desktop-app-container {
+  /* Enable hardware acceleration */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.desktop-app-container .gpu-accelerated {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* Desktop print styles */
+@media print {
+  .desktop-app-container .no-print {
+    display: none !important;
+  }
+  
+  .desktop-app-container {
+    background: white !important;
+    color: black !important;
+  }
+}

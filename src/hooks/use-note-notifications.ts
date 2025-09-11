@@ -16,12 +16,11 @@ export function useNoteNotifications() {
       created_at: new Date().toISOString()
     })
 
-    showSystemNotification({
-      title: '📄 Note Shared',
-      body: `${sharedBy} shared "${noteTitle}" with you`,
-      urgency: 'normal',
-      tag: 'note-shared'
-    })
+    showSystemNotification(
+      '📄 Note Shared',
+      `${sharedBy} shared "${noteTitle}" with you`,
+      { urgency: 'normal' }
+    )
   }, [addNotification, showSystemNotification])
 
   const notifyNoteCommented = useCallback((noteTitle: string, commenterName: string, comment: string) => {
@@ -35,12 +34,11 @@ export function useNoteNotifications() {
       expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // Expire after 7 days
     })
 
-    showSystemNotification({
-      title: '💬 New Comment',
-      body: `${commenterName} commented on "${noteTitle}"`,
-      urgency: 'low',
-      tag: 'note-comment'
-    })
+    showSystemNotification(
+      '💬 New Comment',
+      `${commenterName} commented on "${noteTitle}"`,
+      { urgency: 'low' }
+    )
   }, [addNotification, showSystemNotification])
 
   const notifyNoteCollaborationInvite = useCallback((noteTitle: string, inviterName: string) => {
@@ -53,12 +51,11 @@ export function useNoteNotifications() {
       created_at: new Date().toISOString()
     })
 
-    showSystemNotification({
-      title: '🤝 Collaboration Invite',
-      body: `${inviterName} invited you to collaborate on "${noteTitle}"`,
-      urgency: 'normal',
-      tag: 'note-collaboration'
-    })
+    showSystemNotification(
+      '🤝 Collaboration Invite',
+      `${inviterName} invited you to collaborate on "${noteTitle}"`,
+      { urgency: 'normal' }
+    )
   }, [addNotification, showSystemNotification])
 
   return {

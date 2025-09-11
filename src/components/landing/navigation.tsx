@@ -56,6 +56,9 @@ export function Navigation() {
           >
             FAQ
           </button>
+          <Link href="/download" className="text-muted-foreground transition-colors hover:text-foreground">
+            Download
+          </Link>
           <ThemeToggle />
           <Link href="/login">
             <Button variant="outline" size="sm">
@@ -109,6 +112,9 @@ export function Navigation() {
             >
               FAQ
             </button>
+            <Link href="/download" className="block w-full py-2 text-left text-muted-foreground transition-colors hover:text-foreground">
+              Download
+            </Link>
             <div className="flex flex-col space-y-2 pt-4">
               <div className="flex justify-center pb-2">
                 <ThemeToggle />
