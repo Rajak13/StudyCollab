@@ -1,0 +1,403 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light Theme - Clean and Modern */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 221 83% 53%;
+    /* Modern Blue */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221 83% 53%;
+    --radius: 0.75rem;
+
+    /* Custom StudyCollab Colors */
+    --studycollab-success: 142 76% 36%;
+    /* Green */
+    --studycollab-warning: 38 92% 50%;
+    /* Orange */
+    --studycollab-info: 199 89% 48%;
+    /* Cyan */
+    --studycollab-purple: 262 83% 58%;
+    /* Purple */
+  }
+
+  .dark {
+    /* Dark Nepali Theme - Crimson, Black & White */
+    --background: 0 0% 7%;
+    /* Deep Black */
+    --foreground: 0 0% 95%;
+    /* Crisp White */
+    --card: 0 0% 9%;
+    /* Slightly lighter black for cards */
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 348 83% 47%;
+    /* Nepal Crimson Red */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 14%;
+    /* Dark gray for secondary elements */
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 65%;
+    /* Better contrast for muted text */
+    --accent: 348 83% 47%;
+    /* Crimson accent */
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 18%;
+    /* Subtle borders */
+    --input: 0 0% 14%;
+    --ring: 348 83% 47%;
+    /* Crimson focus ring */
+    --radius: 0.75rem;
+
+    /* Dark Nepali theme specific colors */
+    --dark-nepali-crimson: 348 83% 47%;
+    /* Nepal Flag Crimson */
+    --dark-nepali-blue: 220 91% 25%;
+    /* Lighter blue for dark theme */
+    --dark-nepali-gold: 45 93% 57%;
+    /* Brighter gold for dark theme */
+    --studycollab-success: 142 76% 50%;
+    /* Brighter green for dark */
+    --studycollab-warning: 38 92% 65%;
+    /* Brighter orange for dark */
+    --studycollab-info: 199 89% 65%;
+    /* Brighter cyan for dark */
+    --studycollab-purple: 262 83% 75%;
+    /* Brighter purple for dark */
+  }
+
+  .educational {
+    /* Educational Theme - Warm and Focus-friendly */
+    --background: 43 47% 95%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 142 71% 45%;
+    /* Calming Forest Green */
+    --primary-foreground: 355.7 100% 97.3%;
+    --secondary: 43 47% 92%;
+    /* Warm Paper */
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 43 47% 92%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 43 47% 92%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 43 47% 88%;
+    --input: 43 47% 88%;
+    --ring: 142 71% 45%;
+    --radius: 0.75rem;
+
+    /* Educational specific colors */
+    --educational-focus: 217 91% 60%;
+    /* Soft Blue for focus */
+    --educational-highlight: 48 96% 53%;
+    /* Yellow for highlights */
+    --educational-success: 142 71% 45%;
+    /* Green for success */
+    --educational-warning: 25 95% 53%;
+    /* Orange for warnings */
+    --educational-note: 262 83% 58%;
+    /* Purple for notes */
+  }
+
+  .nepali {
+    /* Nepali Theme - Inspired by Nepal's Flag Colors */
+    --background: 0 0% 98%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 348 83% 47%;
+    /* Nepal Flag Crimson Red */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 220 91% 15%;
+    /* Nepal Flag Blue */
+    --secondary-foreground: 0 0% 98%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 220 91% 15%;
+    /* Nepal Flag Blue for accents */
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 348 83% 47%;
+    --radius: 0.75rem;
+
+    /* Nepali theme specific colors */
+    --nepali-crimson: 348 83% 47%;
+    /* Nepal Flag Crimson */
+    --nepali-blue: 220 91% 15%;
+    /* Nepal Flag Blue */
+    --nepali-gold: 45 93% 47%;
+    /* Traditional Gold */
+    --nepali-success: 142 76% 36%;
+    /* Green for success */
+    --nepali-warning: 38 92% 50%;
+    /* Orange for warnings */
+    --nepali-mountain: 200 18% 46%;
+    /* Mountain Blue-Gray */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  /* Custom animations and effects */
+  .bg-grid-pattern {
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      rgba(255, 255, 255, 0.15) 1px,
+      transparent 0
+    );
+    background-size: 20px 20px;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-bounce-slow {
+    animation: bounce 3s infinite;
+  }
+
+  /* Educational theme specific utilities */
+  .educational .bg-focus {
+    background-color: hsl(var(--educational-focus) / 0.1);
+    border-color: hsl(var(--educational-focus) / 0.2);
+  }
+
+  .educational .text-focus {
+    color: hsl(var(--educational-focus));
+  }
+
+  .educational .bg-highlight {
+    background-color: hsl(var(--educational-highlight) / 0.1);
+    border-color: hsl(var(--educational-highlight) / 0.2);
+  }
+
+  .educational .text-highlight {
+    color: hsl(var(--educational-highlight));
+  }
+
+  .educational .bg-note {
+    background-color: hsl(var(--educational-note) / 0.1);
+    border-color: hsl(var(--educational-note) / 0.2);
+  }
+
+  .educational .text-note {
+    color: hsl(var(--educational-note));
+  }
+
+  /* Nepali theme specific utilities */
+  .nepali .bg-crimson {
+    background-color: hsl(var(--nepali-crimson) / 0.1);
+    border-color: hsl(var(--nepali-crimson) / 0.2);
+  }
+
+  .nepali .text-crimson {
+    color: hsl(var(--nepali-crimson));
+  }
+
+  .nepali .bg-nepal-blue {
+    background-color: hsl(var(--nepali-blue) / 0.1);
+    border-color: hsl(var(--nepali-blue) / 0.2);
+  }
+
+  .nepali .text-nepal-blue {
+    color: hsl(var(--nepali-blue));
+  }
+
+  .nepali .bg-gold {
+    background-color: hsl(var(--nepali-gold) / 0.1);
+    border-color: hsl(var(--nepali-gold) / 0.2);
+  }
+
+  .nepali .text-gold {
+    color: hsl(var(--nepali-gold));
+  }
+
+  /* Dark Nepali theme specific utilities */
+  .dark .bg-dark-crimson {
+    background-color: hsl(var(--dark-nepali-crimson) / 0.1);
+    border-color: hsl(var(--dark-nepali-crimson) / 0.3);
+  }
+
+  .dark .text-dark-crimson {
+    color: hsl(var(--dark-nepali-crimson));
+  }
+
+  .dark .bg-dark-nepal-blue {
+    background-color: hsl(var(--dark-nepali-blue) / 0.1);
+    border-color: hsl(var(--dark-nepali-blue) / 0.3);
+  }
+
+  .dark .text-dark-nepal-blue {
+    color: hsl(var(--dark-nepali-blue));
+  }
+
+  .dark .bg-dark-gold {
+    background-color: hsl(var(--dark-nepali-gold) / 0.1);
+    border-color: hsl(var(--dark-nepali-gold) / 0.3);
+  }
+
+  .dark .text-dark-gold {
+    color: hsl(var(--dark-nepali-gold));
+  }
+
+  /* Theme-specific enhancements */
+  .dark {
+    /* Better scrollbar for dark theme */
+    scrollbar-color: hsl(var(--muted)) hsl(var(--background));
+    /* Nepal-inspired dark gradients */
+    --dark-nepal-gradient: linear-gradient(
+      135deg,
+      hsl(var(--dark-nepali-crimson)) 0%,
+      hsl(var(--background)) 100%
+    );
+    --shadow-color: 348 83% 20%;
+  }
+
+  .educational {
+    /* Softer shadows for educational theme */
+    --shadow-color: 43 47% 80%;
+  }
+
+  .nepali {
+    /* Nepal-inspired gradients */
+    --nepal-gradient: linear-gradient(
+      135deg,
+      hsl(var(--nepali-crimson)) 0%,
+      hsl(var(--nepali-blue)) 100%
+    );
+    --shadow-color: 348 83% 70%;
+  }
+
+  /* Enhanced dark theme styling */
+  .dark {
+    /* Better button styling with crimson */
+    --button-primary: hsl(var(--dark-nepali-crimson));
+    --button-primary-hover: hsl(var(--dark-nepali-crimson) / 0.9);
+
+    /* Better card styling */
+    --card-hover: hsl(var(--dark-nepali-crimson) / 0.05);
+
+    /* Better link styling */
+    --link-color: hsl(var(--dark-nepali-crimson));
+    --link-hover: hsl(var(--dark-nepali-crimson) / 0.8);
+  }
+
+  /* Dark theme specific component enhancements */
+  .dark .bg-primary {
+    background-color: hsl(var(--dark-nepali-crimson));
+  }
+
+  .dark .text-primary {
+    color: hsl(var(--dark-nepali-crimson));
+  }
+
+  .dark .border-primary {
+    border-color: hsl(var(--dark-nepali-crimson));
+  }
+
+  .dark .hover\:bg-primary\/10:hover {
+    background-color: hsl(var(--dark-nepali-crimson) / 0.1);
+  }
+
+  .dark .focus\:ring-primary:focus {
+    --tw-ring-color: hsl(var(--dark-nepali-crimson));
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.5);
+}
+
+/* Custom animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Grid pattern for backgrounds */
+.bg-grid-pattern {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
