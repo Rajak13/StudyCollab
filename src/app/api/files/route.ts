@@ -1,8 +1,4 @@
 import { getCurrentUser } from '@/lib/auth'
-<<<<<<< HEAD
-=======
-import { supabase } from '@/lib/supabase'
->>>>>>> a9ba7c887532e1cbf933e51bc87a873daafc57a3
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { CreateFileData } from '@/types/database'
 import { NextRequest, NextResponse } from 'next/server'
@@ -147,11 +143,7 @@ export async function POST(request: NextRequest) {
       is_public: body.is_public || false,
     }
 
-<<<<<<< HEAD
     const supabaseClient = createSupabaseServerClient()
-=======
-    const supabaseClient = supabase()
->>>>>>> a9ba7c887532e1cbf933e51bc87a873daafc57a3
     const { data: file, error } = await supabaseClient
       .from('files')
       .insert([fileData])
@@ -173,7 +165,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Log the upload action
-<<<<<<< HEAD
     try {
       await supabaseClient.from('file_access_logs').insert([
         {
@@ -190,19 +181,6 @@ export async function POST(request: NextRequest) {
       console.warn('Failed to log file access:', logError)
       // Don't fail the request if logging fails
     }
-=======
-    await supabaseClient.from('file_access_logs').insert([
-      {
-        file_id: file.id,
-        user_id: user.id,
-        action: 'UPLOAD',
-        ip_address:
-          request.headers.get('x-forwarded-for') ||
-          request.headers.get('x-real-ip'),
-        user_agent: request.headers.get('user-agent'),
-      },
-    ])
->>>>>>> a9ba7c887532e1cbf933e51bc87a873daafc57a3
 
     return NextResponse.json({ data: file }, { status: 201 })
   } catch (error) {
