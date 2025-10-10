@@ -124,7 +124,6 @@ export function DragDropZone({
 
     // Validate and filter files
     const validFiles = files.filter(validateFile)
-
     // Check max files limit
     const totalFiles = selectedFiles.length + validFiles.length
     if (totalFiles > maxFiles) {
@@ -205,7 +204,6 @@ export function DragDropZone({
     if (!isElectron || selectedFiles.length === 0) return
 
     setIsUploading(true)
-
     for (const file of selectedFiles) {
       try {
         setUploadProgress(prev => ({ ...prev, [file.path]: 0 }))
@@ -227,7 +225,6 @@ export function DragDropZone({
         }
 
         onUploadCompleteAction?.(file, true)
-
         toast({
           title: 'Upload complete',
           description: `${file.name} uploaded successfully`
@@ -235,7 +232,6 @@ export function DragDropZone({
       } catch (error) {
         console.error('Upload error:', error)
         onUploadCompleteAction?.(file, false)
-
         toast({
           title: 'Upload failed',
           description: `Failed to upload ${file.name}`,
@@ -301,7 +297,6 @@ export function DragDropZone({
               'mx-auto h-12 w-12',
               isDragging && !disabled ? 'text-blue-500' : 'text-gray-400'
             )} />
-
             <div>
               <p className="text-lg font-medium">
                 {isDragging ? 'Drop files here' : 'Drag and drop files here'}
@@ -353,7 +348,6 @@ export function DragDropZone({
               {selectedFiles.map((file, index) => (
                 <div key={`${file.path}-${index}`} className="flex items-center gap-3 p-2 border rounded">
                   {getFileIcon(file)}
-
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{file.name}</p>
                     <p className="text-xs text-gray-500">
