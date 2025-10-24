@@ -12,7 +12,7 @@ interface JoinRequest {
   id: string
   user_id: string
   group_id: string
-  status: 'pending' | 'approved' | 'rejected'
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'pending' | 'approved' | 'rejected'
   created_at: string
   user: {
     id: string
@@ -134,8 +134,12 @@ export function JoinRequests({ groupId, userRole, className = '' }: JoinRequests
     )
   }
 
-  const pendingRequests = requests.filter(req => req.status === 'pending')
-  const processedRequests = requests.filter(req => req.status !== 'pending')
+  const pendingRequests = requests.filter(req => 
+    req.status === 'pending' || req.status === 'PENDING'
+  )
+  const processedRequests = requests.filter(req => 
+    req.status !== 'pending' && req.status !== 'PENDING'
+  )
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -261,9 +265,15 @@ export function JoinRequests({ groupId, userRole, className = '' }: JoinRequests
                   </div>
 
                   <Badge
-                    variant={request.status === 'approved' ? 'default' : 'destructive'}
+                    variant={
+                      request.status === 'approved' || request.status === 'APPROVED' 
+                        ? 'default' 
+                        : 'destructive'
+                    }
                   >
-                    {request.status === 'approved' ? 'Approved' : 'Rejected'}
+                    {request.status === 'approved' || request.status === 'APPROVED' 
+                      ? 'Approved' 
+                      : 'Rejected'}
                   </Badge>
                 </div>
               ))}

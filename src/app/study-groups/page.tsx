@@ -3,10 +3,8 @@
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { DashboardLayout } from '@/components/layout'
 import { StudyGroupsManager } from '@/components/study-groups/study-groups-manager'
-import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/use-auth'
 import { Users } from 'lucide-react'
-import Link from 'next/link'
 
 function StudyGroupsPageContent() {
   const { user } = useAuth()
@@ -44,20 +42,6 @@ function StudyGroupsPageContent() {
           </div>
 
           <StudyGroupsManager />
-
-          {/* Development/Testing Links */}
-          <div className="mt-8 rounded-lg bg-muted p-4">
-            <h3 className="mb-2 text-sm font-semibold">
-              Development & Testing
-            </h3>
-            <div className="flex gap-2">
-              <Link href="/test-study-groups-collaboration">
-                <Button variant="outline" size="sm">
-                  Test Collaboration Features
-                </Button>
-              </Link>
-            </div>
-          </div>
         </div>
       </div>
     </DashboardLayout>

@@ -58,8 +58,20 @@ export async function GET(
     // First, fix any membership consistency issues for this group
     if (group.owner_id === user.id) {
       // Ensure the owner is in the group_members table
-      await supabase
-        .rpc('fix_group_membership_consistency')
+      const { error: fixError } = await serviceSupabase
+        .from('group_members')
+        .upsert({
+          user_id: user.id,
+          group_id: id,
+          role: 'OWNER',
+          joined_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,group_id'
+        })
+      
+      if (fixError) {
+        console.error('Error fixing owner membership:', fixError)
+      }
     }
 
     // Check if user is owner or admin of the group using regular client

@@ -23,19 +23,45 @@ export async function PUT(
 
     const supabase = createClient()
 
-    // Check if user is owner or admin of the group
-    const { data: membership, error: membershipError } = await supabase
-      .from('group_members')
-      .select('role')
-      .eq('group_id', id)
-      .eq('user_id', user.id)
+    // First check if the user is the group owner (bypass membership check)
+    const { data: group } = await supabase
+      .from('study_groups')
+      .select('owner_id')
+      .eq('id', id)
       .single()
 
-    if (
-      membershipError ||
-      !membership ||
-      !['OWNER', 'ADMIN'].includes(membership.role)
-    ) {
+    let isAuthorized = false
+
+    if (group && group.owner_id === user.id) {
+      // User is the owner, they're authorized
+      isAuthorized = true
+      
+      // Ensure owner is in group_members table
+      await supabase
+        .from('group_members')
+        .upsert({
+          user_id: user.id,
+          group_id: id,
+          role: 'OWNER',
+          joined_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,group_id'
+        })
+    } else {
+      // Check if user is admin of the group
+      const { data: membership, error: membershipError } = await supabase
+        .from('group_members')
+        .select('role')
+        .eq('group_id', id)
+        .eq('user_id', user.id)
+        .single()
+
+      if (!membershipError && membership && membership.role === 'ADMIN') {
+        isAuthorized = true
+      }
+    }
+
+    if (!isAuthorized) {
       return NextResponse.json(
         { error: 'Only group owners and admins can manage join requests' },
         { status: 403 }
