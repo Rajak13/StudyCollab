@@ -1,22 +1,16 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { format } from 'date-fns'
-import { CalendarIcon, PlusIcon, TagIcon, X } from 'lucide-react'
+import { PlusIcon, TagIcon, X } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover'
 import {
     Select,
     SelectContent,
@@ -55,7 +49,6 @@ const statusOptions: { value: TaskStatus; label: string }[] = [
 
 export function TaskForm({ task, onSubmit, onCancel, isLoading, className }: TaskFormProps) {
   const [tagInput, setTagInput] = useState('')
-  const [calendarOpen, setCalendarOpen] = useState(false)
   
   const { data: categoriesResponse } = useTaskCategories()
   const categories = categoriesResponse?.data || []
@@ -208,35 +201,11 @@ export function TaskForm({ task, onSubmit, onCancel, isLoading, className }: Tas
 
             <div className="space-y-2">
               <Label>Due Date</Label>
-              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      'w-full justify-start text-left font-normal',
-                      !watchedDueDate && 'text-muted-foreground'
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {watchedDueDate ? (
-                      format(new Date(watchedDueDate), 'PPP')
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={watchedDueDate ? new Date(watchedDueDate) : undefined}
-                    onSelect={(date) => {
-                      setValue('due_date', date?.toISOString())
-                      setCalendarOpen(false)
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <DatePicker
+                date={watchedDueDate ? new Date(watchedDueDate) : undefined}
+                onDateChange={(date) => setValue('due_date', date?.toISOString())}
+                placeholder="Pick a date"
+              />
             </div>
           </div>
 

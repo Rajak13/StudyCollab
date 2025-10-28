@@ -131,41 +131,41 @@ export function TaskManager({ className }: TaskManagerProps) {
     setViewMode(modes[nextIndex])
   }
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts - using Alt key to avoid browser conflicts
   const shortcuts = [
     {
       key: 'n',
-      ctrlKey: true,
+      altKey: true,
       callback: () => setShowCreateDialog(true),
       description: 'Create new task'
     },
     {
       key: 'v',
-      ctrlKey: true,
+      altKey: true,
       callback: toggleViewMode,
       description: 'Toggle view mode'
     },
     {
       key: 'a',
-      ctrlKey: true,
+      altKey: true,
       callback: handleSelectAll,
       description: 'Select all tasks'
     },
     {
       key: 'r',
-      ctrlKey: true,
+      altKey: true,
       callback: () => window.location.reload(),
       description: 'Refresh tasks'
     },
     {
-      key: 's',
-      ctrlKey: true,
+      key: 'q',
+      altKey: true,
       callback: () => setShowStatisticsDialog(true),
       description: 'Show statistics'
     },
     {
       key: 'c',
-      ctrlKey: true,
+      altKey: true,
       callback: () => setShowCategoriesDialog(true),
       description: 'Manage categories'
     },
@@ -180,7 +180,7 @@ export function TaskManager({ className }: TaskManagerProps) {
     },
     {
       key: 'Enter',
-      ctrlKey: true,
+      altKey: true,
       callback: () => {
         if (selectedTasks.length > 0) {
           // Quick complete selected tasks

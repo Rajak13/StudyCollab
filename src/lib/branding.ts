@@ -28,16 +28,16 @@ const DEFAULT_CONFIG: BrandingConfig = {
   windowTitle: 'StudyCollab - Collaborative Study Platform',
   description: 'A comprehensive study platform for students',
   assets: {
-    navbar: '/STUDY.svg',
-    favicon: '/favicon.ico',
-    hero: '/STUDY.svg',
-    window: '/STUDY.svg',
-    tray: '/STUDY.svg',
-    splash: '/splash.svg'
+    navbar: '/ELEVARE.svg',
+    favicon: '/ELEVARE.svg',
+    hero: '/ELEVARE.svg',
+    window: '/ELEVARE.svg',
+    tray: '/ELEVARE.svg',
+    splash: '/ELEVARE.svg'
   },
   theme: {
-    primaryColor: '#3b82f6',
-    accentColor: '#3b82f6',
+    primaryColor: '#667eea',
+    accentColor: '#764ba2',
     backgroundColor: '#ffffff'
   }
 }

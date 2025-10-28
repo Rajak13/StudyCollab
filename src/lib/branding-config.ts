@@ -1,6 +1,6 @@
 'use client';
 
-import { EnvironmentConfigLoader } from './environment-config'
+import { EnvironmentConfigLoader } from './environment-config';
 
 export interface BrandingAssets {
   navbar: string
@@ -243,16 +243,16 @@ export class BrandingConfigManager {
       windowTitle: `${envConfig.appName || 'StudyCollab'} - Collaborative Study Platform`,
       description: 'A comprehensive study platform for students',
       assets: {
-        navbar: envConfig.branding?.logoUrl || '/logo.png',
-        window: '/icon.png',
-        tray: '/tray-icon.png',
-        splash: '/splash.png',
-        favicon: envConfig.branding?.faviconUrl || '/favicon.ico',
-        hero: '/hero-image.jpg'
+        navbar: envConfig.branding?.logoUrl || '/ELEVARE.svg',
+        window: '/ELEVARE.svg',
+        tray: '/ELEVARE.svg',
+        splash: '/ELEVARE.svg',
+        favicon: envConfig.branding?.faviconUrl || '/ELEVARE.svg',
+        hero: '/ELEVARE.svg'
       },
       theme: {
-        primaryColor: envConfig.branding?.themeColor || '#3b82f6',
-        accentColor: envConfig.branding?.themeColor || '#3b82f6',
+        primaryColor: envConfig.branding?.themeColor || '#667eea',
+        accentColor: envConfig.branding?.themeColor || '#764ba2',
         backgroundColor: envConfig.branding?.backgroundColor || '#ffffff'
       }
     }
@@ -268,8 +268,8 @@ export class BrandingConfigManager {
       description: 'A comprehensive study platform for students',
       assets: this.getDefaultAssets(),
       theme: {
-        primaryColor: '#3b82f6',
-        accentColor: '#3b82f6',
+        primaryColor: '#667eea',
+        accentColor: '#764ba2',
         backgroundColor: '#ffffff'
       }
     }
@@ -280,12 +280,12 @@ export class BrandingConfigManager {
    */
   private static getDefaultAssets(): BrandingAssets {
     return {
-      navbar: '/logo.png',
-      window: '/icon.png',
-      tray: '/tray-icon.png',
-      splash: '/splash.png',
-      favicon: '/favicon.ico',
-      hero: '/hero-image.jpg'
+      navbar: '/ELEVARE.svg',
+      window: '/ELEVARE.svg',
+      tray: '/ELEVARE.svg',
+      splash: '/ELEVARE.svg',
+      favicon: '/ELEVARE.svg',
+      hero: '/ELEVARE.svg'
     }
   }
 

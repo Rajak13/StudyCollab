@@ -24,7 +24,12 @@ export * from './skeleton'
 export * from './spinner'
 
 // Form Components
+export * from './calendar'
+export * from './date-picker'
 export * from './form'
+export * from './popover'
+export * from './select'
 
 // Utility Components
 export * from './separator'
+

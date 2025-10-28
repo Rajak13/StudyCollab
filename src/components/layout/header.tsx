@@ -1,5 +1,6 @@
 'use client'
 
+import { useBranding } from '@/hooks/use-branding'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -10,14 +11,13 @@ import { NotificationCenter } from '../notifications/notification-center'
 import { ThemeToggle } from '../theme-toggle'
 import { Button } from '../ui/button'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
-import { useBranding } from '@/hooks/use-branding'
 
 interface HeaderProps {
   className?: string
@@ -106,6 +106,7 @@ export function Header({
 
         {/* Right side actions */}
         <div className="flex items-center space-x-2">
+          
           <ThemeToggle />
 
           {user ? (

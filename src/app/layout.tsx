@@ -1,6 +1,9 @@
 import { AuthProvider } from '@/components/auth'
+import { BrandingUpdater } from '@/components/branding/branding-updater'
 import { ErrorBoundary } from '@/components/error-boundary'
+import { GlobalKeyboardShortcuts } from '@/components/layout/global-keyboard-shortcuts'
 import { PlatformLayout } from '@/components/platform/platform-layout'
+import { KeyboardShortcutsProvider } from '@/components/providers/keyboard-shortcuts-provider'
 import { NotificationProvider } from '@/components/providers/notification-provider'
 import { PlatformProvider } from '@/components/providers/platform-provider'
 import { QueryProvider } from '@/components/providers/query-provider'
@@ -19,6 +22,16 @@ export const metadata: Metadata = {
   title: 'StudyCollab - Collaborative Study Platform',
   description:
     'A comprehensive study platform for students to manage tasks, take notes, share resources, and collaborate in study groups.',
+  icons: {
+    icon: [
+      {
+        url: '/ELEVARE.svg',
+        type: 'image/svg+xml',
+      },
+    ],
+    shortcut: '/ELEVARE.svg',
+    apple: '/ELEVARE.svg',
+  },
 }
 
 export default function RootLayout({
@@ -38,12 +51,16 @@ export default function RootLayout({
             <QueryProvider>
               <PlatformProvider>
                 <AuthProvider>
+                  <KeyboardShortcutsProvider>
                     <NotificationProvider>
                       <PlatformLayout>
                         {children}
                       </PlatformLayout>
                       <Toaster />
+                      <GlobalKeyboardShortcuts />
+                      <BrandingUpdater />
                     </NotificationProvider>
+                  </KeyboardShortcutsProvider>
                 </AuthProvider>
               </PlatformProvider>
             </QueryProvider>
